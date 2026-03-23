@@ -372,8 +372,20 @@
         .ct-sig-name-line { border-bottom: 1.5px solid #111; margin-bottom: 6px; height: 28px; }
         .ct-sig-name-text { font-size: 11px; font-weight: 700; color: #111; }
         .ct-sig-role-text { font-size: 10px; color: #666; margin-top: 2px; }
+        .ct-sig-date-place { font-size: 10px; color: #666; margin-top: 4px; }
         .ct-clause-editor-row { background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.8); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
         .ct-service-editor-row { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.8); border-radius: 10px; padding: 8px 10px; margin-bottom: 6px; }
+
+        /* Paged contract preview: stack pages vertically */
+        #contract-preview-area, #empcontract-preview-area {
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 24px;
+        }
+        #contract-preview-area .extra-preview-page,
+        #empcontract-preview-area .extra-preview-page {
+            margin-top: 0;
+        }
     </style>
     
     <!-- Cloud Storage Integration - Deferred to avoid blocking on mobile -->
@@ -423,8 +435,8 @@
         <div class="ui-nav-pills justify-self-center">
             <button id="nav-invoice" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('invoice')" class="ui-nav-pill active">Invoice</button>
             <button id="nav-quotation" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('quotation')" class="ui-nav-pill">Quotation</button>
-            <button id="nav-contract" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('contract')" class="ui-nav-pill">Contract</button>
-            <button id="nav-empcontract" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('empcontract')" class="ui-nav-pill">Employee Contract</button>
+            <button id="nav-contract" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('contract')" class="ui-nav-pill">Client Contract</button>
+            <button id="nav-empcontract" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('empcontract')" class="ui-nav-pill">HR Contract</button>
         </div>
         <div class="flex items-center justify-end"></div>
     </nav>
@@ -1208,7 +1220,7 @@
         </aside>
 
         <!-- Right: A4 Preview -->
-        <main class="app-preview no-print">
+        <main class="app-preview no-print" id="contract-preview-area">
             <div class="a4-page contract-root" id="contract-a4">
                 <div class="page-content" id="contractPageContent" style="font-family:'Inter',sans-serif;">
                     <div class="text-center text-slate-400 py-12 text-sm">Fill in the form to preview the contract.</div>
@@ -1529,7 +1541,7 @@
         </aside>
 
         <!-- Right: A4 Preview -->
-        <main class="app-preview no-print">
+        <main class="app-preview no-print" id="empcontract-preview-area">
             <div class="a4-page contract-root" id="empcontract-a4">
                 <div class="page-content" id="empContractPageContent" style="font-family:'Inter',sans-serif;">
                     <div class="text-center text-slate-400 py-12 text-sm">Fill in the form to preview the contract.</div>
@@ -1904,6 +1916,14 @@
                 const heightDiff = pdfWrapper.offsetHeight * (1 - scale);
                 pdfWrapper.style.marginBottom = `-${heightDiff}px`;
                 container.style.height = 'auto';
+
+                // Also apply the same scale to any extra pages (paged contract preview)
+                container.querySelectorAll('.extra-preview-page').forEach(function(extraPage) {
+                    extraPage.style.transform = `scale(${scale})`;
+                    extraPage.style.transformOrigin = 'top center';
+                    const extraHeightDiff = extraPage.offsetHeight * (1 - scale);
+                    extraPage.style.marginBottom = `-${extraHeightDiff}px`;
+                });
             });
         };
 
@@ -3877,8 +3897,8 @@
                 <!-- Header -->
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
                     <div>
-                        <img src="https://i.postimg.cc/PJ0fwSNY/OPENY.png" crossorigin="anonymous" alt="OPENY" style="height:36px;width:auto;object-fit:contain;display:block;">
-                        <div style="font-size:10px;color:#666;margin-top:5px;line-height:1.5;">${v('ct-p1-address')}<br>${v('ct-p1-email')}${v('ct-p1-phone') ? '<br>'+v('ct-p1-phone') : ''}${v('ct-p1-website') ? '<br>'+v('ct-p1-website') : ''}</div>
+                        <img src="https://i.postimg.cc/PJ0fwSNY/OPENY.png" crossorigin="anonymous" alt="OPENY" style="height:40px;width:auto;object-fit:contain;display:block;">
+                        <div style="font-size:10.5px;color:#6B7280;margin-top:6px;line-height:1.45;font-family:'Inter',sans-serif;">Villa 175, First District, Fifth Settlement, Cairo<br>info@openytalk.com</div>
                     </div>
                     <div style="text-align:right;">
                         <div style="font-size:28px;font-weight:900;letter-spacing:3px;color:#111;margin:0 0 6px 0;">CONTRACT</div>
@@ -3886,7 +3906,6 @@
                             <div><span style="font-weight:700;color:#111;">NO:</span> ${v('ct-num') || '___'}</div>
                             <div><span style="font-weight:700;color:#111;">DATE:</span> ${formatDate(v('ct-date'))}</div>
                             <div><span style="font-weight:700;color:#111;">DURATION:</span> ${v('ct-duration') || '___'} Months</div>
-                            <div><span style="font-weight:700;color:#111;">STATUS:</span> ${v('ct-status') || 'Draft'}</div>
                         </div>
                     </div>
                 </div>
@@ -3982,7 +4001,10 @@
             content.innerHTML = '';
             content.appendChild(tmp);
             if (typeof window.adjustScreenScale === 'function') window.adjustScreenScale();
-            setTimeout(() => { if (typeof window.fitContentToA4 === 'function') window.fitContentToA4('contractPageContent'); }, 50);
+            setTimeout(() => {
+                if (typeof window.fitContentToA4 === 'function') window.fitContentToA4('contractPageContent');
+                paginateContractPreview('contractPageContent', 'contract-a4', 'contract-preview-area');
+            }, 100);
         };
 
         // ==========================================================================
@@ -4005,15 +4027,14 @@
                 <!-- Header -->
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
                     <div>
-                        <img src="https://i.postimg.cc/PJ0fwSNY/OPENY.png" crossorigin="anonymous" alt="OPENY" style="height:36px;width:auto;object-fit:contain;display:block;">
-                        <div style="font-size:10px;color:#666;margin-top:5px;line-height:1.5;">${v('ec-co-address')}<br>${v('ec-co-email')}${v('ec-co-phone') ? '<br>'+v('ec-co-phone') : ''}</div>
+                        <img src="https://i.postimg.cc/PJ0fwSNY/OPENY.png" crossorigin="anonymous" alt="OPENY" style="height:40px;width:auto;object-fit:contain;display:block;">
+                        <div style="font-size:10.5px;color:#6B7280;margin-top:6px;line-height:1.45;font-family:'Inter',sans-serif;">Villa 175, First District, Fifth Settlement, Cairo<br>info@openytalk.com</div>
                     </div>
                     <div style="text-align:right;">
                         <div style="font-size:26px;font-weight:900;letter-spacing:2px;color:#111;margin:0 0 6px 0;">EMPLOYMENT CONTRACT</div>
                         <div style="font-size:11px;color:#555;line-height:1.7;">
                             <div><span style="font-weight:700;color:#111;">NO:</span> ${v('ec-num') || '___'}</div>
                             <div><span style="font-weight:700;color:#111;">DATE:</span> ${formatDate(v('ec-date'))}</div>
-                            <div><span style="font-weight:700;color:#111;">STATUS:</span> ${v('ec-status') || 'Draft'}</div>
                         </div>
                     </div>
                 </div>
@@ -4120,11 +4141,80 @@
             content.innerHTML = '';
             content.appendChild(tmp);
             if (typeof window.adjustScreenScale === 'function') window.adjustScreenScale();
-            setTimeout(() => { if (typeof window.fitContentToA4 === 'function') window.fitContentToA4('empContractPageContent'); }, 50);
+            setTimeout(() => {
+                if (typeof window.fitContentToA4 === 'function') window.fitContentToA4('empContractPageContent');
+                paginateContractPreview('empContractPageContent', 'empcontract-a4', 'empcontract-preview-area');
+            }, 100);
         };
 
         // ==========================================================================
-        // 12. CONTRACT EXPORT — PDF & WORD
+        // 11b. CONTRACT PAGED PREVIEW — Split into A4 pages
+        // ==========================================================================
+        function paginateContractPreview(contentId, a4PageId, previewAreaId) {
+            const content = document.getElementById(contentId);
+            const a4Page = document.getElementById(a4PageId);
+            const previewArea = document.getElementById(previewAreaId);
+            if (!content || !a4Page || !previewArea) return;
+
+            // Remove any extra pages from previous render
+            previewArea.querySelectorAll('.extra-preview-page').forEach(function(el) { el.remove(); });
+
+            // Reset first page to natural dimensions
+            a4Page.style.height = '';
+            a4Page.style.overflow = '';
+
+            // A4 natural dimensions: 297mm height, 12mm padding each side → 273mm usable
+            // Use offsetHeight to get the current px value (accounts for any zoom/dpi)
+            const pageHPx = a4Page.offsetHeight;    // e.g. ~1122px at 96dpi
+            const padMm = 12;
+            const pageMm = 297;
+            const pxPerMm = pageHPx / pageMm;
+            const usableHPx = (pageMm - 2 * padMm) * pxPerMm; // 273mm in px
+
+            const contentH = content.scrollHeight;
+            if (contentH <= usableHPx + 20) return; // single page, nothing to do
+
+            const numPages = Math.ceil(contentH / usableHPx);
+
+            // Clip first page to exactly A4 height
+            a4Page.style.height = pageHPx + 'px';
+            a4Page.style.overflow = 'hidden';
+
+            // Capture the rendered HTML
+            const innerHtml = content.innerHTML;
+
+            // Get current scale from the first page (set by adjustScreenScale)
+            const existingTransform = a4Page.style.transform || '';
+
+            for (let i = 1; i < numPages; i++) {
+                const shift = i * usableHPx;
+                const newA4 = document.createElement('div');
+                newA4.className = 'a4-page contract-root extra-preview-page';
+                newA4.style.height = pageHPx + 'px';
+                newA4.style.overflow = 'hidden';
+                if (existingTransform) {
+                    newA4.style.transform = existingTransform;
+                    newA4.style.transformOrigin = 'top center';
+                }
+
+                const newContent = document.createElement('div');
+                newContent.className = 'page-content';
+                newContent.style.fontFamily = "'Inter',sans-serif";
+                newContent.style.height = usableHPx + 'px';
+                newContent.style.overflow = 'hidden';
+
+                const shiftDiv = document.createElement('div');
+                shiftDiv.style.marginTop = '-' + shift + 'px';
+                shiftDiv.innerHTML = innerHtml;
+
+                newContent.appendChild(shiftDiv);
+                newA4.appendChild(newContent);
+
+                // Insert after the last page in the preview area
+                const lastPage = previewArea.querySelector('.extra-preview-page:last-child') || a4Page;
+                lastPage.insertAdjacentElement('afterend', newA4);
+            }
+        }
         // ==========================================================================
         window.lazyGenerateContractPDF = async function(type) {
             const isEmp = type === 'empcontract';
