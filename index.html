@@ -234,7 +234,10 @@
                 min-height: 0;
                 width: 100%;
                 padding: 1.5rem 1rem 2rem;
-                display: block;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
                 position: static;
             }
         }
@@ -248,6 +251,8 @@
         @media (max-width: 1023px) {
             .export-dock { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); position: static; }
             .a4-page { box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        }
+
         @media (max-width: 768px) {
             .export-dock { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); padding: 0.625rem 1rem; flex-direction: row; flex-wrap: nowrap; }
             .a4-page { box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
@@ -262,8 +267,6 @@
                 min-width: 0;
             }
             .export-dock .ui-button svg { width: 1rem; height: 1rem; flex-shrink: 0; }
-            .export-dock { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); }
-            .a4-page { box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 
             /* ── Top nav: single row, horizontal scroll on mobile ── */
             .ui-top-nav {
