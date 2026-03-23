@@ -1932,6 +1932,7 @@
         // ==========================================================================
         const PLATFORMS_LIST = ['IG', 'Snap', 'TikTok', 'Google', 'Salla'];
         let invCustomServices = [];
+        let currentInvoiceRef = null;
 
         const STORAGE_KEY = 'openy_quotation_editor_state'; 
         const QUOTE_COUNTER_KEY = 'openy_last_quote_num';
@@ -2017,18 +2018,23 @@
             const htmlText = strText.replace(/\n/g, '<br>');
             return `<${tag} class="${className}" dir="${dir}">${htmlText}</${tag}>`;
         }
-        function generateInvoiceRef(monthStr) {
-            if (!monthStr || monthStr === 'N/A') return 'INV-0000-000';
-            const parts = monthStr.split('-');
-            if (parts.length >= 2) {
-                let m = parts[0].substring(0, 3).toLowerCase();
-                let y = parts[1];
-                if (y.length === 2) y = '20' + y;
-                const map = { 'jan': '001', 'feb': '002', 'mar': '003', 'apr': '004', 'may': '005', 'jun': '006', 'jul': '007', 'aug': '008', 'sep': '009', 'oct': '010', 'nov': '011', 'dec': '012' };
-                const num = map[m] || '000';
-                return `INV-${y}-${num}`;
-            }
-            return `INV-0000-000`;
+        function generateInvoiceRef() {
+            if (currentInvoiceRef) return currentInvoiceRef;
+            const year = new Date().getFullYear();
+            return `INV-${year}-001`;
+        }
+        async function initInvoiceNumber() {
+            const year = new Date().getFullYear();
+            const prefix = `INV-${year}-`;
+            const records = await cloudDB.getAll('inv_history');
+            let maxNum = 0;
+            records.forEach(r => {
+                if (r.ref && r.ref.startsWith(prefix)) {
+                    const n = parseInt(r.ref.slice(prefix.length), 10);
+                    if (!isNaN(n) && n > maxNum) maxNum = n;
+                }
+            });
+            currentInvoiceRef = `${prefix}${String(maxNum + 1).padStart(3, '0')}`;
         }
         function formatCurrency(amount) {
             const code = appState.currency || 'EGP';
@@ -2624,8 +2630,9 @@
                 if(typeof window.updateExportVisibility === 'function') window.updateExportVisibility();
                 
                 // Unlock heavy rendering after UI has safely painted (Mobile specific fix)
-                setTimeout(() => { 
+                setTimeout(async () => { 
                     isAppBooting = false;
+                    await initInvoiceNumber();
                     if(typeof window.updateAllocations === 'function') window.updateAllocations(); 
                     if(typeof window.saveAndRender === 'function') window.saveAndRender(); 
                     if(typeof window.adjustLayout === 'function') window.adjustLayout();
@@ -3010,7 +3017,7 @@
             const contentDiv = document.getElementById('invoicePageContent');
             if (!contentDiv || !data) return;
 
-            const invoiceRef = generateInvoiceRef(data.month);
+            const invoiceRef = generateInvoiceRef();
             let html = `
                 <div class="scale-wrapper" style="transform-origin: top left; width: 100%;">
                 <div class="avoid-break">
@@ -3565,7 +3572,7 @@
             
             const invoiceData = window.calculateInvoiceData();
             const element = document.getElementById('invoicePageContent');
-            const invoiceRef = generateInvoiceRef(invoiceData.month);
+            const invoiceRef = generateInvoiceRef();
             const filename = sanitizeFilename(invoiceData.client, invoiceRef);
 
             // Prepare element for flawless export
@@ -3619,6 +3626,8 @@
                     source: 'web'
                 };
                 await cloudDB.put(record, 'inv_history');
+                await initInvoiceNumber();
+                if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
             } catch (e) {
                 console.error(e);
                 showToast("Error generating PDF");
@@ -3645,7 +3654,7 @@
             
             try {
                 const invoiceData = window.calculateInvoiceData();
-                const invoiceRef = generateInvoiceRef(invoiceData.month);
+                const invoiceRef = generateInvoiceRef();
                 const workbook = new ExcelJS.Workbook();
                 const worksheet = workbook.addWorksheet('Invoice', {
                     pageSetup: { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1 }
@@ -3957,6 +3966,8 @@
                     source: 'web'
                 };
                 await cloudDB.put(record, 'inv_history');
+                await initInvoiceNumber();
+                if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
             } catch (e) {
                 console.error(e);
                 showToast("Error generating Excel");
