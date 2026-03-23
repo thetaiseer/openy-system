@@ -376,15 +376,77 @@
         .ct-clause-editor-row { background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.8); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
         .ct-service-editor-row { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.8); border-radius: 10px; padding: 8px 10px; margin-bottom: 6px; }
 
-        /* Paged contract preview: stack pages vertically */
-        #contract-preview-area, #empcontract-preview-area {
-            flex-direction: column !important;
-            align-items: center !important;
-            gap: 24px;
+        /* ============================================================
+           LANGUAGE TOGGLE & AI PANEL STYLES
+           ============================================================ */
+        .lang-toggle-btn {
+            background: rgba(255,255,255,0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(203,213,225,0.6); border-radius: 8px; padding: 0.375rem 0.75rem;
+            font-size: 0.78rem; font-weight: 700; color: #334155; cursor: pointer; transition: all 0.2s;
+            white-space: nowrap; letter-spacing: 0.5px;
         }
-        #contract-preview-area .extra-preview-page,
-        #empcontract-preview-area .extra-preview-page {
-            margin-top: 0;
+        .lang-toggle-btn:hover { background: #fff; border-color: var(--primary); color: var(--primary); }
+        .ai-global-btn {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff;
+            border: none; border-radius: 8px; padding: 0.375rem 0.75rem; font-size: 0.78rem;
+            font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+            box-shadow: 0 3px 10px rgba(99,102,241,0.3);
+        }
+        .ai-global-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 15px rgba(99,102,241,0.4); }
+
+        /* AI Assistant Panel */
+        .ai-panel {
+            background: linear-gradient(135deg, rgba(219,234,254,0.55) 0%, rgba(233,213,255,0.55) 100%);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(147,197,253,0.5); border-radius: var(--radius-card);
+            padding: 0.875rem 1rem; margin-bottom: 1rem; transition: all 0.2s;
+        }
+        .ai-panel-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+        .ai-panel-title { font-size: 0.85rem; font-weight: 800; color: #1E40AF; display: flex; align-items: center; gap: 0.4rem; }
+        .ai-panel-chevron { color: #1E40AF; transition: transform 0.2s; font-size: 0.75rem; }
+        .ai-panel.collapsed .ai-panel-chevron { transform: rotate(-90deg); }
+        .ai-panel-body { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
+        .ai-panel.collapsed .ai-panel-body { display: none; }
+        .ai-response-box {
+            background: rgba(255,255,255,0.75); border: 1px solid rgba(147,197,253,0.4);
+            border-radius: 10px; padding: 0.65rem 0.875rem; font-size: 0.82rem; color: #1e293b;
+            min-height: 48px; white-space: pre-wrap; line-height: 1.5;
+        }
+        .ai-panel-btns { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .ai-btn-gen { background: linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; border:none; border-radius:8px; padding:0.45rem 0.875rem; font-size:0.8rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+        .ai-btn-gen:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 4px 12px rgba(99,102,241,0.35); }
+        .ai-btn-gen:disabled { opacity:0.6; cursor:not-allowed; }
+        .ai-btn-apply { background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); color:#166534; border-radius:8px; padding:0.45rem 0.875rem; font-size:0.8rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+        .ai-btn-apply:hover { background:rgba(34,197,94,0.25); }
+        .ai-btn-clear { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#991b1b; border-radius:8px; padding:0.45rem 0.75rem; font-size:0.8rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+        .ai-btn-clear:hover { background:rgba(239,68,68,0.2); }
+
+        /* Global AI Modal */
+        #global-ai-modal .ai-modal-box {
+            background: rgba(255,255,255,0.93); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,0.9); border-radius: 24px; padding: 1.5rem;
+            max-width: 580px; width: calc(100% - 2rem);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.14);
+        }
+        .global-ai-type-badge {
+            display: inline-block; background: linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff;
+            border-radius: 20px; padding: 0.25rem 0.75rem; font-size: 0.8rem; font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .global-ai-output {
+            background: rgba(248,250,252,0.9); border: 1px solid rgba(203,213,225,0.6);
+            border-radius: 12px; padding: 0.75rem; font-size: 0.82rem; color: #1e293b;
+            white-space: pre-wrap; max-height: 200px; overflow-y: auto; line-height: 1.5;
+            font-family: 'Tajawal', system-ui, sans-serif;
+        }
+
+        /* RTL document fixes for export */
+        .a4-page[dir="rtl"] .page-content, .a4-page.rtl-mode .page-content {
+            direction: rtl; text-align: right;
+            font-family: 'Tajawal', sans-serif !important;
+        }
+        .a4-page[dir="rtl"] .page-content table, .a4-page.rtl-mode .page-content table {
+            direction: rtl;
         }
     </style>
     
@@ -427,6 +489,30 @@
         </div>
     </div>
 
+    <!-- Global AI Document Generator Modal -->
+    <div id="global-ai-modal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-[100] backdrop-blur-sm" style="font-family: 'Tajawal', 'Google Sans', system-ui, sans-serif;">
+        <div class="ai-modal-box">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span style="font-size:1.25rem;">✨</span>
+                    <h3 id="global-ai-modal-title" class="text-base font-bold text-slate-900" data-i18n="aiGlobalTitle">AI Assistant — Create Document</h3>
+                </div>
+                <button onclick="window.closeGlobalAI()" class="text-slate-400 hover:text-slate-700 text-xl font-bold leading-none">✕</button>
+            </div>
+            <textarea id="global-ai-prompt" class="ui-input resize-y w-full" rows="4"
+                data-i18n-placeholder="aiGlobalPlaceholder"
+                placeholder="Describe what you want... e.g.: Invoice for Pro icon KSA worth 50,000 EGP for March 2026 campaign"
+                style="font-family:'Tajawal',system-ui,sans-serif; direction:rtl; text-align:right;"></textarea>
+            <div class="flex gap-2 mt-3 flex-wrap">
+                <button id="global-ai-generate-btn" onclick="window.runGlobalAI()" class="ai-btn-gen flex-1" data-i18n="aiGenerate">Generate ✨</button>
+                <button onclick="window.applyGlobalAI()" class="ai-btn-apply flex-1" data-i18n="aiApply">Apply to Form</button>
+                <button onclick="document.getElementById('global-ai-prompt').value=''; document.getElementById('global-ai-output').style.display='none'; window.globalAIContext=null;" class="ai-btn-clear" data-i18n="aiClear">Clear</button>
+            </div>
+            <div id="global-ai-type" class="global-ai-type-badge mt-3" style="display:none;"></div>
+            <div id="global-ai-output" class="global-ai-output mt-2" style="display:none;"></div>
+        </div>
+    </div>
+
     <!-- Unified Shared Top Navigation -->
     <nav class="ui-top-nav no-print">
         <div class="flex items-center gap-3">
@@ -438,7 +524,10 @@
             <button id="nav-contract" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('contract')" class="ui-nav-pill">Client Contract</button>
             <button id="nav-empcontract" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('empcontract')" class="ui-nav-pill">HR Contract</button>
         </div>
-        <div class="flex items-center justify-end"></div>
+        <div class="flex items-center justify-end gap-2">
+            <button id="ai-global-btn" onclick="window.openGlobalAI()" class="ai-global-btn no-print">✨ AI</button>
+            <button id="lang-toggle-btn" onclick="window.toggleLanguage()" class="lang-toggle-btn no-print">عربي</button>
+        </div>
     </nav>
 
     <!-- ============================================== -->
@@ -455,6 +544,26 @@
 
             <main class="app-editor">
                 <div id="inv-tab-editor" class="tab-content active">
+
+                    <!-- AI Assistant Panel (Invoice) -->
+                    <div class="ai-panel" id="ai-panel-inv">
+                        <div class="ai-panel-header" onclick="this.closest('.ai-panel').classList.toggle('collapsed')">
+                            <span class="ai-panel-title">✨ <span data-i18n="aiAssistant">AI Assistant</span></span>
+                            <span class="ai-panel-chevron">▾</span>
+                        </div>
+                        <div class="ai-panel-body">
+                            <textarea id="ai-inv-prompt" class="ui-input resize-y !text-sm" rows="2"
+                                placeholder="اكتب وصف الفاتورة... مثال: فاتورة لشركة Pro icon KSA بقيمة 50000 جنيه عن حملة مارس 2026"
+                                style="font-family:'Tajawal',system-ui,sans-serif; direction:rtl; text-align:right;"></textarea>
+                            <div class="ai-panel-btns">
+                                <button id="ai-inv-generate-btn" onclick="window.runInvAI()" class="ai-btn-gen" data-i18n="aiGenerate">Generate ✨</button>
+                                <button onclick="window.applyInvAI()" class="ai-btn-apply" data-i18n="aiApply">Apply to Form</button>
+                                <button onclick="document.getElementById('ai-inv-prompt').value='';document.getElementById('ai-inv-output').style.display='none';window.aiInvoiceContext=null;" class="ai-btn-clear" data-i18n="aiClear">Clear</button>
+                            </div>
+                            <div id="ai-inv-output" class="ai-response-box" style="display:none;"></div>
+                        </div>
+                    </div>
+
                     <div id="inv-edit-mode-banner" class="ui-card flex justify-between items-center hidden">
                         <div class="flex items-center gap-2 text-[#92400E] text-sm font-semibold">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
@@ -782,7 +891,26 @@
             <main class="app-editor">
                 
                 <div id="tab-editor" class="tab-content active">
-                    
+
+                    <!-- AI Assistant Panel (Quotation) -->
+                    <div class="ai-panel" id="ai-panel-quote">
+                        <div class="ai-panel-header" onclick="this.closest('.ai-panel').classList.toggle('collapsed')">
+                            <span class="ai-panel-title">✨ <span data-i18n="aiAssistant">AI Assistant</span></span>
+                            <span class="ai-panel-chevron">▾</span>
+                        </div>
+                        <div class="ai-panel-body">
+                            <textarea id="ai-quote-prompt" class="ui-input resize-y !text-sm" rows="2"
+                                placeholder="اكتب وصف عرض السعر... مثال: عرض سعر لخدمات تسويق رقمي لمدة 3 شهور بقيمة 15000 جنيه"
+                                style="font-family:'Tajawal',system-ui,sans-serif; direction:rtl; text-align:right;"></textarea>
+                            <div class="ai-panel-btns">
+                                <button id="ai-quote-generate-btn" onclick="window.runQuoteAI()" class="ai-btn-gen" data-i18n="aiGenerate">Generate ✨</button>
+                                <button onclick="window.applyQuoteAI()" class="ai-btn-apply" data-i18n="aiApply">Apply to Form</button>
+                                <button onclick="document.getElementById('ai-quote-prompt').value='';document.getElementById('ai-quote-output').style.display='none';window.aiQuoteContext=null;" class="ai-btn-clear" data-i18n="aiClear">Clear</button>
+                            </div>
+                            <div id="ai-quote-output" class="ai-response-box" style="display:none;"></div>
+                        </div>
+                    </div>
+
                     <div id="edit-mode-banner" class="ui-card flex justify-between items-center hidden">
                         <div class="flex items-center gap-2 text-[#92400E] text-sm font-semibold">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
@@ -983,10 +1111,30 @@
         <aside class="app-sidebar no-print">
             <div class="ui-sub-tabs pt-4 px-6 border-b border-[var(--border-soft)] shrink-0">
                 <button class="ui-nav-pill active" data-ctab="editor" onclick="window.switchContractTab('editor')">Editor</button>
+                <button class="ui-nav-pill" data-ctab="history" onclick="window.switchContractTab('history')">History</button>
             </div>
 
             <main class="app-editor">
                 <div id="ct-tab-editor" class="tab-content active">
+
+                    <!-- AI Assistant Panel (Contract) -->
+                    <div class="ai-panel" id="ai-panel-ct">
+                        <div class="ai-panel-header" onclick="this.closest('.ai-panel').classList.toggle('collapsed')">
+                            <span class="ai-panel-title">✨ <span data-i18n="aiAssistant">AI Assistant</span></span>
+                            <span class="ai-panel-chevron">▾</span>
+                        </div>
+                        <div class="ai-panel-body">
+                            <textarea id="ai-ct-prompt" class="ui-input resize-y !text-sm" rows="2"
+                                placeholder="اكتب وصف العقد... مثال: عقد عميل شامل خدمات التسويق لمدة 6 أشهر بقيمة 15000 جنيه"
+                                style="font-family:'Tajawal',system-ui,sans-serif; direction:rtl; text-align:right;"></textarea>
+                            <div class="ai-panel-btns">
+                                <button id="ai-ct-generate-btn" onclick="window.runContractAI()" class="ai-btn-gen" data-i18n="aiGenerate">Generate ✨</button>
+                                <button onclick="window.applyContractAI()" class="ai-btn-apply" data-i18n="aiApply">Apply to Form</button>
+                                <button onclick="document.getElementById('ai-ct-prompt').value='';document.getElementById('ai-ct-output').style.display='none';window.aiContractContext=null;" class="ai-btn-clear" data-i18n="aiClear">Clear</button>
+                            </div>
+                            <div id="ai-ct-output" class="ai-response-box" style="display:none;"></div>
+                        </div>
+                    </div>
 
                     <!-- Contract Info Card -->
                     <div class="ui-card">
@@ -1202,6 +1350,29 @@
                     </div>
 
                 </div><!-- end ct-tab-editor -->
+
+                <!-- Contract History Tab -->
+                <div id="ct-tab-history" class="tab-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-base font-bold text-slate-900">Contract History</h2>
+                        <div class="flex gap-2">
+                            <button onclick="window.exportCtBackup()" class="ui-button-ghost !border !border-[rgba(255,255,255,0.8)] !text-blue-700">Backup</button>
+                            <label class="ui-button-ghost !border !border-[rgba(255,255,255,0.8)] !text-blue-700 cursor-pointer">
+                                Restore
+                                <input type="file" class="hidden" accept=".json" onchange="window.importCtBackup(event)">
+                            </label>
+                            <button onclick="window.clearCtHistory()" class="ui-button-ghost !border !border-[rgba(255,255,255,0.8)] !text-red-600">Clear</button>
+                        </div>
+                    </div>
+                    <div class="ui-form-group mb-4">
+                        <input type="text" id="ct-history-search" class="ui-input w-full" placeholder="Search contracts..." oninput="window.renderCtHistoryList()">
+                    </div>
+                    <div id="ct-history-list-container"></div>
+                    <div id="ct-history-empty" class="text-center py-10 rounded-xl hidden mt-4">
+                        <svg class="w-8 h-8 text-slate-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div class="text-slate-600 text-sm font-medium">No contracts exported yet.</div>
+                    </div>
+                </div><!-- end ct-tab-history -->
             </main>
 
             <!-- Export Dock -->
@@ -1238,10 +1409,30 @@
         <aside class="app-sidebar no-print">
             <div class="ui-sub-tabs pt-4 px-6 border-b border-[var(--border-soft)] shrink-0">
                 <button class="ui-nav-pill active" data-ectab="editor" onclick="window.switchEmpContractTab('editor')">Editor</button>
+                <button class="ui-nav-pill" data-ectab="history" onclick="window.switchEmpContractTab('history')">History</button>
             </div>
 
             <main class="app-editor">
                 <div id="ec-tab-editor" class="tab-content active">
+
+                    <!-- AI Assistant Panel (Employee Contract) -->
+                    <div class="ai-panel" id="ai-panel-ec">
+                        <div class="ai-panel-header" onclick="this.closest('.ai-panel').classList.toggle('collapsed')">
+                            <span class="ai-panel-title">✨ <span data-i18n="aiAssistant">AI Assistant</span></span>
+                            <span class="ai-panel-chevron">▾</span>
+                        </div>
+                        <div class="ai-panel-body">
+                            <textarea id="ai-ec-prompt" class="ui-input resize-y !text-sm" rows="2"
+                                placeholder="اكتب وصف عقد الموظف... مثال: عقد توظيف لمصمم جرافيك براتب 8000 جنيه وفترة تجربة 3 أشهر"
+                                style="font-family:'Tajawal',system-ui,sans-serif; direction:rtl; text-align:right;"></textarea>
+                            <div class="ai-panel-btns">
+                                <button id="ai-ec-generate-btn" onclick="window.runEmpContractAI()" class="ai-btn-gen" data-i18n="aiGenerate">Generate ✨</button>
+                                <button onclick="window.applyEmpContractAI()" class="ai-btn-apply" data-i18n="aiApply">Apply to Form</button>
+                                <button onclick="document.getElementById('ai-ec-prompt').value='';document.getElementById('ai-ec-output').style.display='none';window.aiEmpContractContext=null;" class="ai-btn-clear" data-i18n="aiClear">Clear</button>
+                            </div>
+                            <div id="ai-ec-output" class="ai-response-box" style="display:none;"></div>
+                        </div>
+                    </div>
 
                     <!-- Contract Info Card -->
                     <div class="ui-card">
@@ -1523,6 +1714,29 @@
                     </div>
 
                 </div><!-- end ec-tab-editor -->
+
+                <!-- Employee Contract History Tab -->
+                <div id="ec-tab-history" class="tab-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-base font-bold text-slate-900">Employee Contract History</h2>
+                        <div class="flex gap-2">
+                            <button onclick="window.exportEcBackup()" class="ui-button-ghost !border !border-[rgba(255,255,255,0.8)] !text-blue-700">Backup</button>
+                            <label class="ui-button-ghost !border !border-[rgba(255,255,255,0.8)] !text-blue-700 cursor-pointer">
+                                Restore
+                                <input type="file" class="hidden" accept=".json" onchange="window.importEcBackup(event)">
+                            </label>
+                            <button onclick="window.clearEcHistory()" class="ui-button-ghost !border !border-[rgba(255,255,255,0.8)] !text-red-600">Clear</button>
+                        </div>
+                    </div>
+                    <div class="ui-form-group mb-4">
+                        <input type="text" id="ec-history-search" class="ui-input w-full" placeholder="Search employee contracts..." oninput="window.renderEcHistoryList()">
+                    </div>
+                    <div id="ec-history-list-container"></div>
+                    <div id="ec-history-empty" class="text-center py-10 rounded-xl hidden mt-4">
+                        <svg class="w-8 h-8 text-slate-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div class="text-slate-600 text-sm font-medium">No employee contracts exported yet.</div>
+                    </div>
+                </div><!-- end ec-tab-history -->
             </main>
 
             <!-- Export Dock -->
@@ -1559,6 +1773,30 @@
 
         const STORAGE_KEY = 'openy_quotation_editor_state'; 
         const QUOTE_COUNTER_KEY = 'openy_last_quote_num';
+
+        // ===========================================================================
+        // FIREBASE CONFIGURATION — FILL IN YOUR WEB APP CREDENTIALS BELOW
+        // Steps:
+        //   1. Go to Firebase Console → https://console.firebase.google.com/
+        //   2. Select your project → Project Settings → General
+        //   3. Under "Your apps", click "Add app" → Web (</>)
+        //   4. Register the app and copy the firebaseConfig values here
+        //   5. In Firebase Console → Firestore Database → Rules, set:
+        //        allow read, write: if request.auth != null;
+        //
+        // SECURITY NOTE: Only use Firebase Web SDK config here.
+        // NEVER put Admin SDK private keys or service account JSON in this file.
+        // ===========================================================================
+        const FIREBASE_WEB_CONFIG = {
+            apiKey:            "YOUR_API_KEY",
+            authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId:         "YOUR_PROJECT_ID",
+            storageBucket:     "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId:             "YOUR_APP_ID"
+        };
+        // Set to true after filling in FIREBASE_WEB_CONFIG above
+        const FIREBASE_ENABLED = FIREBASE_WEB_CONFIG.apiKey !== "YOUR_API_KEY";
         
         let allHistoryRecords = [];
         let allInvHistoryRecords = [];
@@ -1967,108 +2205,104 @@
             }
         };
 
+        // All known store names – extend here when adding new document types
+        const ALL_STORES = ['history', 'inv_history', 'ct_history', 'ec_history'];
+
         const cloudDB = {
             unsubscribers: {},
-            user: null,
+            db: null,
+            _ready: false,
             async init() {
                 try {
-                    let config = {};
-                    if (typeof __firebase_config !== 'undefined') config = JSON.parse(__firebase_config);
-                    if (!config.apiKey) return;
+                    if (!FIREBASE_ENABLED) return; // No config provided yet
+                    if (!window.FB) return;
 
-                    const app = window.FB.initializeApp(config);
-                    this.auth = window.FB.getAuth(app);
+                    const app = window.FB.initializeApp(FIREBASE_WEB_CONFIG);
                     this.db = window.FB.getFirestore(app);
-                    this.appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                    const auth = window.FB.getAuth(app);
 
-                    // Ensure session persists locally if the origin remains the same
-                    try { await window.FB.setPersistence(this.auth, window.FB.browserLocalPersistence); } catch(e) {}
+                    // Keep session alive across page reloads on the same browser
+                    try { await window.FB.setPersistence(auth, window.FB.browserLocalPersistence); } catch(e) {}
 
-                    const initAuth = async () => {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await window.FB.signInWithCustomToken(this.auth, __initial_auth_token);
-                        } else {
-                            await window.FB.signInAnonymously(this.auth);
-                        }
-                    };
-                    await initAuth();
+                    // Anonymous sign-in so Firestore rules can use `request.auth != null`
+                    await window.FB.signInAnonymously(auth);
 
-                    window.FB.onAuthStateChanged(this.auth, async (user) => {
-                        this.user = user;
+                    window.FB.onAuthStateChanged(auth, async (user) => {
                         if (user) {
-                            // Push any locally saved data to the cloud first (Rescues data if anonymous UID changed)
-                            this.syncUp('history');
-                            this.syncUp('inv_history');
-                            
-                            this.setupRealtime('history');
-                            this.setupRealtime('inv_history');
+                            this._ready = true;
+                            // Push any offline-written records to Firestore concurrently
+                            await Promise.all(ALL_STORES.map(s => this.syncUp(s)));
+                            // Then subscribe to live updates for each store
+                            for (const s of ALL_STORES) this.setupRealtime(s);
                         } else {
-                            if (this.unsubscribers['history']) this.unsubscribers['history']();
-                            if (this.unsubscribers['inv_history']) this.unsubscribers['inv_history']();
+                            this._ready = false;
+                            ALL_STORES.forEach(s => {
+                                if (this.unsubscribers[s]) { this.unsubscribers[s](); delete this.unsubscribers[s]; }
+                            });
                         }
                     });
                 } catch(e) { console.error("Firebase init failed:", e); }
             },
             async syncUp(storeName) {
-                if (!this.db || !this.user) return;
+                if (!this.db) return;
                 const records = localStore.getAll(storeName);
                 for (const rec of records) {
                     try {
-                        const docRef = window.FB.doc(this.db, 'artifacts', this.appId, 'users', this.user.uid, storeName, rec.id);
+                        const docRef = window.FB.doc(this.db, storeName, rec.id);
                         await window.FB.setDoc(docRef, rec, { merge: true });
                     } catch(e) {}
                 }
             },
             setupRealtime(storeName) {
-                if (!this.db || !this.user) return;
+                if (!this.db) return;
                 try {
                     if (this.unsubscribers[storeName]) this.unsubscribers[storeName]();
-                    const colRef = window.FB.collection(this.db, 'artifacts', this.appId, 'users', this.user.uid, storeName);
+                    const colRef = window.FB.collection(this.db, storeName);
                     this.unsubscribers[storeName] = window.FB.onSnapshot(colRef, (snapshot) => {
-                        // Save cloud data to local
-                        const cloudRecords = snapshot.docs.map(doc => doc.data());
+                        const cloudRecords = snapshot.docs.map(d => d.data());
                         cloudRecords.forEach(rec => localStore.put(rec, storeName));
-                        
-                        // Render from local (merged) truth
                         const merged = localStore.getAll(storeName);
                         if (storeName === 'history') {
                             allHistoryRecords = merged;
-                            if(document.getElementById('tab-history')?.classList.contains('active')) window.renderHistoryList();
+                            if (document.getElementById('tab-history')?.classList.contains('active')) window.renderHistoryList();
                         } else if (storeName === 'inv_history') {
                             allInvHistoryRecords = merged;
-                            if(document.getElementById('inv-tab-history')?.classList.contains('active')) window.renderInvHistoryList();
+                            if (document.getElementById('inv-tab-history')?.classList.contains('active')) window.renderInvHistoryList();
+                        } else if (storeName === 'ct_history') {
+                            if (document.getElementById('ct-tab-history')?.classList.contains('active')) window.renderCtHistoryList();
+                        } else if (storeName === 'ec_history') {
+                            if (document.getElementById('ec-tab-history')?.classList.contains('active')) window.renderEcHistoryList();
                         }
                     }, (error) => console.error(`Firestore sync error for ${storeName}:`, error));
-                } catch(e) { console.error(`Failed to setup realtime listener for ${storeName}:`, e); }
+                } catch(e) { console.error(`Failed to setup realtime for ${storeName}:`, e); }
             },
             async getAll(storeName = "history") {
                 return localStore.getAll(storeName);
             },
             async put(record, storeName = "history") {
-                localStore.put(record, storeName); // Save locally instantly
-                if (!this.db || !this.user) return;
+                localStore.put(record, storeName); // instant local write
+                if (!this.db) return;
                 try {
-                    const docRef = window.FB.doc(this.db, 'artifacts', this.appId, 'users', this.user.uid, storeName, record.id);
+                    const docRef = window.FB.doc(this.db, storeName, record.id);
                     await window.FB.setDoc(docRef, record);
-                } catch(e) { console.error("Failed to save to cloud:", e); }
+                } catch(e) { console.error("Failed to save to Firestore:", e); }
             },
             async delete(id, storeName = "history") {
-                localStore.delete(id, storeName); // Delete locally instantly
-                if (!this.db || !this.user) return;
+                localStore.delete(id, storeName);
+                if (!this.db) return;
                 try {
-                    const docRef = window.FB.doc(this.db, 'artifacts', this.appId, 'users', this.user.uid, storeName, id);
+                    const docRef = window.FB.doc(this.db, storeName, id);
                     await window.FB.deleteDoc(docRef);
-                } catch(e) { console.error("Failed to delete from cloud:", e); }
+                } catch(e) { console.error("Failed to delete from Firestore:", e); }
             },
             async clear(storeName = "history") {
-                localStore.clear(storeName); // Clear locally instantly
-                if (!this.db || !this.user) return;
+                localStore.clear(storeName);
+                if (!this.db) return;
                 try {
-                    const colRef = window.FB.collection(this.db, 'artifacts', this.appId, 'users', this.user.uid, storeName);
+                    const colRef = window.FB.collection(this.db, storeName);
                     const snap = await window.FB.getDocs(colRef);
-                    const promises = snap.docs.map(d => window.FB.deleteDoc(d.ref));
-                    await Promise.all(promises);
-                } catch(e) { console.error("Failed to clear cloud:", e); }
+                    await Promise.all(snap.docs.map(d => window.FB.deleteDoc(d.ref)));
+                } catch(e) { console.error("Failed to clear Firestore:", e); }
             }
         };
 
@@ -2167,6 +2401,8 @@
                     await cloudDB.init();
                     if(typeof window.renderHistoryList === 'function') window.renderHistoryList(); 
                     if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList();
+                    if(typeof window.renderCtHistoryList === 'function') window.renderCtHistoryList();
+                    if(typeof window.renderEcHistoryList === 'function') window.renderEcHistoryList();
                 } catch(e) {
                     console.warn("Cloud init error", e);
                 }
@@ -2974,7 +3210,7 @@
                 margin:       12, // Uniform 12mm margin applied via jsPDF natively
                 filename:     filename,
                 image:        { type: 'jpeg', quality: 1 },
-                html2canvas:  { scale: 2, useCORS: true, logging: false, scrollY: 0 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false, scrollY: 0, letterRendering: true, allowTaint: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak:    { mode: ['css', 'legacy'], avoid: ['.avoid-break', 'thead', 'tr'] }
             };
@@ -2983,6 +3219,7 @@
                 await html2pdf().set(opt).from(element).save();
                 showToast("PDF Downloaded successfully!");
                 
+                const _now = new Date();
                 const record = {
                     id: Date.now().toString(),
                     client: appState['client-name'],
@@ -2992,7 +3229,11 @@
                     currency: appState.currency,
                     status: 'unpaid',
                     timestamp: Date.now(),
-                    type: 'quote'
+                    type: 'quote',
+                    year: _now.getFullYear(),
+                    month: _now.getMonth() + 1,
+                    day: _now.getDate(),
+                    source: 'web'
                 };
                 await cloudDB.put(record, 'history');
             } catch (e) {
@@ -3051,6 +3292,7 @@
                 saveAs(blob, filename);
                 showToast("Excel Downloaded successfully!");
                 
+                const _now2 = new Date();
                 const record = {
                     id: Date.now().toString(),
                     client: appState['client-name'],
@@ -3060,7 +3302,11 @@
                     currency: appState.currency,
                     status: 'unpaid',
                     timestamp: Date.now(),
-                    type: 'quote'
+                    type: 'quote',
+                    year: _now2.getFullYear(),
+                    month: _now2.getMonth() + 1,
+                    day: _now2.getDate(),
+                    source: 'web'
                 };
                 await cloudDB.put(record, 'history');
             } catch (e) {
@@ -3110,7 +3356,7 @@
                 margin:       12, // Uniform 12mm margin applied via jsPDF natively
                 filename:     filename,
                 image:        { type: 'jpeg', quality: 1 },
-                html2canvas:  { scale: 2, useCORS: true, logging: false, scrollY: 0 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false, scrollY: 0, letterRendering: true, allowTaint: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak:    { mode: ['css', 'legacy'], avoid: ['.avoid-break'] } // Simplified to only avoid breaking explicit elements
             };
@@ -3119,6 +3365,7 @@
                 await html2pdf().set(opt).from(element).save();
                 showToast("Invoice PDF Downloaded!");
                 
+                const _now3 = new Date();
                 const record = {
                     id: Date.now().toString(),
                     client: invoiceData.client,
@@ -3128,7 +3375,11 @@
                     currency: invoiceData.currency,
                     status: 'unpaid',
                     timestamp: Date.now(),
-                    type: 'invoice'
+                    type: 'invoice',
+                    year: _now3.getFullYear(),
+                    month: _now3.getMonth() + 1,
+                    day: _now3.getDate(),
+                    source: 'web'
                 };
                 await cloudDB.put(record, 'inv_history');
             } catch (e) {
@@ -3452,6 +3703,7 @@
                 saveAs(blob, filename);
                 showToast("Invoice Excel Downloaded!");
 
+                const _now4 = new Date();
                 const record = {
                     id: Date.now().toString(),
                     client: invoiceData.client,
@@ -3461,7 +3713,11 @@
                     currency: invoiceData.currency,
                     status: 'unpaid',
                     timestamp: Date.now(),
-                    type: 'invoice'
+                    type: 'invoice',
+                    year: _now4.getFullYear(),
+                    month: _now4.getMonth() + 1,
+                    day: _now4.getDate(),
+                    source: 'web'
                 };
                 await cloudDB.put(record, 'inv_history');
             } catch (e) {
@@ -3476,6 +3732,57 @@
         // ==========================================================================
         // 9. HISTORY MANAGEMENT (Render logic)
         // ==========================================================================
+
+        // Helper: returns month name from month number (1-12)
+        function _monthName(m) {
+            return new Date(2000, m - 1).toLocaleString('en-US', { month: 'long' });
+        }
+
+        // Helper: group records array by year then month, sorted newest first
+        function _groupByYearMonth(records) {
+            const map = {};
+            records.forEach(r => {
+                const ts = r.timestamp || Date.now();
+                const d = new Date(ts);
+                const y = r.year  || d.getFullYear();
+                const m = r.month || (d.getMonth() + 1);
+                const key = `${y}-${String(m).padStart(2, '0')}`;
+                if (!map[key]) map[key] = { year: y, month: m, records: [] };
+                map[key].records.push(r);
+            });
+            return Object.values(map).sort((a, b) =>
+                b.year !== a.year ? b.year - a.year : b.month - a.month
+            );
+        }
+
+        // Helper: render a single history card (shared by all 4 modules)
+        function _renderHistoryCard(r, storeName, container) {
+            const isPaid = r.status === 'paid';
+            const statusColor = isPaid ? 'bg-green-100 text-green-700 border-green-200' : 'bg-orange-100 text-orange-700 border-orange-200';
+            const canToggle = ['history', 'inv_history'].includes(storeName);
+            const div = document.createElement('div');
+            div.className = 'ui-card !p-4 !mb-3 flex flex-col gap-3';
+            div.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="font-bold text-slate-800 text-sm mb-1">${r.client || '—'}</div>
+                        <div class="text-xs text-slate-500 font-mono">${r.ref || '—'} • ${r.date || '—'}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-black text-slate-900">${r.amount > 0 ? new Intl.NumberFormat('en-US').format(r.amount) + ' ' + (r.currency || '') : '—'}</div>
+                        <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold border ${statusColor} uppercase tracking-wider ${canToggle ? 'cursor-pointer' : ''}"
+                            ${canToggle ? `onclick="window.toggleStatus('${r.id}', '${storeName}', '${r.status}')"` : ''}>
+                            ${r.status}
+                        </span>
+                    </div>
+                </div>
+                <div class="flex gap-2 border-t border-slate-100 pt-3">
+                    <button onclick="window.deleteRecord('${r.id}', '${storeName}')" class="ui-button-ghost !text-red-600 hover:!bg-red-50 !py-1 flex-1 justify-center text-xs">Delete</button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
         window.renderHistoryList = async function() {
             const container = document.getElementById('history-list-container');
             const emptyEl = document.getElementById('history-empty');
@@ -3483,47 +3790,23 @@
             if (!container) return;
 
             let records = await cloudDB.getAll('history');
-            
             records = records.filter(r => {
                 const matchSearch = (r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal));
                 const matchFilter = currentHistoryFilter === 'all' || r.status === currentHistoryFilter;
                 return matchSearch && matchFilter;
             });
-
-            records.sort((a,b) => b.timestamp - a.timestamp);
+            records.sort((a, b) => b.timestamp - a.timestamp);
 
             container.innerHTML = '';
-            if (records.length === 0) {
-                if(emptyEl) emptyEl.classList.remove('hidden');
-                return;
-            } else {
-                if(emptyEl) emptyEl.classList.add('hidden');
-            }
+            if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
+            if (emptyEl) emptyEl.classList.add('hidden');
 
-            records.forEach(r => {
-                const isPaid = r.status === 'paid';
-                const statusColor = isPaid ? 'bg-green-100 text-green-700 border-green-200' : 'bg-orange-100 text-orange-700 border-orange-200';
-                
-                const div = document.createElement('div');
-                div.className = 'ui-card !p-4 !mb-3 flex flex-col gap-3';
-                div.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <div class="font-bold text-slate-800 text-sm mb-1">${r.client}</div>
-                            <div class="text-xs text-slate-500 font-mono">${r.ref} • ${r.date}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="font-black text-slate-900">${new Intl.NumberFormat('en-US').format(r.amount)} ${r.currency}</div>
-                            <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold border ${statusColor} uppercase tracking-wider cursor-pointer" onclick="window.toggleStatus('${r.id}', 'history', '${r.status}')">
-                                ${r.status}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="flex gap-2 border-t border-slate-100 pt-3">
-                        <button onclick="window.deleteRecord('${r.id}', 'history')" class="ui-button-ghost !text-red-600 hover:!bg-red-50 !py-1 flex-1 justify-center text-xs">Delete</button>
-                    </div>
-                `;
-                container.appendChild(div);
+            _groupByYearMonth(records).forEach(group => {
+                const header = document.createElement('div');
+                header.className = 'text-xs font-extrabold text-slate-500 uppercase tracking-widest px-1 mt-4 mb-2';
+                header.textContent = `${group.year}  •  ${_monthName(group.month)}`;
+                container.appendChild(header);
+                group.records.forEach(r => _renderHistoryCard(r, 'history', container));
             });
         };
 
@@ -3534,47 +3817,73 @@
             if (!container) return;
 
             let records = await cloudDB.getAll('inv_history');
-            
             records = records.filter(r => {
                 const matchSearch = (r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal));
                 const matchFilter = currentInvHistoryFilter === 'all' || r.status === currentInvHistoryFilter;
                 return matchSearch && matchFilter;
             });
-
-            records.sort((a,b) => b.timestamp - a.timestamp);
+            records.sort((a, b) => b.timestamp - a.timestamp);
 
             container.innerHTML = '';
-            if (records.length === 0) {
-                if(emptyEl) emptyEl.classList.remove('hidden');
-                return;
-            } else {
-                if(emptyEl) emptyEl.classList.add('hidden');
-            }
+            if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
+            if (emptyEl) emptyEl.classList.add('hidden');
 
-            records.forEach(r => {
-                const isPaid = r.status === 'paid';
-                const statusColor = isPaid ? 'bg-green-100 text-green-700 border-green-200' : 'bg-orange-100 text-orange-700 border-orange-200';
-                
-                const div = document.createElement('div');
-                div.className = 'ui-card !p-4 !mb-3 flex flex-col gap-3';
-                div.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <div class="font-bold text-slate-800 text-sm mb-1">${r.client}</div>
-                            <div class="text-xs text-slate-500 font-mono">${r.ref} • ${r.date}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="font-black text-slate-900">${new Intl.NumberFormat('en-US').format(r.amount)} ${r.currency}</div>
-                            <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold border ${statusColor} uppercase tracking-wider cursor-pointer" onclick="window.toggleStatus('${r.id}', 'inv_history', '${r.status}')">
-                                ${r.status}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="flex gap-2 border-t border-slate-100 pt-3">
-                        <button onclick="window.deleteRecord('${r.id}', 'inv_history')" class="ui-button-ghost !text-red-600 hover:!bg-red-50 !py-1 flex-1 justify-center text-xs">Delete</button>
-                    </div>
-                `;
-                container.appendChild(div);
+            _groupByYearMonth(records).forEach(group => {
+                const header = document.createElement('div');
+                header.className = 'text-xs font-extrabold text-slate-500 uppercase tracking-widest px-1 mt-4 mb-2';
+                header.textContent = `${group.year}  •  ${_monthName(group.month)}`;
+                container.appendChild(header);
+                group.records.forEach(r => _renderHistoryCard(r, 'inv_history', container));
+            });
+        };
+
+        window.renderCtHistoryList = async function() {
+            const container = document.getElementById('ct-history-list-container');
+            const emptyEl = document.getElementById('ct-history-empty');
+            const searchVal = (document.getElementById('ct-history-search')?.value || '').toLowerCase();
+            if (!container) return;
+
+            let records = await cloudDB.getAll('ct_history');
+            records = records.filter(r =>
+                r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal)
+            );
+            records.sort((a, b) => b.timestamp - a.timestamp);
+
+            container.innerHTML = '';
+            if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
+            if (emptyEl) emptyEl.classList.add('hidden');
+
+            _groupByYearMonth(records).forEach(group => {
+                const header = document.createElement('div');
+                header.className = 'text-xs font-extrabold text-slate-500 uppercase tracking-widest px-1 mt-4 mb-2';
+                header.textContent = `${group.year}  •  ${_monthName(group.month)}`;
+                container.appendChild(header);
+                group.records.forEach(r => _renderHistoryCard(r, 'ct_history', container));
+            });
+        };
+
+        window.renderEcHistoryList = async function() {
+            const container = document.getElementById('ec-history-list-container');
+            const emptyEl = document.getElementById('ec-history-empty');
+            const searchVal = (document.getElementById('ec-history-search')?.value || '').toLowerCase();
+            if (!container) return;
+
+            let records = await cloudDB.getAll('ec_history');
+            records = records.filter(r =>
+                r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal)
+            );
+            records.sort((a, b) => b.timestamp - a.timestamp);
+
+            container.innerHTML = '';
+            if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
+            if (emptyEl) emptyEl.classList.add('hidden');
+
+            _groupByYearMonth(records).forEach(group => {
+                const header = document.createElement('div');
+                header.className = 'text-xs font-extrabold text-slate-500 uppercase tracking-widest px-1 mt-4 mb-2';
+                header.textContent = `${group.year}  •  ${_monthName(group.month)}`;
+                container.appendChild(header);
+                group.records.forEach(r => _renderHistoryCard(r, 'ec_history', container));
             });
         };
 
@@ -3584,16 +3893,18 @@
             if (record) {
                 record.status = currentStatus === 'paid' ? 'unpaid' : 'paid';
                 await cloudDB.put(record, storeName);
-                if(storeName === 'history') window.renderHistoryList();
-                else window.renderInvHistoryList();
+                if (storeName === 'history') window.renderHistoryList();
+                else if (storeName === 'inv_history') window.renderInvHistoryList();
             }
         };
 
         window.deleteRecord = async function(id, storeName) {
             window.openConfirmModal("Delete Record", "Are you sure you want to delete this record? This action cannot be undone.", async () => {
                 await cloudDB.delete(id, storeName);
-                if(storeName === 'history') window.renderHistoryList();
-                else window.renderInvHistoryList();
+                if (storeName === 'history') window.renderHistoryList();
+                else if (storeName === 'inv_history') window.renderInvHistoryList();
+                else if (storeName === 'ct_history') window.renderCtHistoryList();
+                else if (storeName === 'ec_history') window.renderEcHistoryList();
                 showToast("Record deleted.");
             });
         };
@@ -3642,6 +3953,22 @@
             });
         };
 
+        window.clearCtHistory = async function() {
+            window.openConfirmModal("Clear History", "Are you sure you want to clear all Contract records?", async () => {
+                await cloudDB.clear('ct_history');
+                window.renderCtHistoryList();
+                showToast("History cleared.");
+            });
+        };
+
+        window.clearEcHistory = async function() {
+            window.openConfirmModal("Clear History", "Are you sure you want to clear all Employee Contract records?", async () => {
+                await cloudDB.clear('ec_history');
+                window.renderEcHistoryList();
+                showToast("History cleared.");
+            });
+        };
+
         window.exportBackup = async function() {
             const records = await cloudDB.getAll('history');
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records));
@@ -3657,6 +3984,24 @@
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
             dlAnchorElem.setAttribute("download", "openy_inv_backup.json");
+            dlAnchorElem.click();
+        };
+
+        window.exportCtBackup = async function() {
+            const records = await cloudDB.getAll('ct_history');
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "openy_contract_backup.json");
+            dlAnchorElem.click();
+        };
+
+        window.exportEcBackup = async function() {
+            const records = await cloudDB.getAll('ec_history');
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "openy_empcontract_backup.json");
             dlAnchorElem.click();
         };
 
@@ -3698,6 +4043,40 @@
                 } catch (err) {
                     showToast("Invalid backup file.");
                 }
+            };
+            reader.readAsText(file);
+        };
+
+        window.importCtBackup = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (Array.isArray(data)) {
+                        for (const item of data) await cloudDB.put(item, 'ct_history');
+                        window.renderCtHistoryList();
+                        showToast("Backup restored successfully.");
+                    }
+                } catch (err) { showToast("Invalid backup file."); }
+            };
+            reader.readAsText(file);
+        };
+
+        window.importEcBackup = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (Array.isArray(data)) {
+                        for (const item of data) await cloudDB.put(item, 'ec_history');
+                        window.renderEcHistoryList();
+                        showToast("Backup restored successfully.");
+                    }
+                } catch (err) { showToast("Invalid backup file."); }
             };
             reader.readAsText(file);
         };
@@ -3772,10 +4151,26 @@
 
         // --- Contract: Tab Switcher ---
         window.switchContractTab = function(tabId) {
-            document.getElementById('ct-tab-editor')?.classList.toggle('active', tabId === 'editor');
+            const editorTab = document.getElementById('ct-tab-editor');
+            const historyTab = document.getElementById('ct-tab-history');
+            const exportDock = document.getElementById('ct-export-section');
+            const pills = document.querySelectorAll('#contract-module .ui-sub-tabs .ui-nav-pill');
+            if (editorTab) editorTab.classList.toggle('active', tabId === 'editor');
+            if (historyTab) historyTab.classList.toggle('active', tabId === 'history');
+            if (exportDock) exportDock.style.display = tabId === 'editor' ? '' : 'none';
+            pills.forEach(btn => btn.classList.toggle('active', btn.dataset.ctab === tabId));
+            if (tabId === 'history') window.renderCtHistoryList();
         };
         window.switchEmpContractTab = function(tabId) {
-            document.getElementById('ec-tab-editor')?.classList.toggle('active', tabId === 'editor');
+            const editorTab = document.getElementById('ec-tab-editor');
+            const historyTab = document.getElementById('ec-tab-history');
+            const exportDock = document.getElementById('ec-export-section');
+            const pills = document.querySelectorAll('#empcontract-module .ui-sub-tabs .ui-nav-pill');
+            if (editorTab) editorTab.classList.toggle('active', tabId === 'editor');
+            if (historyTab) historyTab.classList.toggle('active', tabId === 'history');
+            if (exportDock) exportDock.style.display = tabId === 'editor' ? '' : 'none';
+            pills.forEach(btn => btn.classList.toggle('active', btn.dataset.ectab === tabId));
+            if (tabId === 'history') window.renderEcHistoryList();
         };
 
         // --- Contract: Services ---
@@ -4249,7 +4644,7 @@
                 margin: 12,
                 filename: filename,
                 image: { type: 'jpeg', quality: 1 },
-                html2canvas: { scale: 2, useCORS: true, logging: false, scrollY: 0 },
+                html2canvas: { scale: 2, useCORS: true, logging: false, scrollY: 0, letterRendering: true, allowTaint: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak: { mode: ['css', 'legacy'], avoid: ['.ct-clause', '.ct-sig-grid', '.ct-party-grid', '.avoid-break'] }
             };
@@ -4257,6 +4652,24 @@
             try {
                 await html2pdf().set(opt).from(element).save();
                 showToast('PDF Downloaded successfully!');
+                // Save record to Firebase history
+                const _nowCt = new Date();
+                const ctRecord = {
+                    id: Date.now().toString(),
+                    client: clientName,
+                    ref: refNum,
+                    date: (isEmp ? document.getElementById('ec-date') : document.getElementById('ct-date'))?.value || _nowCt.toISOString().split('T')[0],
+                    amount: parseFloat((isEmp ? document.getElementById('ec-salary') : document.getElementById('ct-total-value'))?.value || 0) || 0,
+                    currency: (isEmp ? document.getElementById('ec-currency') : document.getElementById('ct-currency'))?.value || 'EGP',
+                    status: (isEmp ? document.getElementById('ec-status') : document.getElementById('ct-status'))?.value || 'Draft',
+                    timestamp: Date.now(),
+                    type: isEmp ? 'empcontract' : 'contract',
+                    year: _nowCt.getFullYear(),
+                    month: _nowCt.getMonth() + 1,
+                    day: _nowCt.getDate(),
+                    source: 'web'
+                };
+                await cloudDB.put(ctRecord, isEmp ? 'ec_history' : 'ct_history');
             } catch (e) {
                 console.error(e);
                 showToast('Error generating PDF');
@@ -4288,35 +4701,56 @@
 
             try {
                 const styleBlock = `<style>
-                    body { font-family: Arial, sans-serif; font-size: 11pt; color: #111; }
+                    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap');
+                    body { font-family: 'Tajawal', 'Arial', sans-serif; font-size: 11pt; color: #111; direction: rtl; }
                     .ct-header-divider { border-top: 3px solid #111; margin: 10pt 0 14pt; }
                     .ct-section-label { background: #111; color: #fff; font-size: 9pt; font-weight: bold; letter-spacing: 1pt; text-transform: uppercase; padding: 5pt 8pt; display: inline-block; margin-bottom: 8pt; }
                     .ct-party-grid { display: table; width: 100%; border-collapse: separate; border-spacing: 10pt; }
                     .ct-party-box { display: table-cell; border: 1.5pt solid #111; padding: 8pt; width: 50%; vertical-align: top; }
                     .ct-party-header { background: #111; color: #fff; font-size: 8pt; font-weight: bold; padding: 5pt 8pt; margin: -8pt -8pt 8pt; display: block; }
-                    .ct-party-name { font-size: 14pt; font-weight: bold; }
-                    .ct-party-detail { font-size: 9pt; color: #555; margin-top: 2pt; }
+                    .ct-party-name { font-size: 14pt; font-weight: bold; font-family: 'Tajawal', Arial, sans-serif; }
+                    .ct-party-detail { font-size: 9pt; color: #555; margin-top: 2pt; font-family: 'Tajawal', Arial, sans-serif; }
                     .ct-financial-box { border: 1pt solid #ddd; padding: 10pt; background: #f9f9f9; }
                     .ct-financial-row { display: flex; justify-content: space-between; font-size: 10pt; padding: 4pt 0; border-bottom: 1pt solid #eee; }
                     .ct-financial-total { background: #111; color: #fff; padding: 8pt 10pt; font-size: 11pt; font-weight: bold; display: flex; justify-content: space-between; margin: 6pt -10pt -10pt; }
-                    .ct-clause { margin-bottom: 10pt; }
+                    .ct-clause { margin-bottom: 10pt; page-break-inside: avoid; }
                     .ct-clause-num { background: #111; color: #fff; font-size: 8pt; font-weight: bold; padding: 2pt 6pt; }
-                    .ct-clause-title-text { font-size: 11pt; font-weight: bold; direction: rtl; text-align: right; }
-                    .ct-clause-body { font-size: 10pt; line-height: 1.7; direction: rtl; text-align: right; padding-right: 20pt; color: #333; }
+                    .ct-clause-title-text { font-size: 11pt; font-weight: bold; direction: rtl; text-align: right; font-family: 'Tajawal', Arial, sans-serif; }
+                    .ct-clause-body { font-size: 10pt; line-height: 1.8; direction: rtl; text-align: right; padding-right: 20pt; color: #333; font-family: 'Tajawal', Arial, sans-serif; }
                     .ct-sig-grid { display: table; width: 100%; margin-top: 24pt; border-top: 2pt solid #111; padding-top: 14pt; }
                     .ct-sig-block { display: table-cell; width: 50%; text-align: center; padding: 0 20pt; }
                     .ct-sig-party-label { background: #111; color: #fff; font-size: 8pt; font-weight: bold; padding: 3pt 7pt; }
                     .ct-sig-name-line { border-bottom: 1.5pt solid #111; margin: 20pt 0 6pt; }
-                    .ct-sig-name-text { font-size: 10pt; font-weight: bold; }
+                    .ct-sig-name-text { font-size: 10pt; font-weight: bold; font-family: 'Tajawal', Arial, sans-serif; }
+                    .arabic-text { font-family: 'Tajawal', Arial, sans-serif !important; direction: rtl; text-align: right; }
                 </style>`;
                 const htmlContent = element.innerHTML;
-                const fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8">${styleBlock}</head><body>${htmlContent}</body></html>`;
+                const dir = appLang === 'ar' ? 'rtl' : 'ltr';
+                const fullHtml = `<!DOCTYPE html><html dir="${dir}" lang="${appLang}"><head><meta charset="UTF-8">${styleBlock}</head><body style="direction:${dir};">${htmlContent}</body></html>`;
                 const blob = new Blob(['\ufeff', fullHtml], { type: 'application/msword' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url; a.download = filename; a.click();
                 URL.revokeObjectURL(url);
                 showToast('Word document downloaded!');
+                // Save record to Firebase history
+                const _nowCtW = new Date();
+                const ctWRecord = {
+                    id: Date.now().toString(),
+                    client: clientName,
+                    ref: refNum,
+                    date: (isEmp ? document.getElementById('ec-date') : document.getElementById('ct-date'))?.value || _nowCtW.toISOString().split('T')[0],
+                    amount: parseFloat((isEmp ? document.getElementById('ec-salary') : document.getElementById('ct-total-value'))?.value || 0) || 0,
+                    currency: (isEmp ? document.getElementById('ec-currency') : document.getElementById('ct-currency'))?.value || 'EGP',
+                    status: (isEmp ? document.getElementById('ec-status') : document.getElementById('ct-status'))?.value || 'Draft',
+                    timestamp: Date.now(),
+                    type: isEmp ? 'empcontract' : 'contract',
+                    year: _nowCtW.getFullYear(),
+                    month: _nowCtW.getMonth() + 1,
+                    day: _nowCtW.getDate(),
+                    source: 'web'
+                };
+                await cloudDB.put(ctWRecord, isEmp ? 'ec_history' : 'ct_history');
             } catch(e) {
                 console.error(e);
                 showToast('Error generating Word document');
@@ -4367,6 +4801,524 @@
                 if (ec) ec.textContent = getDefaultEmpClauses().length;
             }
         }
+
+        // ==========================================================================
+        // LANGUAGE SUPPORT & i18n
+        // ==========================================================================
+        let appLang = localStorage.getItem('openy_lang') || 'ar';
+
+        const i18n = {
+            ar: {
+                invoice: 'فاتورة', quotation: 'عرض سعر', contract: 'عقد عميل', empcontract: 'عقد توظيف',
+                editor: 'المحرر', history: 'السجل',
+                downloadExcel: 'تنزيل Excel', downloadPDF: 'تنزيل PDF',
+                exportPDF: 'تصدير PDF', exportWord: 'تصدير Word',
+                aiAssistant: 'المساعد الذكي ✨', aiGenerate: 'توليد ✨', aiApply: 'تطبيق على النموذج',
+                aiRegenerate: 'إعادة التوليد', aiClear: 'مسح',
+                aiGlobalTitle: 'المساعد الذكي — إنشاء مستند',
+                aiGlobalPlaceholder: 'اكتب ما تريده... مثال: أريد فاتورة لشركة Pro icon KSA بقيمة 50000 جنيه عن حملة مارس 2026',
+                generating: 'جارٍ التوليد...',
+            },
+            en: {
+                invoice: 'Invoice', quotation: 'Quotation', contract: 'Contract', empcontract: 'Employee Contract',
+                editor: 'Editor', history: 'History',
+                downloadExcel: 'Download Excel', downloadPDF: 'Download PDF',
+                exportPDF: 'Export PDF', exportWord: 'Export Word',
+                aiAssistant: 'AI Assistant ✨', aiGenerate: 'Generate ✨', aiApply: 'Apply to Form',
+                aiRegenerate: 'Regenerate', aiClear: 'Clear',
+                aiGlobalTitle: 'AI Assistant — Create Document',
+                aiGlobalPlaceholder: 'Describe what you want... e.g.: Invoice for Pro icon KSA worth 50,000 EGP for March 2026 campaign',
+                generating: 'Generating...',
+            }
+        };
+
+        function t(key) { return i18n[appLang]?.[key] || i18n['en'][key] || key; }
+
+        window.toggleLanguage = function() {
+            window.setLanguage(appLang === 'ar' ? 'en' : 'ar');
+        };
+
+        window.setLanguage = function(lang) {
+            appLang = lang;
+            localStorage.setItem('openy_lang', lang);
+            const isRTL = lang === 'ar';
+            const dir = isRTL ? 'rtl' : 'ltr';
+
+            // Update language toggle button label
+            const btn = document.getElementById('lang-toggle-btn');
+            if (btn) btn.textContent = lang === 'ar' ? 'EN' : 'عربي';
+
+            // Update nav module labels
+            const navMap = { 'nav-invoice': 'invoice', 'nav-quotation': 'quotation', 'nav-contract': 'contract', 'nav-empcontract': 'empcontract' };
+            Object.entries(navMap).forEach(([id, key]) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = t(key);
+            });
+
+            // Update module directions
+            ['invoice-module', 'quotation-module', 'contract-module', 'empcontract-module'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.dir = dir;
+            });
+
+            // Update a4 page styles for RTL
+            document.querySelectorAll('.a4-page').forEach(el => {
+                if (isRTL) { el.classList.add('rtl-mode'); el.dir = 'rtl'; }
+                else { el.classList.remove('rtl-mode'); el.dir = 'ltr'; }
+            });
+
+            // Update all data-i18n elements
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+                const val = t(key);
+                if (val) el.textContent = val;
+            });
+
+            // Update placeholders
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.dataset.i18nPlaceholder;
+                const val = t(key);
+                if (val) el.placeholder = val;
+            });
+
+            // Re-render active preview
+            setTimeout(() => {
+                // Find active module by checking display property
+                const moduleIds = ['invoice','quotation','contract','empcontract'];
+                const activeId = moduleIds.find(id => {
+                    const el = document.getElementById(id + '-module');
+                    return el && el.style.display !== 'none' && el.style.display !== '';
+                });
+                if (activeId) {
+                    if (activeId === 'invoice' && typeof window.updateAllocations === 'function') window.updateAllocations();
+                    else if (activeId === 'quotation' && typeof window.renderPreview === 'function') window.renderPreview();
+                    else if (activeId === 'contract' && typeof window.renderContractPreview === 'function') window.renderContractPreview();
+                    else if (activeId === 'empcontract' && typeof window.renderEmpContractPreview === 'function') window.renderEmpContractPreview();
+                }
+            }, 100);
+        };
+
+        // Initialize language on load (after DOM ready)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Apply initial language state (delayed to let main init run first)
+            setTimeout(() => {
+                const savedLang = localStorage.getItem('openy_lang') || 'ar';
+                const langBtn = document.getElementById('lang-toggle-btn');
+                if (langBtn) langBtn.textContent = savedLang === 'ar' ? 'EN' : 'عربي';
+                if (savedLang !== 'en') {
+                    // Apply RTL to modules that start with dir="ltr"
+                    ['invoice-module','quotation-module','contract-module','empcontract-module'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.dir = 'rtl';
+                    });
+                    document.querySelectorAll('.a4-page').forEach(el => { el.classList.add('rtl-mode'); el.dir = 'rtl'; });
+                }
+            }, 700);
+        }, { once: true });
+
+        // ==========================================================================
+        // ARABIC PDF FIX HELPER
+        // Wait for fonts and set proper direction before export
+        // ==========================================================================
+        async function prepareElementForExport(element) {
+            // Wait for all fonts (including Tajawal) to load
+            try { await document.fonts.ready; } catch(e) {}
+            // Additional stabilization delay
+            await new Promise(r => setTimeout(r, 250));
+            // Apply correct direction for Arabic
+            if (appLang === 'ar') {
+                element.style.direction = 'rtl';
+                element.setAttribute('dir', 'rtl');
+                // Ensure Tajawal font is applied
+                if (!element.style.fontFamily || !element.style.fontFamily.includes('Tajawal')) {
+                    element.style.fontFamily = "'Tajawal', sans-serif";
+                }
+            } else {
+                element.style.direction = 'ltr';
+                element.setAttribute('dir', 'ltr');
+            }
+        }
+
+        function resetElementAfterExport(element, origStyle) {
+            element.style.direction = origStyle.direction || '';
+            element.style.fontFamily = origStyle.fontFamily || '';
+            if (origStyle.dir !== null) element.setAttribute('dir', origStyle.dir || '');
+            else element.removeAttribute('dir');
+        }
+
+        // Patch the export functions to add Arabic fix
+        const _origLazyPDF = window.lazyGenerateQuotePDF;
+        window.lazyGenerateQuotePDF = async function() {
+            const element = document.getElementById('pageContent');
+            if (element) {
+                const origDir = element.style.direction;
+                const origFont = element.style.fontFamily;
+                const origAttrDir = element.getAttribute('dir');
+                await prepareElementForExport(element);
+                try { await _origLazyPDF.call(this); } finally {
+                    element.style.direction = origDir;
+                    element.style.fontFamily = origFont;
+                    if (origAttrDir !== null) element.setAttribute('dir', origAttrDir); else element.removeAttribute('dir');
+                }
+            } else { await _origLazyPDF.call(this); }
+        };
+
+        const _origLazyInvPDF = window.lazyGenerateInvoicePDF;
+        window.lazyGenerateInvoicePDF = async function() {
+            const element = document.getElementById('invoicePageContent');
+            if (element) {
+                const origDir = element.style.direction;
+                const origFont = element.style.fontFamily;
+                const origAttrDir = element.getAttribute('dir');
+                await prepareElementForExport(element);
+                try { await _origLazyInvPDF.call(this); } finally {
+                    element.style.direction = origDir;
+                    element.style.fontFamily = origFont;
+                    if (origAttrDir !== null) element.setAttribute('dir', origAttrDir); else element.removeAttribute('dir');
+                }
+            } else { await _origLazyInvPDF.call(this); }
+        };
+
+        const _origLazyCtPDF = window.lazyGenerateContractPDF;
+        window.lazyGenerateContractPDF = async function(type) {
+            const isEmp = type === 'empcontract';
+            const elementId = isEmp ? 'empContractPageContent' : 'contractPageContent';
+            const element = document.getElementById(elementId);
+            if (element) {
+                const origDir = element.style.direction;
+                const origFont = element.style.fontFamily;
+                const origAttrDir = element.getAttribute('dir');
+                await prepareElementForExport(element);
+                try { await _origLazyCtPDF.call(this, type); } finally {
+                    element.style.direction = origDir;
+                    element.style.fontFamily = origFont;
+                    if (origAttrDir !== null) element.setAttribute('dir', origAttrDir); else element.removeAttribute('dir');
+                }
+            } else { await _origLazyCtPDF.call(this, type); }
+        };
+
+        // Also patch Word export to include Tajawal font
+        const _origLazyCtWord = window.lazyGenerateContractWord;
+        window.lazyGenerateContractWord = async function(type) {
+            // Word export uses innerHTML directly, Arabic should work since it's HTML
+            await _origLazyCtWord.call(this, type);
+        };
+
+        // ==========================================================================
+        // SHARED AI HELPERS
+        // ==========================================================================
+        /** Parse AI JSON response, stripping markdown code fences if present */
+        function parseAIResponse(text) {
+            if (!text) return null;
+            try {
+                return JSON.parse(text.replace(/```json\n?|```\n?/g, '').trim());
+            } catch(e) {
+                return null;
+            }
+        }
+
+        /** Set a form field value if it has meaningful content */
+        function setFieldValue(id, value) {
+            const el = document.getElementById(id);
+            if (el && value !== undefined && value !== null && String(value).trim() !== '') {
+                el.value = value;
+            }
+        }
+
+        /** Run an AI generation with standard loading state management */
+        async function runAIGeneration(opts) {
+            const { promptId, outputId, btnId, systemPrompt, onSuccess, onError } = opts;
+            const promptEl = document.getElementById(promptId);
+            const outputEl = document.getElementById(outputId);
+            const btn = document.getElementById(btnId);
+            if (!promptEl || !btn) return;
+            const prompt = promptEl.value.trim();
+            if (!prompt) { showToast(appLang === 'ar' ? 'الرجاء كتابة وصف' : 'Please enter a description'); return; }
+
+            const origText = btn.innerHTML;
+            btn.innerHTML = t('generating'); btn.disabled = true;
+            if (outputEl) outputEl.style.display = 'none';
+
+            const text = await fetchGeminiText(`${systemPrompt}\n\nRequest: ${prompt}`);
+            if (text) {
+                const json = parseAIResponse(text);
+                if (json) { onSuccess(json, outputEl); }
+                else { if (onError) onError(text, outputEl); else if (outputEl) { outputEl.style.display = 'block'; outputEl.textContent = text.substring(0, 300); } }
+            }
+            btn.innerHTML = origText; btn.disabled = false;
+        }
+
+        // ==========================================================================
+        // AI ASSISTANT — INVOICE
+        // ==========================================================================
+        window.aiInvoiceContext = null;
+
+        window.runInvAI = function() {
+            runAIGeneration({
+                promptId: 'ai-inv-prompt', outputId: 'ai-inv-output', btnId: 'ai-inv-generate-btn',
+                systemPrompt: `You are an invoice assistant. Analyze the request and return ONLY a valid JSON object (no markdown):\n{"client":"","totalBudget":0,"currency":"EGP","campaignMonth":"Mar-2026","project":"","desc":""}\nSupported currencies: EGP, SAR, AED, USD. campaignMonth format: Mon-YYYY like Mar-2026.`,
+                onSuccess: (json, outputEl) => {
+                    window.aiInvoiceContext = json;
+                    if (outputEl) {
+                        outputEl.style.display = 'block';
+                        outputEl.innerHTML = `<b>${appLang==='ar'?'العميل':'Client'}:</b> ${json.client||''} &nbsp; <b>${appLang==='ar'?'المبلغ':'Amount'}:</b> ${json.totalBudget||''} ${json.currency||''}<br><b>${appLang==='ar'?'الشهر':'Month'}:</b> ${json.campaignMonth||''}`;
+                    }
+                }
+            });
+        };
+
+        window.applyInvAI = function() {
+            const ctx = window.aiInvoiceContext;
+            if (!ctx) { showToast(appLang==='ar'?'لم يتم التوليد بعد':'Nothing to apply'); return; }
+            if (ctx.client) {
+                const cl = document.getElementById('clientName');
+                const presets = cl ? Array.from(cl.options).map(o => o.value) : [];
+                if (presets.includes(ctx.client)) { setFieldValue('clientName', ctx.client); }
+                else { setFieldValue('clientName', 'custom'); setFieldValue('inv-custom-client-name', ctx.client); if (ctx.project) setFieldValue('inv-custom-project', ctx.project); if (ctx.desc) setFieldValue('inv-custom-desc', ctx.desc); }
+                if (typeof window.toggleDetailedOptions === 'function') window.toggleDetailedOptions();
+            }
+            setFieldValue('totalBudget', ctx.totalBudget);
+            if (ctx.currency) setFieldValue('currency', ctx.currency);
+            if (ctx.campaignMonth) setFieldValue('campaignMonth', ctx.campaignMonth);
+            if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
+            showToast(appLang==='ar'?'تم التطبيق ✓':'Applied ✓');
+        };
+
+        // ==========================================================================
+        // AI ASSISTANT — QUOTATION
+        // ==========================================================================
+        window.aiQuoteContext = null;
+
+        window.runQuoteAI = function() {
+            runAIGeneration({
+                promptId: 'ai-quote-prompt', outputId: 'ai-quote-output', btnId: 'ai-quote-generate-btn',
+                systemPrompt: `You are a quotation assistant. Return ONLY valid JSON:\n{"clientName":"","company":"","project":"","projectDesc":"","finalPrice":0,"currency":"EGP","services":[{"name":"","scope":""}]}\nReturn 2-4 relevant services based on the project description.`,
+                onSuccess: (json, outputEl) => {
+                    window.aiQuoteContext = json;
+                    if (outputEl) {
+                        outputEl.style.display = 'block';
+                        outputEl.innerHTML = `<b>${appLang==='ar'?'العميل':'Client'}:</b> ${json.clientName||''}<br><b>${appLang==='ar'?'المشروع':'Project'}:</b> ${json.project||''}<br><b>${appLang==='ar'?'الإجمالي':'Total'}:</b> ${json.finalPrice||''} ${json.currency||''}<br><b>${appLang==='ar'?'الخدمات':'Services'}:</b> ${(json.services||[]).length}`;
+                    }
+                }
+            });
+        };
+
+        window.applyQuoteAI = function() {
+            const ctx = window.aiQuoteContext;
+            if (!ctx) { showToast(appLang==='ar'?'لم يتم التوليد بعد':'Nothing to apply'); return; }
+            setFieldValue('in-client-name', ctx.clientName); setFieldValue('in-company', ctx.company);
+            setFieldValue('in-project', ctx.project); setFieldValue('in-project-desc', ctx.projectDesc);
+            setFieldValue('in-final-price', ctx.finalPrice);
+            if (ctx.currency) { setFieldValue('in-currency', ctx.currency); appState.currency = ctx.currency; }
+            if (ctx.services && ctx.services.length > 0) {
+                const container = document.getElementById('services-container');
+                if (container) { container.innerHTML = ''; appState.services = []; }
+                ctx.services.forEach(s => { if (typeof window.addService === 'function') window.addService(s.name||'', s.scope||''); });
+            }
+            if (typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender();
+            showToast(appLang==='ar'?'تم التطبيق ✓':'Applied ✓');
+        };
+
+        // ==========================================================================
+        // AI ASSISTANT — CLIENT CONTRACT
+        // ==========================================================================
+        window.aiContractContext = null;
+
+        window.runContractAI = function() {
+            runAIGeneration({
+                promptId: 'ai-ct-prompt', outputId: 'ai-ct-output', btnId: 'ai-ct-generate-btn',
+                systemPrompt: `You are a client contract assistant. Return ONLY valid JSON:\n{"p2name":"","p2email":"","p2phone":"","p2address":"","totalValue":0,"currency":"EGP","duration":12,"paymentMethod":"Bank Transfer","paymentTerms":"Monthly","contractServices":["Service 1","Service 2"],"notes":""}`,
+                onSuccess: (json, outputEl) => {
+                    window.aiContractContext = json;
+                    if (outputEl) {
+                        outputEl.style.display = 'block';
+                        outputEl.innerHTML = `<b>${appLang==='ar'?'العميل':'Client'}:</b> ${json.p2name||''}<br><b>${appLang==='ar'?'القيمة':'Value'}:</b> ${json.totalValue||''} ${json.currency||''}<br><b>${appLang==='ar'?'المدة':'Duration'}:</b> ${json.duration||''} ${appLang==='ar'?'شهر':'months'}`;
+                    }
+                }
+            });
+        };
+
+        window.applyContractAI = function() {
+            const ctx = window.aiContractContext;
+            if (!ctx) { showToast(appLang==='ar'?'لم يتم التوليد بعد':'Nothing to apply'); return; }
+            setFieldValue('ct-p2-name', ctx.p2name); setFieldValue('ct-p2-email', ctx.p2email);
+            setFieldValue('ct-p2-phone', ctx.p2phone); setFieldValue('ct-p2-address', ctx.p2address);
+            setFieldValue('ct-total-value', ctx.totalValue);
+            if (ctx.currency) setFieldValue('ct-currency', ctx.currency);
+            setFieldValue('ct-duration', ctx.duration);
+            if (ctx.paymentMethod) setFieldValue('ct-payment-method', ctx.paymentMethod);
+            setFieldValue('ct-payment-terms', ctx.paymentTerms); setFieldValue('ct-financial-notes', ctx.notes);
+            if (ctx.contractServices && ctx.contractServices.length > 0) {
+                const container = document.getElementById('ct-services-container');
+                if (container) container.innerHTML = '';
+                ctx.contractServices.forEach(s => { if (typeof window.addContractService === 'function' && s) window.addContractService(String(s)); });
+            }
+            if (typeof window.debouncedRenderContract === 'function') window.debouncedRenderContract();
+            showToast(appLang==='ar'?'تم التطبيق ✓':'Applied ✓');
+        };
+
+        // ==========================================================================
+        // AI ASSISTANT — EMPLOYEE CONTRACT
+        // ==========================================================================
+        window.aiEmpContractContext = null;
+
+        window.runEmpContractAI = function() {
+            runAIGeneration({
+                promptId: 'ai-ec-prompt', outputId: 'ai-ec-output', btnId: 'ai-ec-generate-btn',
+                systemPrompt: `You are an employment contract assistant. Return ONLY valid JSON:\n{"empName":"","jobTitle":"","jobDept":"","salary":0,"currency":"EGP","jobType":"Full-time","probation":"3 months","workDays":"Sunday – Thursday","dailyHours":8,"benefits":"","payMethod":"Bank Transfer","empDuration":"1 Year","workplace":"Office"}`,
+                onSuccess: (json, outputEl) => {
+                    window.aiEmpContractContext = json;
+                    if (outputEl) {
+                        outputEl.style.display = 'block';
+                        outputEl.innerHTML = `<b>${appLang==='ar'?'الموظف':'Employee'}:</b> ${json.empName||''}<br><b>${appLang==='ar'?'الوظيفة':'Title'}:</b> ${json.jobTitle||''}<br><b>${appLang==='ar'?'الراتب':'Salary'}:</b> ${json.salary||''} ${json.currency||''}`;
+                    }
+                }
+            });
+        };
+
+        window.applyEmpContractAI = function() {
+            const ctx = window.aiEmpContractContext;
+            if (!ctx) { showToast(appLang==='ar'?'لم يتم التوليد بعد':'Nothing to apply'); return; }
+            setFieldValue('ec-emp-name', ctx.empName); setFieldValue('ec-job-title', ctx.jobTitle); setFieldValue('ec-job-dept', ctx.jobDept);
+            setFieldValue('ec-salary', ctx.salary);
+            if (ctx.currency) setFieldValue('ec-currency', ctx.currency);
+            if (ctx.jobType) setFieldValue('ec-job-type', ctx.jobType);
+            setFieldValue('ec-probation', ctx.probation); setFieldValue('ec-work-days', ctx.workDays);
+            if (ctx.dailyHours) setFieldValue('ec-daily-hours', ctx.dailyHours);
+            setFieldValue('ec-benefits', ctx.benefits);
+            if (ctx.payMethod) setFieldValue('ec-pay-method', ctx.payMethod);
+            setFieldValue('ec-emp-duration', ctx.empDuration); setFieldValue('ec-workplace', ctx.workplace);
+            if (typeof window.debouncedRenderEmpContract === 'function') window.debouncedRenderEmpContract();
+            showToast(appLang==='ar'?'تم التطبيق ✓':'Applied ✓');
+        };
+
+        // ==========================================================================
+        // GLOBAL AI DOCUMENT GENERATOR
+        // ==========================================================================
+        window.globalAIContext = null;
+
+        window.openGlobalAI = function() {
+            const modal = document.getElementById('global-ai-modal');
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+        };
+
+        window.closeGlobalAI = function() {
+            const modal = document.getElementById('global-ai-modal');
+            if (modal) { modal.classList.remove('flex'); modal.classList.add('hidden'); }
+        };
+
+        window.runGlobalAI = async function() {
+            const promptEl = document.getElementById('global-ai-prompt');
+            const outputEl = document.getElementById('global-ai-output');
+            const typeEl = document.getElementById('global-ai-type');
+            const btn = document.getElementById('global-ai-generate-btn');
+            if (!promptEl || !btn) return;
+            const prompt = promptEl.value.trim();
+            if (!prompt) { showToast(appLang==='ar'?'الرجاء كتابة وصف':'Please enter a description'); return; }
+
+            const origText = btn.innerHTML;
+            btn.innerHTML = (appLang==='ar'?'جارٍ التحليل...':'Analyzing...') + ' ⏳';
+            btn.disabled = true;
+            if (outputEl) outputEl.style.display = 'none';
+            if (typeEl) typeEl.style.display = 'none';
+
+            // Note: quoteServices = array of {name,scope} objects, contractServices = array of strings
+            const sysPrompt = `You are an intelligent document system. Analyze the user request and return ONLY a valid JSON object. Use this exact structure:
+{"documentType":"invoice|quotation|contract|empcontract","data":{"clientName":"","company":"","project":"","projectDesc":"","finalPrice":0,"currency":"EGP","quoteServices":[{"name":"","scope":""}],"totalBudget":0,"campaignMonth":"Mar-2026","p2name":"","totalValue":0,"duration":12,"paymentMethod":"Bank Transfer","contractServices":[""],"empName":"","jobTitle":"","jobDept":"","salary":0,"jobType":"Full-time","probation":"3 months"}}
+Only fill fields relevant to the detected document type. Return ONLY valid JSON.`;
+
+            const text = await fetchGeminiText(`${sysPrompt}\n\nUser request: ${prompt}`);
+            if (text) {
+                const json = parseAIResponse(text);
+                if (json) {
+                    window.globalAIContext = json;
+                    if (typeEl) {
+                        const typeLabels = { invoice: t('invoice'), quotation: t('quotation'), contract: t('contract'), empcontract: t('empcontract') };
+                        typeEl.textContent = '📄 ' + (typeLabels[json.documentType] || json.documentType);
+                        typeEl.style.display = 'inline-block';
+                    }
+                    if (outputEl) {
+                        outputEl.style.display = 'block';
+                        const d = json.data || {};
+                        const rows = [];
+                        if (d.clientName) rows.push((appLang==='ar'?'العميل: ':'Client: ') + d.clientName);
+                        if (d.p2name) rows.push((appLang==='ar'?'العميل: ':'Client: ') + d.p2name);
+                        if (d.empName) rows.push((appLang==='ar'?'الموظف: ':'Employee: ') + d.empName);
+                        if (d.project) rows.push((appLang==='ar'?'المشروع: ':'Project: ') + d.project);
+                        if (d.finalPrice) rows.push((appLang==='ar'?'الإجمالي: ':'Total: ') + d.finalPrice + ' ' + (d.currency||'EGP'));
+                        if (d.totalBudget) rows.push((appLang==='ar'?'الميزانية: ':'Budget: ') + d.totalBudget + ' ' + (d.currency||'EGP'));
+                        if (d.totalValue) rows.push((appLang==='ar'?'قيمة العقد: ':'Contract Value: ') + d.totalValue + ' ' + (d.currency||'EGP'));
+                        if (d.salary) rows.push((appLang==='ar'?'الراتب: ':'Salary: ') + d.salary + ' ' + (d.currency||'EGP'));
+                        outputEl.innerHTML = rows.join('<br>') || JSON.stringify(d, null, 2);
+                    }
+                } else {
+                    window.globalAIContext = null;
+                    if (outputEl) { outputEl.style.display = 'block'; outputEl.textContent = text.substring(0, 400); }
+                    showToast(appLang==='ar'?'خطأ في التحليل':'Parse error');
+                }
+            }
+            btn.innerHTML = origText; btn.disabled = false;
+        };
+
+        window.applyGlobalAI = function() {
+            const ctx = window.globalAIContext;
+            if (!ctx) { showToast(appLang==='ar'?'لم يتم التوليد بعد':'Nothing to apply'); return; }
+            const type = ctx.documentType;
+            const data = ctx.data || {};
+
+            window.closeGlobalAI();
+            if (typeof window.switchMainModule === 'function') window.switchMainModule(type);
+
+            setTimeout(() => {
+                if (type === 'invoice') {
+                    const clientToSet = data.clientName || data.p2name;
+                    if (clientToSet) {
+                        const cl = document.getElementById('clientName');
+                        const presets = cl ? Array.from(cl.options).map(o => o.value) : [];
+                        if (presets.includes(clientToSet)) { setFieldValue('clientName', clientToSet); }
+                        else { setFieldValue('clientName', 'custom'); setFieldValue('inv-custom-client-name', clientToSet); if (data.project) setFieldValue('inv-custom-project', data.project); }
+                        if (typeof window.toggleDetailedOptions === 'function') window.toggleDetailedOptions();
+                    }
+                    setFieldValue('totalBudget', data.totalBudget); setFieldValue('currency', data.currency);
+                    if (data.campaignMonth) setFieldValue('campaignMonth', data.campaignMonth);
+                    if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
+
+                } else if (type === 'quotation') {
+                    setFieldValue('in-client-name', data.clientName); setFieldValue('in-company', data.company);
+                    setFieldValue('in-project', data.project); setFieldValue('in-project-desc', data.projectDesc);
+                    setFieldValue('in-final-price', data.finalPrice); setFieldValue('in-currency', data.currency);
+                    if (Array.isArray(data.quoteServices) && data.quoteServices.length > 0) {
+                        const container = document.getElementById('services-container');
+                        if (container) { container.innerHTML = ''; appState.services = []; }
+                        data.quoteServices.forEach(s => { if (typeof window.addService === 'function') window.addService(s.name||'', s.scope||''); });
+                    }
+                    if (typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender();
+
+                } else if (type === 'contract') {
+                    setFieldValue('ct-p2-name', data.p2name || data.clientName); setFieldValue('ct-total-value', data.totalValue || data.finalPrice);
+                    setFieldValue('ct-currency', data.currency); setFieldValue('ct-duration', data.duration);
+                    if (data.paymentMethod) setFieldValue('ct-payment-method', data.paymentMethod);
+                    if (Array.isArray(data.contractServices) && data.contractServices.length > 0) {
+                        const container = document.getElementById('ct-services-container');
+                        if (container) container.innerHTML = '';
+                        data.contractServices.forEach(s => { if (typeof window.addContractService === 'function' && s) window.addContractService(String(s)); });
+                    }
+                    if (typeof window.debouncedRenderContract === 'function') window.debouncedRenderContract();
+
+                } else if (type === 'empcontract') {
+                    setFieldValue('ec-emp-name', data.empName); setFieldValue('ec-job-title', data.jobTitle); setFieldValue('ec-job-dept', data.jobDept);
+                    setFieldValue('ec-salary', data.salary); setFieldValue('ec-currency', data.currency);
+                    if (data.jobType) setFieldValue('ec-job-type', data.jobType);
+                    setFieldValue('ec-probation', data.probation); setFieldValue('ec-work-days', data.workDays);
+                    if (data.dailyHours) setFieldValue('ec-daily-hours', data.dailyHours);
+                    if (data.payMethod) setFieldValue('ec-pay-method', data.payMethod);
+                    if (typeof window.debouncedRenderEmpContract === 'function') window.debouncedRenderEmpContract();
+                }
+
+                showToast(appLang==='ar'?'تم تطبيق البيانات ✓':'Data applied ✓');
+            }, 400);
+        };
+
     </script>
 </body>
 </html>
