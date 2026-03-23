@@ -2762,7 +2762,16 @@
             const toggleEl = document.getElementById(`plat${toggledId}`);
             if (!toggleEl) return;
             const isEnabled = toggleEl.checked;
-            const enabledPlats = PLATFORMS_LIST.filter(id => document.getElementById(`plat${id}`)?.checked);
+
+            // Cache all platform element states upfront to avoid repeated DOM queries inside loops
+            const platChecked = {};
+            const percValues = {};
+            PLATFORMS_LIST.forEach(id => {
+                platChecked[id] = document.getElementById(`plat${id}`)?.checked || false;
+                percValues[id] = parseInt(document.getElementById(`percNum-${id}`)?.value || 0) || 0;
+            });
+
+            const enabledPlats = PLATFORMS_LIST.filter(id => platChecked[id]);
             const setPerc = (id, val) => {
                 const slider = document.getElementById(`percSlider-${id}`);
                 const num = document.getElementById(`percNum-${id}`);
@@ -2780,24 +2789,25 @@
                     let others = enabledPlats.filter(id => id !== toggledId);
                     setPerc(toggledId, newShare);
                     let remaining = 100 - newShare;
-                    let othersTotal = others.reduce((sum, id) => sum + parseInt(document.getElementById(`percNum-${id}`)?.value || 0), 0);
+                    let othersTotal = others.reduce((sum, id) => sum + percValues[id], 0);
                     others.forEach((id, index) => {
-                        let share = (index === others.length - 1) ? remaining : (othersTotal === 0 ? Math.floor((100 - newShare) / others.length) : Math.round((parseInt(document.getElementById(`percNum-${id}`)?.value || 0) / othersTotal) * (100 - newShare)));
+                        let share = (index === others.length - 1) ? remaining : (othersTotal === 0 ? Math.floor((100 - newShare) / others.length) : Math.round((percValues[id] / othersTotal) * (100 - newShare)));
                         setPerc(id, share);
                         remaining -= share;
                     });
                 } else {
                     let others = enabledPlats;
-                    let othersTotal = others.reduce((sum, id) => sum + parseInt(document.getElementById(`percNum-${id}`)?.value || 0), 0);
+                    let othersTotal = others.reduce((sum, id) => sum + percValues[id], 0);
                     let remaining = 100;
                     others.forEach((id, index) => {
-                        let share = (index === others.length - 1) ? remaining : (othersTotal === 0 ? Math.floor(100 / others.length) : Math.round((parseInt(document.getElementById(`percNum-${id}`)?.value || 0) / othersTotal) * 100));
+                        let share = (index === others.length - 1) ? remaining : (othersTotal === 0 ? Math.floor(100 / others.length) : Math.round((percValues[id] / othersTotal) * 100));
                         setPerc(id, share);
                         remaining -= share;
                     });
                 }
             }
-            PLATFORMS_LIST.forEach(id => { if (!document.getElementById(`plat${id}`)?.checked) setPerc(id, 0); });
+            // Reuse the cached platChecked map instead of re-querying the DOM
+            PLATFORMS_LIST.forEach(id => { if (!platChecked[id]) setPerc(id, 0); });
             if(typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
         };
 
@@ -2805,7 +2815,16 @@
             let val = parseInt(newValue) || 0;
             if (val < 0) val = 0;
             if (val > 100) val = 100;
-            const enabledPlats = PLATFORMS_LIST.filter(id => document.getElementById(`plat${id}`)?.checked);
+
+            // Cache all platform element states upfront to avoid repeated DOM queries inside loops
+            const platChecked = {};
+            const percValues = {};
+            PLATFORMS_LIST.forEach(id => {
+                platChecked[id] = document.getElementById(`plat${id}`)?.checked || false;
+                percValues[id] = parseInt(document.getElementById(`percNum-${id}`)?.value || 0) || 0;
+            });
+
+            const enabledPlats = PLATFORMS_LIST.filter(id => platChecked[id]);
             const setPerc = (id, val) => {
                 const slider = document.getElementById(`percSlider-${id}`);
                 const num = document.getElementById(`percNum-${id}`);
@@ -2819,13 +2838,13 @@
             if (enabledPlats.length === 1) { setPerc(changedId, 100); return window.debouncedUpdateAllocations(); }
 
             const others = enabledPlats.filter(id => id !== changedId);
-            let currentOthersTotal = others.reduce((sum, id) => sum + parseInt(document.getElementById(`percNum-${id}`)?.value || 0), 0);
+            let currentOthersTotal = others.reduce((sum, id) => sum + percValues[id], 0);
             let newOthersTotal = 100 - val;
             setPerc(changedId, val);
             let remaining = newOthersTotal;
-            
+
             others.forEach((id, index) => {
-                let share = (index === others.length - 1) ? remaining : (currentOthersTotal === 0 ? Math.round(newOthersTotal / others.length) : Math.round((parseInt(document.getElementById(`percNum-${id}`)?.value || 0) / currentOthersTotal) * newOthersTotal));
+                let share = (index === others.length - 1) ? remaining : (currentOthersTotal === 0 ? Math.round(newOthersTotal / others.length) : Math.round((percValues[id] / currentOthersTotal) * newOthersTotal));
                 setPerc(id, share);
                 remaining -= share;
             });
@@ -3050,7 +3069,9 @@
             if (!contentDiv || !data) return;
 
             const invoiceRef = generateInvoiceRef(data.month);
-            let html = `
+            // Use an array of parts and join at the end to avoid repeated string re-allocation with +=
+            const parts = [];
+            parts.push(`
                 <div class="scale-wrapper" style="transform-origin: top left; width: 100%;">
                 <div class="avoid-break">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
@@ -3078,35 +3099,35 @@
                     </div>
                 </div>
                 <div id="invoice-dynamic-content" style="width: 100%; font-family: 'Inter', sans-serif;">
-            `;
+            `);
 
             if (!isValid && data.type !== 'custom') {
-                html += `<div style="text-align: center; margin-top: 40px; padding: 24px; background: #FEF2F2; color: #DC2626; font-weight: bold; border: 1px solid #FECACA; border-radius: 12px;">Cannot generate preview.<br>Total allocation must be exactly 100%.<br>Current: ${currentPerc}%</div></div>`;
+                parts.push(`<div style="text-align: center; margin-top: 40px; padding: 24px; background: #FEF2F2; color: #DC2626; font-weight: bold; border: 1px solid #FECACA; border-radius: 12px;">Cannot generate preview.<br>Total allocation must be exactly 100%.<br>Current: ${currentPerc}%</div></div>`);
             } else if (data.type === 'custom') {
-                html += `<div class="invoice-section avoid-break"><div style="margin-bottom: 15px;">`;
-                if (data.project) html += `<div style="font-weight: bold; font-size: 14px;">Project: ${formatBilingualText(data.project, 'span')}</div>`;
-                if (data.desc) html += `<div style="font-size: 11px; color: #555; margin-top: 4px;">${formatBilingualText(data.desc)}</div>`;
-                html += `</div><table class="invoice-table" style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+                parts.push(`<div class="invoice-section avoid-break"><div style="margin-bottom: 15px;">`);
+                if (data.project) parts.push(`<div style="font-weight: bold; font-size: 14px;">Project: ${formatBilingualText(data.project, 'span')}</div>`);
+                if (data.desc) parts.push(`<div style="font-size: 11px; color: #555; margin-top: 4px;">${formatBilingualText(data.desc)}</div>`);
+                parts.push(`</div><table class="invoice-table" style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
                     <thead><tr style="background: #111; color: #fff;">
                     <th class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 12px; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; text-align: left;">Service Name</th>
                     <th class="no-wrap-text" style="border: 1px solid #111; padding: 12px; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; text-align: left;">Scope of Work</th>
-                </tr></thead><tbody>`;
-                if (data.services.length === 0) { html += `<tr><td colspan="2" style="border: 1px solid #111; padding: 6px; font-size: 11px; text-align: center; color: #666;">No services added.</td></tr>`; } 
-                else { data.services.forEach(s => { html += `<tr><td style="border: 1px solid #111; padding: 12px; font-size: 11px; font-weight: bold; vertical-align: top; width: 30%; background: #fff;">${formatBilingualText(s.name || '—')}</td><td style="border: 1px solid #111; padding: 12px; font-size: 11px; vertical-align: top; width: 70%; background: #fff;">${formatBilingualText(s.scope || '—')}</td></tr>`; }); }
-                html += `</tbody></table><div style="display: flex; justify-content: flex-end; margin-top: 16px;"><table style="width: 300px; border-collapse: collapse;"><tr><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 6px; font-size: 14px; font-weight: bold; text-align: right; background: #111; color: #fff;">TOTAL AMOUNT:</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 14px; font-weight: bold; text-align: center; background: #111; color: #fff;">${data.totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr></table></div></div>`;
+                </tr></thead><tbody>`);
+                if (data.services.length === 0) { parts.push(`<tr><td colspan="2" style="border: 1px solid #111; padding: 6px; font-size: 11px; text-align: center; color: #666;">No services added.</td></tr>`); } 
+                else { data.services.forEach(s => { parts.push(`<tr><td style="border: 1px solid #111; padding: 12px; font-size: 11px; font-weight: bold; vertical-align: top; width: 30%; background: #fff;">${formatBilingualText(s.name || '—')}</td><td style="border: 1px solid #111; padding: 12px; font-size: 11px; vertical-align: top; width: 70%; background: #fff;">${formatBilingualText(s.scope || '—')}</td></tr>`); }); }
+                parts.push(`</tbody></table><div style="display: flex; justify-content: flex-end; margin-top: 16px;"><table style="width: 300px; border-collapse: collapse;"><tr><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 6px; font-size: 14px; font-weight: bold; text-align: right; background: #111; color: #fff;">TOTAL AMOUNT:</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 14px; font-weight: bold; text-align: center; background: #111; color: #fff;">${data.totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr></table></div></div>`);
             } else if (data.type === 'simple') {
-                html += `<div class="invoice-section avoid-break"><table class="invoice-table" style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+                parts.push(`<div class="invoice-section avoid-break"><table class="invoice-table" style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
                     <thead><tr style="background: #111; color: #fff;"><th class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 12px; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; text-align: left;">Description</th><th class="no-wrap-text" style="border: 1px solid #111; padding: 12px; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; text-align: left;">Amount (${data.currency})</th></tr></thead>
                     <tbody>
                         <tr><td style="border: 1px solid #111; padding: 12px; font-size: 11px; text-align: left; background: #fff;">Service Fees - ${data.month}</td><td style="border: 1px solid #111; padding: 12px; font-size: 11px; text-align: left; font-weight: bold; background: #fff; white-space: nowrap;">${data.totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
                         <tr><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 12px; font-size: 12px; text-align: right; font-weight: bold; background: #111; color: #fff;">GRAND TOTAL:</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 12px; font-size: 12px; text-align: left; font-weight: bold; background: #111; color: #fff; white-space: nowrap;">${data.totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
-                    </tbody></table></div>`;
+                    </tbody></table></div>`);
             } else {
                 data.branches.forEach((branch, bIdx) => {
                     // Force an immediate page break before every branch except the first one
                     let pageBreakHtml = bIdx > 0 ? `<div class="html2pdf__page-break"></div>` : ``;
 
-                    html += `${pageBreakHtml}<div class="invoice-section avoid-break"><table class="invoice-table" style="width: 100%; border-collapse: collapse; margin-bottom: 12px;">
+                    parts.push(`${pageBreakHtml}<div class="invoice-section avoid-break"><table class="invoice-table" style="width: 100%; border-collapse: collapse; margin-bottom: 12px;">
                         <thead>
                             <tr style="background: #111; color: #fff;"><th colspan="6" class="no-wrap-text" style="border: 1px solid #111; border-bottom: 1px solid white; padding: 12px; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; text-align: center;">${formatBilingualText(branch.name)}</th></tr>
                             <tr style="background: #111; color: #fff;">
@@ -3117,7 +3138,7 @@
                                 <th class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 12px; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; text-align: left; width: 14%;">Results</th>
                                 <th class="no-wrap-text" style="border: 1px solid #111; padding: 12px; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; text-align: left; width: 16%;">Cost (${data.currency})</th>
                             </tr>
-                        </thead><tbody style="background: #FFFFFF;">`;
+                        </thead><tbody style="background: #FFFFFF;">`);
                     
                     let platformSpans = {}, currentPlatform = "", platStartIndex = 0;
                     for (let i = 0; i < branch.items.length; i++) {
@@ -3127,39 +3148,37 @@
 
                     for (let i = 0; i < branch.items.length; i++) {
                         let item = branch.items[i];
-                        html += `<tr style="page-break-inside: avoid;">`;
+                        parts.push(`<tr style="page-break-inside: avoid;">`);
                         
                         // Real Rowspan for Branch
                         if (i === 0) {
-                            html += `<td style="border: 1px solid #111; padding: 6px; font-size: 11px; text-align: center; vertical-align: middle; background: #fff;" rowspan="${branch.items.length}">${formatBilingualText(item.branchName)}</td>`;
+                            parts.push(`<td style="border: 1px solid #111; padding: 6px; font-size: 11px; text-align: center; vertical-align: middle; background: #fff;" rowspan="${branch.items.length}">${formatBilingualText(item.branchName)}</td>`);
                         }
 
                         // Real Rowspan for Platform
                         if (platformSpans[i] !== undefined) {
-                            html += `<td style="border: 1px solid #111; padding: 6px; font-size: 11px; text-align: center; vertical-align: middle; background: #fff;" rowspan="${platformSpans[i]}">${formatBilingualText(item.platform)}</td>`;
+                            parts.push(`<td style="border: 1px solid #111; padding: 6px; font-size: 11px; text-align: center; vertical-align: middle; background: #fff;" rowspan="${platformSpans[i]}">${formatBilingualText(item.platform)}</td>`);
                         }
 
                         // Regular Cells with strict white-space: nowrap on numbers
-                        html += `<td style="border: 1px solid #111; padding: 6px; font-size: 11px; text-align: left; background: #fff;">${formatBilingualText(item.adName)}</td>
+                        parts.push(`<td style="border: 1px solid #111; padding: 6px; font-size: 11px; text-align: left; background: #fff;">${formatBilingualText(item.adName)}</td>
                                  <td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 11px; text-align: center; background: #fff; white-space: nowrap;">${item.dateStr}</td>
                                  <td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 11px; text-align: center; background: #fff; white-space: nowrap;">${formatBilingualText(item.results)}</td>
                                  <td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 11px; text-align: center; background: #fff; white-space: nowrap;">${item.cost.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td>
-                                 </tr>`;
+                                 </tr>`);
                     }
-                    html += `<tr style="background: #E5E7EB; font-weight: bold;"><td colspan="5" style="border: 1px solid #111; padding: 6px; font-size: 11px; text-align: center;">${formatBilingualText(branch.name)} Total</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 3px 6px; font-size: 11px; text-align: center; white-space: nowrap;">${branch.total.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr></tbody></table></div>`;
+                    parts.push(`<tr style="background: #E5E7EB; font-weight: bold;"><td colspan="5" style="border: 1px solid #111; padding: 6px; font-size: 11px; text-align: center;">${formatBilingualText(branch.name)} Total</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 3px 6px; font-size: 11px; text-align: center; white-space: nowrap;">${branch.total.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr></tbody></table></div>`);
                 });
                 
-                html += `<div class="avoid-break" style="page-break-inside: avoid; display: flex; justify-content: flex-end; margin-top: 16px;"><table style="width: 300px; border-collapse: collapse;"><tbody>
+                parts.push(`<div class="avoid-break" style="page-break-inside: avoid; display: flex; justify-content: flex-end; margin-top: 16px;"><table style="width: 300px; border-collapse: collapse;"><tbody>
                     <tr><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 6px; font-size: 12px; font-weight: bold; text-align: right; width: 60%; background: #fff;">Final Budget (Ad Spend):</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 12px; font-weight: bold; text-align: center; width: 40%; background: #fff; white-space: nowrap;">${data.netBudget.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
                     <tr><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 6px; font-size: 12px; font-weight: bold; text-align: right; background: #fff;">Our Fees:</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 12px; font-weight: bold; text-align: center; background: #fff; white-space: nowrap;">${data.fees.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
                     <tr><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 6px; font-size: 12px; font-weight: bold; text-align: right; background: #111; color: #fff;">GRAND TOTAL:</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 12px; font-weight: bold; text-align: center; background: #111; color: #fff; white-space: nowrap;">${data.totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
-                </tbody></table></div></div></div>`;
+                </tbody></table></div></div></div>`);
             }
             
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
-            contentDiv.innerHTML = '';
-            contentDiv.appendChild(tempDiv);
+            // Join all parts into one string for a single innerHTML parse, avoiding the extra tempDiv wrapper
+            contentDiv.innerHTML = parts.join('');
             if (typeof window.adjustScreenScale === 'function') window.adjustScreenScale();
             setTimeout(() => { if (typeof window.fitContentToA4 === 'function') window.fitContentToA4('invoicePageContent'); }, 50);
         };
