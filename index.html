@@ -60,10 +60,10 @@
             --radius-btn: 12px;
         }
 
-        .arabic-text { font-family: "Cairo", "Segoe UI", Tahoma, Arial, sans-serif !important; direction: rtl; text-align: right; unicode-bidi: embed; }
+        .arabic-text { font-family: 'Cairo', sans-serif !important; direction: rtl; text-align: right; unicode-bidi: embed; }
         /* Ensure Arabic text overrides the Inter blanket rule inside document roots */
         .quote-root .arabic-text, .invoice-root .arabic-text, .contract-root .arabic-text {
-            font-family: "Cairo", "Segoe UI", Tahoma, Arial, sans-serif !important;
+            font-family: 'Cairo', sans-serif !important;
         }
         .english-text { font-family: "Google Sans", sans-serif !important; direction: ltr; text-align: left; }
         td, th { white-space: normal; word-break: break-word; }
@@ -521,8 +521,8 @@
         .ct-financial-total { background: #111; color: #fff; margin: 8px -14px -12px; padding: 10px 14px; font-size: 12px; font-weight: 900; display: flex; justify-content: space-between; }
         .ct-clause { margin-bottom: 11px; page-break-inside: avoid; break-inside: avoid; }
         .ct-clause-num { display: inline-block; font-size: 9px; font-weight: 800; color: #fff; background: #111; padding: 2px 7px; margin-bottom: 4px; }
-        .ct-clause-title-text { font-size: 11.5px; font-weight: 800; color: #111; direction: rtl; text-align: right; font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif !important; }
-        .ct-clause-body { font-size: 10.5px; color: #333; line-height: 1.7; direction: rtl; text-align: right; font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif !important; }
+        .ct-clause-title-text { font-size: 11.5px; font-weight: 800; color: #111; direction: rtl; text-align: right; font-family: 'Cairo', sans-serif !important; }
+        .ct-clause-body { font-size: 10.5px; color: #333; line-height: 1.7; direction: rtl; text-align: right; font-family: 'Cairo', sans-serif !important; }
         .ct-sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 28px; padding-top: 16px; border-top: 2px solid #111; }
         .ct-sig-block { text-align: center; }
         .ct-sig-party-label { font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; background: #111; color: #fff; padding: 4px 8px; display: inline-block; margin-bottom: 24px; }
@@ -594,13 +594,13 @@
             background: rgba(248,250,252,0.9); border: 1px solid rgba(203,213,225,0.6);
             border-radius: 12px; padding: 0.75rem; font-size: 0.82rem; color: #1e293b;
             white-space: pre-wrap; max-height: 200px; overflow-y: auto; line-height: 1.5;
-            font-family: 'Cairo', 'Segoe UI', Tahoma, system-ui, sans-serif;
+            font-family: 'Cairo', sans-serif;
         }
 
         /* RTL document fixes for export */
         .a4-page[dir="rtl"] .page-content, .a4-page.rtl-mode .page-content {
             direction: rtl; text-align: right;
-            font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif !important;
+            font-family: 'Cairo', sans-serif !important;
         }
         /* ============================================================
            LANDING SELECTION SCREEN
@@ -4452,7 +4452,7 @@
                         <button class="ui-button-ghost !py-1 !px-2 text-xs !text-red-500 hover:!bg-red-50" title="Delete" onclick="document.getElementById('row-${clause.id}').remove(); window.debouncedRenderContract();">✕</button>
                     </div>
                 </div>
-                <textarea class="ui-input text-sm resize-y w-full" rows="3" dir="rtl" style="text-align:right;font-family:'Cairo','Segoe UI',Tahoma,sans-serif;" placeholder="Clause text (Arabic)..." oninput="window.debouncedRenderContract()">${clause.text || ''}</textarea>`;
+                <textarea class="ui-input text-sm resize-y w-full" rows="3" dir="rtl" style="text-align:right;font-family:'Cairo',sans-serif;" placeholder="Clause text (Arabic)..." oninput="window.debouncedRenderContract()">${clause.text || ''}</textarea>`;
             container.appendChild(row);
         }
 
@@ -4470,7 +4470,7 @@
                         <button class="ui-button-ghost !py-1 !px-2 text-xs !text-red-500 hover:!bg-red-50" title="Delete" onclick="document.getElementById('erow-${clause.id}').remove(); window.debouncedRenderEmpContract();">✕</button>
                     </div>
                 </div>
-                <textarea class="ui-input text-sm resize-y w-full" rows="3" dir="rtl" style="text-align:right;font-family:'Cairo','Segoe UI',Tahoma,sans-serif;" placeholder="Clause text (Arabic)..." oninput="window.debouncedRenderEmpContract()">${clause.text || ''}</textarea>`;
+                <textarea class="ui-input text-sm resize-y w-full" rows="3" dir="rtl" style="text-align:right;font-family:'Cairo',sans-serif;" placeholder="Clause text (Arabic)..." oninput="window.debouncedRenderEmpContract()">${clause.text || ''}</textarea>`;
             container.appendChild(row);
         }
 
@@ -4545,8 +4545,8 @@
 
                 <!-- Title Band (Arabic) -->
                 <div style="text-align:center;margin:12px 0;padding:10px;background:#111;color:#fff;">
-                    <div style="font-size:18px;font-weight:900;letter-spacing:1px;font-family:'Cairo','Segoe UI',Tahoma,sans-serif;direction:rtl;">عقد خدمات تسويق رقمي</div>
-                    <div style="font-size:11px;opacity:0.8;margin-top:3px;font-family:'Cairo','Segoe UI',Tahoma,sans-serif;direction:rtl;">Digital Marketing Services Agreement</div>
+                    <div style="font-size:18px;font-weight:900;letter-spacing:1px;font-family:'Cairo',sans-serif;direction:rtl;">عقد خدمات تسويق رقمي</div>
+                    <div style="font-size:11px;opacity:0.8;margin-top:3px;font-family:'Cairo',sans-serif;direction:rtl;">Digital Marketing Services Agreement</div>
                 </div>
 
                 <!-- Parties -->
@@ -4674,8 +4674,8 @@
 
                 <!-- Title Band -->
                 <div style="text-align:center;margin:12px 0;padding:10px;background:#111;color:#fff;">
-                    <div style="font-size:18px;font-weight:900;letter-spacing:1px;font-family:'Cairo','Segoe UI',Tahoma,sans-serif;direction:rtl;">عقد توظيف</div>
-                    <div style="font-size:11px;opacity:0.8;margin-top:3px;font-family:'Cairo','Segoe UI',Tahoma,sans-serif;direction:rtl;">Employment Contract</div>
+                    <div style="font-size:18px;font-weight:900;letter-spacing:1px;font-family:'Cairo',sans-serif;direction:rtl;">عقد توظيف</div>
+                    <div style="font-size:11px;opacity:0.8;margin-top:3px;font-family:'Cairo',sans-serif;direction:rtl;">Employment Contract</div>
                 </div>
 
                 <!-- Parties -->
@@ -4939,27 +4939,27 @@
             try {
                 const styleBlock = `<style>
                     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
-                    body { font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; font-size: 11pt; color: #111; direction: rtl; }
+                    body { font-family: 'Cairo', sans-serif; font-size: 11pt; color: #111; direction: rtl; }
                     .ct-header-divider { border-top: 3px solid #111; margin: 10pt 0 14pt; }
                     .ct-section-label { background: #111; color: #fff; font-size: 9pt; font-weight: bold; letter-spacing: 1pt; text-transform: uppercase; padding: 5pt 8pt; display: inline-block; margin-bottom: 8pt; }
                     .ct-party-grid { display: table; width: 100%; border-collapse: separate; border-spacing: 10pt; }
                     .ct-party-box { display: table-cell; border: 1.5pt solid #111; padding: 8pt; width: 50%; vertical-align: top; }
                     .ct-party-header { background: #111; color: #fff; font-size: 8pt; font-weight: bold; padding: 5pt 8pt; margin: -8pt -8pt 8pt; display: block; }
-                    .ct-party-name { font-size: 14pt; font-weight: bold; font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; }
-                    .ct-party-detail { font-size: 9pt; color: #555; margin-top: 2pt; font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; }
+                    .ct-party-name { font-size: 14pt; font-weight: bold; font-family: 'Cairo', sans-serif; }
+                    .ct-party-detail { font-size: 9pt; color: #555; margin-top: 2pt; font-family: 'Cairo', sans-serif; }
                     .ct-financial-box { border: 1pt solid #ddd; padding: 10pt; background: #f9f9f9; }
                     .ct-financial-row { display: flex; justify-content: space-between; font-size: 10pt; padding: 4pt 0; border-bottom: 1pt solid #eee; }
                     .ct-financial-total { background: #111; color: #fff; padding: 8pt 10pt; font-size: 11pt; font-weight: bold; display: flex; justify-content: space-between; margin: 6pt -10pt -10pt; }
                     .ct-clause { margin-bottom: 10pt; page-break-inside: avoid; }
                     .ct-clause-num { background: #111; color: #fff; font-size: 8pt; font-weight: bold; padding: 2pt 6pt; }
-                    .ct-clause-title-text { font-size: 11pt; font-weight: bold; direction: rtl; text-align: right; font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; }
-                    .ct-clause-body { font-size: 10pt; line-height: 1.8; direction: rtl; text-align: right; padding-right: 20pt; color: #333; font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; }
+                    .ct-clause-title-text { font-size: 11pt; font-weight: bold; direction: rtl; text-align: right; font-family: 'Cairo', sans-serif; }
+                    .ct-clause-body { font-size: 10pt; line-height: 1.8; direction: rtl; text-align: right; padding-right: 20pt; color: #333; font-family: 'Cairo', sans-serif; }
                     .ct-sig-grid { display: table; width: 100%; margin-top: 24pt; border-top: 2pt solid #111; padding-top: 14pt; }
                     .ct-sig-block { display: table-cell; width: 50%; text-align: center; padding: 0 20pt; }
                     .ct-sig-party-label { background: #111; color: #fff; font-size: 8pt; font-weight: bold; padding: 3pt 7pt; }
                     .ct-sig-name-line { border-bottom: 1.5pt solid #111; margin: 20pt 0 6pt; }
-                    .ct-sig-name-text { font-size: 10pt; font-weight: bold; font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; }
-                    .arabic-text { font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif !important; direction: rtl; text-align: right; }
+                    .ct-sig-name-text { font-size: 10pt; font-weight: bold; font-family: 'Cairo', sans-serif; }
+                    .arabic-text { font-family: 'Cairo', sans-serif !important; direction: rtl; text-align: right; }
                 </style>`;
                 const htmlContent = element.innerHTML;
                 const dir = appLang === 'ar' ? 'rtl' : 'ltr';
@@ -5155,7 +5155,7 @@
                 element.setAttribute('dir', 'rtl');
                 // Ensure Cairo font is applied for proper Arabic shaping
                 if (!element.style.fontFamily || !element.style.fontFamily.includes('Cairo')) {
-                    element.style.fontFamily = "'Cairo', 'Segoe UI', Tahoma, sans-serif";
+                    element.style.fontFamily = "'Cairo', sans-serif";
                 }
             } else {
                 element.style.direction = 'ltr';
