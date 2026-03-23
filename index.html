@@ -71,7 +71,7 @@
 
         body { 
             margin: 0; padding: 0; 
-            overflow-x: hidden;
+            overflow-x: hidden; /* prevent horizontal scroll from oversized preview layout box */
             color: var(--text-main);
             font-family: "Google Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
             font-optical-sizing: auto; -webkit-font-smoothing: antialiased;
@@ -83,7 +83,6 @@
                 radial-gradient(circle at 50% 50%, rgba(191, 219, 254, 0.5), transparent 40%);
             background-attachment: fixed;
             background-size: cover;
-            overflow-x: hidden; /* prevent horizontal scroll from oversized preview layout box */
         }
 
         body, button, input, select, textarea, label, div, span, p, h1, h2, h3, h4, h5, h6, table, th, td { font-family: inherit; }
@@ -5471,8 +5470,6 @@
         // Wait for fonts and set proper direction before export
         // ==========================================================================
         async function prepareElementForExport(element, langOverride) {
-            // Wait for all fonts (including Amiri) to load
-        async function prepareElementForExport(element) {
             // Wait for all fonts (including Cairo) to load
             try { await document.fonts.ready; } catch(e) {}
             // Additional stabilization delay
