@@ -369,6 +369,24 @@
             .system-logo { height: 22px; }
         }
 
+        /* Mobile Form Layout — ensure fields stack cleanly on small screens */
+        @media (max-width: 639px) {
+            .ui-form-group {
+                width: 100%;
+                min-width: 0;
+                box-sizing: border-box;
+            }
+            .ui-input {
+                width: 100%;
+                min-width: 0;
+                box-sizing: border-box;
+            }
+            /* Force 1-column stacking for form grids inside cards on mobile */
+            .ui-card .grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
         /* Modal Glass Effect */
         #confirm-modal > div, #reset-modal > div {
             background: rgba(255, 255, 255, 0.85) !important;
@@ -1114,7 +1132,7 @@
                                 Document Setup
                             </span>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="ui-form-group mb-0">
                                 <label class="ui-label">Date</label>
                                 <input type="date" id="in-date" class="ui-input" onchange="if(typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender()">
@@ -1123,7 +1141,7 @@
                                 <label class="ui-label">Quote #</label>
                                 <input type="text" id="in-quote-num" class="ui-input" oninput="if(typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender()">
                             </div>
-                            <div class="ui-form-group col-span-2 mb-0 mt-1">
+                            <div class="ui-form-group sm:col-span-2 mb-0 mt-1">
                                 <label class="ui-label">Currency</label>
                                 <select id="in-currency" class="ui-input" onchange="if(typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender()">
                                     <option value="EGP" selected>EGP — Egyptian Pound</option>
@@ -1205,7 +1223,7 @@
                                 Terms & Conditions
                             </span>
                         </div>
-                        <div class="grid grid-cols-2 gap-4 pt-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                             <div class="ui-form-group">
                                 <label class="ui-label">Payment Due (Days)</label>
                                 <input type="number" id="in-terms-days" class="ui-input" value="7" oninput="if(typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender()">
@@ -1221,7 +1239,7 @@
                                 </select>
                                 <input type="text" id="in-terms-method-custom" class="ui-input mt-2 hidden" placeholder="Specify method" oninput="if(typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender()">
                             </div>
-                            <div class="ui-form-group col-span-2 mb-0 mt-1">
+                            <div class="ui-form-group sm:col-span-2 mb-0 mt-1">
                                 <label class="ui-label">Additional notes (optional)</label>
                                 <textarea id="in-terms-notes" class="ui-input resize-y" rows="2" placeholder="e.g. Work commences upon payment clearance." oninput="if(typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender()"></textarea>
                             </div>
@@ -1307,7 +1325,7 @@
                                 Contract Info
                             </span>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="ui-form-group mb-0">
                                 <label class="ui-label">Contract No.</label>
                                 <input type="text" id="ct-num" class="ui-input" placeholder="C-2025-001" oninput="window.debouncedRenderContract()">
@@ -1329,7 +1347,7 @@
                                     <option value="Terminated">Terminated</option>
                                 </select>
                             </div>
-                            <div class="ui-form-group mb-0 col-span-2">
+                            <div class="ui-form-group mb-0 sm:col-span-2">
                                 <label class="ui-label">Currency</label>
                                 <select id="ct-currency" class="ui-input" onchange="window.debouncedRenderContract()">
                                     <option value="EGP">EGP — Egyptian Pound</option>
@@ -1492,7 +1510,7 @@
                                 Signatures
                             </span>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="ui-form-group mb-0">
                                 <label class="ui-label">Party 1 Representative</label>
                                 <input type="text" id="ct-sig1-name" class="ui-input" placeholder="Full name" oninput="window.debouncedRenderContract()">
@@ -1586,7 +1604,7 @@
                                 Contract Info
                             </span>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="ui-form-group mb-0">
                                 <label class="ui-label">Contract No.</label>
                                 <input type="text" id="ec-num" class="ui-input" placeholder="EC-2025-001" oninput="window.debouncedRenderEmpContract()">
@@ -1608,7 +1626,7 @@
                                     <option value="Terminated">Terminated</option>
                                 </select>
                             </div>
-                            <div class="ui-form-group mb-0 col-span-2">
+                            <div class="ui-form-group mb-0 sm:col-span-2">
                                 <label class="ui-label">Currency</label>
                                 <select id="ec-currency" class="ui-input" onchange="window.debouncedRenderEmpContract()">
                                     <option value="EGP">EGP — Egyptian Pound</option>
@@ -1837,7 +1855,7 @@
                                 Signatures
                             </span>
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="ui-form-group mb-0">
                                 <label class="ui-label">Company Representative</label>
                                 <input type="text" id="ec-sig1-name" class="ui-input" placeholder="Full name" oninput="window.debouncedRenderEmpContract()">
