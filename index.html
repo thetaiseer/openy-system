@@ -28,6 +28,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Tajawal (Arabic Web Font) -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <!-- Amiri (Arabic Document Export Font — proper shaping & RTL for PDF/Word) -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     
     <style>
         /* ==========================================================================
@@ -60,7 +62,7 @@
             --radius-btn: 12px;
         }
 
-        .arabic-text { font-family: "Tajawal", sans-serif !important; direction: rtl; text-align: right; unicode-bidi: embed; }
+        .arabic-text { font-family: "Amiri", "Tajawal", sans-serif !important; direction: rtl; text-align: right; unicode-bidi: embed; }
         .english-text { font-family: "Google Sans", sans-serif !important; direction: ltr; text-align: left; }
         td, th { white-space: normal; word-break: break-word; }
         .no-wrap-text { white-space: nowrap !important; }
@@ -364,8 +366,8 @@
         .ct-financial-total { background: #111; color: #fff; margin: 8px -14px -12px; padding: 10px 14px; font-size: 12px; font-weight: 900; display: flex; justify-content: space-between; }
         .ct-clause { margin-bottom: 11px; page-break-inside: avoid; break-inside: avoid; }
         .ct-clause-num { display: inline-block; font-size: 9px; font-weight: 800; color: #fff; background: #111; padding: 2px 7px; margin-bottom: 4px; }
-        .ct-clause-title-text { font-size: 11.5px; font-weight: 800; color: #111; direction: rtl; text-align: right; font-family: 'Tajawal', sans-serif !important; }
-        .ct-clause-body { font-size: 10.5px; color: #333; line-height: 1.7; direction: rtl; text-align: right; font-family: 'Tajawal', sans-serif !important; }
+        .ct-clause-title-text { font-size: 11.5px; font-weight: 800; color: #111; direction: rtl; text-align: right; font-family: 'Amiri', 'Tajawal', sans-serif !important; }
+        .ct-clause-body { font-size: 10.5px; color: #333; line-height: 1.7; direction: rtl; text-align: right; font-family: 'Amiri', 'Tajawal', sans-serif !important; }
         .ct-sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 28px; padding-top: 16px; border-top: 2px solid #111; }
         .ct-sig-block { text-align: center; }
         .ct-sig-party-label { font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; background: #111; color: #fff; padding: 4px 8px; display: inline-block; margin-bottom: 24px; }
@@ -437,17 +439,50 @@
             background: rgba(248,250,252,0.9); border: 1px solid rgba(203,213,225,0.6);
             border-radius: 12px; padding: 0.75rem; font-size: 0.82rem; color: #1e293b;
             white-space: pre-wrap; max-height: 200px; overflow-y: auto; line-height: 1.5;
-            font-family: 'Tajawal', system-ui, sans-serif;
+            font-family: 'Amiri', 'Tajawal', system-ui, sans-serif;
         }
 
         /* RTL document fixes for export */
         .a4-page[dir="rtl"] .page-content, .a4-page.rtl-mode .page-content {
             direction: rtl; text-align: right;
-            font-family: 'Tajawal', sans-serif !important;
+            font-family: 'Amiri', 'Tajawal', sans-serif !important;
         }
-        .a4-page[dir="rtl"] .page-content table, .a4-page.rtl-mode .page-content table {
-            direction: rtl;
+        /* ============================================================
+           LANDING SELECTION SCREEN
+           ============================================================ */
+        #landing-screen {
+            position: fixed; inset: 0; z-index: 200;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background-color: #f0f4ff;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(219, 234, 254, 0.9), transparent 35%),
+                radial-gradient(circle at 90% 80%, rgba(233, 213, 255, 0.9), transparent 35%),
+                radial-gradient(circle at 50% 50%, rgba(191, 219, 254, 0.5), transparent 45%);
+            padding: 2rem 1rem;
+            overflow-y: auto;
+            transition: opacity 0.35s ease;
         }
+        #landing-screen.fade-out { opacity: 0; pointer-events: none; }
+        .landing-header { text-align: center; margin-bottom: 2.5rem; }
+        .landing-logo { height: 36px; width: auto; object-fit: contain; margin-bottom: 1rem; display: block; margin-left: auto; margin-right: auto; }
+        .landing-title { font-size: 1.75rem; font-weight: 900; color: #0F172A; letter-spacing: -0.5px; margin: 0 0 0.5rem; }
+        .landing-subtitle { font-size: 0.95rem; color: #475569; font-weight: 500; margin: 0; }
+        .landing-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; max-width: 760px; width: 100%; }
+        @media (max-width: 600px) { .landing-cards { grid-template-columns: 1fr; } }
+        .landing-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.48) 100%);
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,0.9); border-radius: 20px; padding: 1.75rem 1.5rem;
+            box-shadow: 0 10px 40px rgba(31,38,135,0.09); cursor: pointer;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+            display: flex; flex-direction: column; gap: 0.75rem;
+        }
+        .landing-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 20px 55px rgba(37,99,235,0.18); border-color: rgba(37,99,235,0.35); }
+        .landing-card-icon { width: 48px; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #2563EB, #7C3AED); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(37,99,235,0.3); flex-shrink: 0; }
+        .landing-card-icon svg { color: #fff; width: 24px; height: 24px; }
+        .landing-card-title { font-size: 1.1rem; font-weight: 800; color: #0F172A; margin: 0; }
+        .landing-card-desc { font-size: 0.83rem; color: #64748B; font-weight: 500; line-height: 1.5; margin: 0; }
+        .landing-card-arrow { display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 700; color: #2563EB; margin-top: auto; padding-top: 0.5rem; }
     </style>
     
     <!-- Cloud Storage Integration - Deferred to avoid blocking on mobile -->
@@ -464,6 +499,53 @@
     </script>
 </head>
 <body>
+
+    <!-- LANDING SELECTION SCREEN -->
+    <div id="landing-screen">
+        <div class="landing-header">
+            <img src="https://i.postimg.cc/PJ0fwSNY/OPENY.png" alt="OPENY Logo" class="landing-logo">
+            <h1 class="landing-title">OPENY Document System</h1>
+            <p class="landing-subtitle">Select a document type to get started</p>
+        </div>
+        <div class="landing-cards">
+            <!-- Invoice -->
+            <div class="landing-card" onclick="window.openModule('invoice')">
+                <div class="landing-card-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <div class="landing-card-title">Invoice</div>
+                <div class="landing-card-desc">Create professional invoices with campaign budget breakdown and platform allocation.</div>
+                <div class="landing-card-arrow">Open Invoice <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg></div>
+            </div>
+            <!-- Quotation -->
+            <div class="landing-card" onclick="window.openModule('quotation')">
+                <div class="landing-card-icon" style="background:linear-gradient(135deg,#0EA5E9,#2563EB);">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                </div>
+                <div class="landing-card-title">Quotation</div>
+                <div class="landing-card-desc">Generate detailed service quotations with deliverables, pricing, and terms & conditions.</div>
+                <div class="landing-card-arrow" style="color:#0EA5E9;">Open Quotation <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg></div>
+            </div>
+            <!-- Client Contract -->
+            <div class="landing-card" onclick="window.openModule('contract')">
+                <div class="landing-card-icon" style="background:linear-gradient(135deg,#059669,#0D9488);">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </div>
+                <div class="landing-card-title">Client Contract</div>
+                <div class="landing-card-desc">Draft comprehensive client service agreements with legal clauses and digital marketing scope.</div>
+                <div class="landing-card-arrow" style="color:#059669;">Open Client Contract <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg></div>
+            </div>
+            <!-- HR Contract -->
+            <div class="landing-card" onclick="window.openModule('empcontract')">
+                <div class="landing-card-icon" style="background:linear-gradient(135deg,#D97706,#DC2626);">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+                <div class="landing-card-title">HR Contract</div>
+                <div class="landing-card-desc">Create employment contracts with salary, job details, benefits, and legal terms for HR.</div>
+                <div class="landing-card-arrow" style="color:#D97706;">Open HR Contract <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Super Reset Modal -->
     <div id="reset-modal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-[100] backdrop-blur-sm" style="font-family: 'Google Sans', system-ui, sans-serif;">
@@ -489,30 +571,6 @@
         </div>
     </div>
 
-    <!-- Global AI Document Generator Modal -->
-    <div id="global-ai-modal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-[100] backdrop-blur-sm" style="font-family: 'Tajawal', 'Google Sans', system-ui, sans-serif;">
-        <div class="ai-modal-box">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-2">
-                    <span style="font-size:1.25rem;">✨</span>
-                    <h3 id="global-ai-modal-title" class="text-base font-bold text-slate-900" data-i18n="aiGlobalTitle">AI Assistant — Create Document</h3>
-                </div>
-                <button onclick="window.closeGlobalAI()" class="text-slate-400 hover:text-slate-700 text-xl font-bold leading-none">✕</button>
-            </div>
-            <textarea id="global-ai-prompt" class="ui-input resize-y w-full" rows="4"
-                data-i18n-placeholder="aiGlobalPlaceholder"
-                placeholder="Describe what you want... e.g.: Invoice for Pro icon KSA worth 50,000 EGP for March 2026 campaign"
-                style="font-family:'Tajawal',system-ui,sans-serif; direction:rtl; text-align:right;"></textarea>
-            <div class="flex gap-2 mt-3 flex-wrap">
-                <button id="global-ai-generate-btn" onclick="window.runGlobalAI()" class="ai-btn-gen flex-1" data-i18n="aiGenerate">Generate ✨</button>
-                <button onclick="window.applyGlobalAI()" class="ai-btn-apply flex-1" data-i18n="aiApply">Apply to Form</button>
-                <button onclick="document.getElementById('global-ai-prompt').value=''; document.getElementById('global-ai-output').style.display='none'; window.globalAIContext=null;" class="ai-btn-clear" data-i18n="aiClear">Clear</button>
-            </div>
-            <div id="global-ai-type" class="global-ai-type-badge mt-3" style="display:none;"></div>
-            <div id="global-ai-output" class="global-ai-output mt-2" style="display:none;"></div>
-        </div>
-    </div>
-
     <!-- Unified Shared Top Navigation -->
     <nav class="ui-top-nav no-print">
         <div class="flex items-center gap-3">
@@ -525,8 +583,10 @@
             <button id="nav-empcontract" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('empcontract')" class="ui-nav-pill">HR Contract</button>
         </div>
         <div class="flex items-center justify-end gap-2">
-            <button id="ai-global-btn" onclick="window.openGlobalAI()" class="ai-global-btn no-print">✨ AI</button>
-            <button id="lang-toggle-btn" onclick="window.toggleLanguage()" class="lang-toggle-btn no-print">عربي</button>
+            <button onclick="window.openLanding()" class="lang-toggle-btn no-print" title="Back to Home">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                Home
+            </button>
         </div>
     </nav>
 
@@ -544,25 +604,6 @@
 
             <main class="app-editor">
                 <div id="inv-tab-editor" class="tab-content active">
-
-                    <!-- AI Assistant Panel (Invoice) -->
-                    <div class="ai-panel" id="ai-panel-inv">
-                        <div class="ai-panel-header" onclick="this.closest('.ai-panel').classList.toggle('collapsed')">
-                            <span class="ai-panel-title">✨ <span data-i18n="aiAssistant">AI Assistant</span></span>
-                            <span class="ai-panel-chevron">▾</span>
-                        </div>
-                        <div class="ai-panel-body">
-                            <textarea id="ai-inv-prompt" class="ui-input resize-y !text-sm" rows="2"
-                                placeholder="اكتب وصف الفاتورة... مثال: فاتورة لشركة Pro icon KSA بقيمة 50000 جنيه عن حملة مارس 2026"
-                                style="font-family:'Tajawal',system-ui,sans-serif; direction:rtl; text-align:right;"></textarea>
-                            <div class="ai-panel-btns">
-                                <button id="ai-inv-generate-btn" onclick="window.runInvAI()" class="ai-btn-gen" data-i18n="aiGenerate">Generate ✨</button>
-                                <button onclick="window.applyInvAI()" class="ai-btn-apply" data-i18n="aiApply">Apply to Form</button>
-                                <button onclick="document.getElementById('ai-inv-prompt').value='';document.getElementById('ai-inv-output').style.display='none';window.aiInvoiceContext=null;" class="ai-btn-clear" data-i18n="aiClear">Clear</button>
-                            </div>
-                            <div id="ai-inv-output" class="ai-response-box" style="display:none;"></div>
-                        </div>
-                    </div>
 
                     <div id="inv-edit-mode-banner" class="ui-card flex justify-between items-center hidden">
                         <div class="flex items-center gap-2 text-[#92400E] text-sm font-semibold">
@@ -634,12 +675,7 @@
                                 <input type="text" id="inv-custom-project" class="ui-input" placeholder="e.g. Content Strategy" oninput="if(typeof window.debouncedSaveAndRenderInv === 'function') window.debouncedSaveAndRenderInv()">
                             </div>
                             <div class="ui-form-group md:col-span-2 mb-0 mt-1">
-                                <div class="flex justify-between items-center mb-1">
-                                    <label class="ui-label mb-0">Short Description (Optional)</label>
-                                    <button type="button" id="btn-inv-gemini-proj" onclick="if (typeof window.autoGenerateInvProjectDesc === 'function') window.autoGenerateInvProjectDesc()" class="text-[10px] flex items-center gap-1 font-bold cursor-pointer transition-colors px-2 py-1 rounded">
-                                        ✨ AI Generate
-                                    </button>
-                                </div>
+                                <label class="ui-label mb-0">Short Description (Optional)</label>
                                 <textarea id="inv-custom-desc" class="ui-input resize-y" rows="2" placeholder="Brief description of the invoice context" oninput="if(typeof window.debouncedSaveAndRenderInv === 'function') window.debouncedSaveAndRenderInv()"></textarea>
                             </div>
                         </div>
@@ -892,25 +928,6 @@
                 
                 <div id="tab-editor" class="tab-content active">
 
-                    <!-- AI Assistant Panel (Quotation) -->
-                    <div class="ai-panel" id="ai-panel-quote">
-                        <div class="ai-panel-header" onclick="this.closest('.ai-panel').classList.toggle('collapsed')">
-                            <span class="ai-panel-title">✨ <span data-i18n="aiAssistant">AI Assistant</span></span>
-                            <span class="ai-panel-chevron">▾</span>
-                        </div>
-                        <div class="ai-panel-body">
-                            <textarea id="ai-quote-prompt" class="ui-input resize-y !text-sm" rows="2"
-                                placeholder="اكتب وصف عرض السعر... مثال: عرض سعر لخدمات تسويق رقمي لمدة 3 شهور بقيمة 15000 جنيه"
-                                style="font-family:'Tajawal',system-ui,sans-serif; direction:rtl; text-align:right;"></textarea>
-                            <div class="ai-panel-btns">
-                                <button id="ai-quote-generate-btn" onclick="window.runQuoteAI()" class="ai-btn-gen" data-i18n="aiGenerate">Generate ✨</button>
-                                <button onclick="window.applyQuoteAI()" class="ai-btn-apply" data-i18n="aiApply">Apply to Form</button>
-                                <button onclick="document.getElementById('ai-quote-prompt').value='';document.getElementById('ai-quote-output').style.display='none';window.aiQuoteContext=null;" class="ai-btn-clear" data-i18n="aiClear">Clear</button>
-                            </div>
-                            <div id="ai-quote-output" class="ai-response-box" style="display:none;"></div>
-                        </div>
-                    </div>
-
                     <div id="edit-mode-banner" class="ui-card flex justify-between items-center hidden">
                         <div class="flex items-center gap-2 text-[#92400E] text-sm font-semibold">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
@@ -970,12 +987,7 @@
                             <input type="text" id="in-project" class="ui-input" placeholder="e.g. Q3 Performance Scaling" oninput="if(typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender()">
                         </div>
                         <div class="ui-form-group mb-0 mt-1">
-                            <div class="flex justify-between items-center mb-1">
-                                <label class="ui-label mb-0">Description</label>
-                                <button type="button" id="btn-gemini-proj" onclick="if(typeof window.autoGenerateProjectDesc === 'function') window.autoGenerateProjectDesc()" class="text-[10px] flex items-center gap-1 font-bold cursor-pointer transition-colors px-2 py-1 rounded">
-                                    ✨ AI Generate
-                                </button>
-                            </div>
+                            <label class="ui-label mb-0">Description</label>
                             <textarea id="in-project-desc" class="ui-input resize-y" rows="3" placeholder="Add a short project description (optional)" oninput="if(typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender()"></textarea>
                         </div>
                     </div>
@@ -1116,25 +1128,6 @@
 
             <main class="app-editor">
                 <div id="ct-tab-editor" class="tab-content active">
-
-                    <!-- AI Assistant Panel (Contract) -->
-                    <div class="ai-panel" id="ai-panel-ct">
-                        <div class="ai-panel-header" onclick="this.closest('.ai-panel').classList.toggle('collapsed')">
-                            <span class="ai-panel-title">✨ <span data-i18n="aiAssistant">AI Assistant</span></span>
-                            <span class="ai-panel-chevron">▾</span>
-                        </div>
-                        <div class="ai-panel-body">
-                            <textarea id="ai-ct-prompt" class="ui-input resize-y !text-sm" rows="2"
-                                placeholder="اكتب وصف العقد... مثال: عقد عميل شامل خدمات التسويق لمدة 6 أشهر بقيمة 15000 جنيه"
-                                style="font-family:'Tajawal',system-ui,sans-serif; direction:rtl; text-align:right;"></textarea>
-                            <div class="ai-panel-btns">
-                                <button id="ai-ct-generate-btn" onclick="window.runContractAI()" class="ai-btn-gen" data-i18n="aiGenerate">Generate ✨</button>
-                                <button onclick="window.applyContractAI()" class="ai-btn-apply" data-i18n="aiApply">Apply to Form</button>
-                                <button onclick="document.getElementById('ai-ct-prompt').value='';document.getElementById('ai-ct-output').style.display='none';window.aiContractContext=null;" class="ai-btn-clear" data-i18n="aiClear">Clear</button>
-                            </div>
-                            <div id="ai-ct-output" class="ai-response-box" style="display:none;"></div>
-                        </div>
-                    </div>
 
                     <!-- Contract Info Card -->
                     <div class="ui-card">
@@ -1414,25 +1407,6 @@
 
             <main class="app-editor">
                 <div id="ec-tab-editor" class="tab-content active">
-
-                    <!-- AI Assistant Panel (Employee Contract) -->
-                    <div class="ai-panel" id="ai-panel-ec">
-                        <div class="ai-panel-header" onclick="this.closest('.ai-panel').classList.toggle('collapsed')">
-                            <span class="ai-panel-title">✨ <span data-i18n="aiAssistant">AI Assistant</span></span>
-                            <span class="ai-panel-chevron">▾</span>
-                        </div>
-                        <div class="ai-panel-body">
-                            <textarea id="ai-ec-prompt" class="ui-input resize-y !text-sm" rows="2"
-                                placeholder="اكتب وصف عقد الموظف... مثال: عقد توظيف لمصمم جرافيك براتب 8000 جنيه وفترة تجربة 3 أشهر"
-                                style="font-family:'Tajawal',system-ui,sans-serif; direction:rtl; text-align:right;"></textarea>
-                            <div class="ai-panel-btns">
-                                <button id="ai-ec-generate-btn" onclick="window.runEmpContractAI()" class="ai-btn-gen" data-i18n="aiGenerate">Generate ✨</button>
-                                <button onclick="window.applyEmpContractAI()" class="ai-btn-apply" data-i18n="aiApply">Apply to Form</button>
-                                <button onclick="document.getElementById('ai-ec-prompt').value='';document.getElementById('ai-ec-output').style.display='none';window.aiEmpContractContext=null;" class="ai-btn-clear" data-i18n="aiClear">Clear</button>
-                            </div>
-                            <div id="ai-ec-output" class="ai-response-box" style="display:none;"></div>
-                        </div>
-                    </div>
 
                     <!-- Contract Info Card -->
                     <div class="ui-card">
@@ -2053,6 +2027,26 @@
             });
         };
 
+        // Landing screen logic
+        window.openModule = function(moduleName) {
+            const landing = document.getElementById('landing-screen');
+            if (landing) {
+                landing.classList.add('fade-out');
+                setTimeout(() => { landing.style.display = 'none'; }, 380);
+            }
+            if (typeof window.switchMainModule === 'function') window.switchMainModule(moduleName);
+        };
+
+        window.openLanding = function() {
+            const landing = document.getElementById('landing-screen');
+            if (landing) {
+                landing.style.display = 'flex';
+                landing.style.opacity = '0';
+                landing.classList.remove('fade-out');
+                requestAnimationFrame(() => { landing.style.opacity = '1'; });
+            }
+        };
+
         window.switchMainModule = function(moduleName) {
             const invMod = document.getElementById('invoice-module');
             const quoMod = document.getElementById('quotation-module');
@@ -2313,9 +2307,8 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             try {
-                if(typeof window.switchMainModule === 'function') {
-                    window.switchMainModule('invoice');
-                }
+                // Don't auto-switch to invoice — landing screen handles initial module selection
+                // but still initialize the invoice module in background so it's ready
                 
                 flatpickr("#campaignMonth", { plugins: [new monthSelectPlugin({ shorthand: true, dateFormat: "M-Y", altFormat: "M-Y" })], defaultDate: "today", disableMobile: true, onChange: () => { if(typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations(); } });
                 flatpickr("#invoiceDate", { plugins: [new monthSelectPlugin({ shorthand: true, dateFormat: "M-y", altFormat: "M-y" })], defaultDate: "today", disableMobile: true, onChange: () => { if(typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations(); } });
@@ -2438,9 +2431,6 @@
                 <div class="ui-form-group mb-0 relative">
                     <div class="flex justify-between items-center mb-2 px-1">
                         <span class="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold">Scope of Work</span>
-                        <button type="button" id="btn-inv-gemini-scope-${id}" onclick="if(typeof window.autoGenerateInvScope === 'function') window.autoGenerateInvScope('${id}')" class="text-[10px] text-blue-600 hover:text-blue-800 flex items-center gap-1 font-bold cursor-pointer transition-colors bg-white px-2 py-1 rounded border border-[rgba(203,213,225,0.6)]">
-                            ✨ AI Generate
-                        </button>
                     </div>
                     <textarea id="inv-srv-scope-${id}" class="ui-input text-sm leading-relaxed resize-y" rows="3" placeholder="Scope description..." oninput="if(typeof window.debouncedSaveAndRenderInv === 'function') window.debouncedSaveAndRenderInv()">${scope}</textarea>
                 </div>
@@ -3034,9 +3024,6 @@
                 <div class="ui-form-group mb-0 relative">
                     <div class="flex justify-between items-center mb-2 px-1">
                         <span class="text-[10px] text-slate-500 uppercase tracking-wider font-extrabold">Scope of Work</span>
-                        <button type="button" id="btn-gemini-scope-${id}" onclick="if(typeof window.autoGenerateScope === 'function') window.autoGenerateScope('${id}')" class="text-[10px] text-blue-600 hover:text-blue-800 flex items-center gap-1 font-bold cursor-pointer transition-colors bg-white px-2 py-1 rounded border border-[rgba(203,213,225,0.6)]">
-                            ✨ AI Generate
-                        </button>
                     </div>
                     <textarea id="srv-scope-${id}" class="ui-input text-sm leading-relaxed resize-y" rows="3" placeholder="Scope description..." oninput="if(typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender()">${scope}</textarea>
                 </div>
@@ -4215,7 +4202,7 @@
                         <button class="ui-button-ghost !py-1 !px-2 text-xs !text-red-500 hover:!bg-red-50" title="Delete" onclick="document.getElementById('row-${clause.id}').remove(); window.debouncedRenderContract();">✕</button>
                     </div>
                 </div>
-                <textarea class="ui-input text-sm resize-y w-full" rows="3" dir="rtl" style="text-align:right;font-family:'Tajawal',sans-serif;" placeholder="Clause text (Arabic)..." oninput="window.debouncedRenderContract()">${clause.text || ''}</textarea>`;
+                <textarea class="ui-input text-sm resize-y w-full" rows="3" dir="rtl" style="text-align:right;font-family:'Amiri','Tajawal',sans-serif;" placeholder="Clause text (Arabic)..." oninput="window.debouncedRenderContract()">${clause.text || ''}</textarea>`;
             container.appendChild(row);
         }
 
@@ -4233,7 +4220,7 @@
                         <button class="ui-button-ghost !py-1 !px-2 text-xs !text-red-500 hover:!bg-red-50" title="Delete" onclick="document.getElementById('erow-${clause.id}').remove(); window.debouncedRenderEmpContract();">✕</button>
                     </div>
                 </div>
-                <textarea class="ui-input text-sm resize-y w-full" rows="3" dir="rtl" style="text-align:right;font-family:'Tajawal',sans-serif;" placeholder="Clause text (Arabic)..." oninput="window.debouncedRenderEmpContract()">${clause.text || ''}</textarea>`;
+                <textarea class="ui-input text-sm resize-y w-full" rows="3" dir="rtl" style="text-align:right;font-family:'Amiri','Tajawal',sans-serif;" placeholder="Clause text (Arabic)..." oninput="window.debouncedRenderEmpContract()">${clause.text || ''}</textarea>`;
             container.appendChild(row);
         }
 
@@ -4308,8 +4295,8 @@
 
                 <!-- Title Band (Arabic) -->
                 <div style="text-align:center;margin:12px 0;padding:10px;background:#111;color:#fff;">
-                    <div style="font-size:18px;font-weight:900;letter-spacing:1px;font-family:'Tajawal',sans-serif;direction:rtl;">عقد خدمات تسويق رقمي</div>
-                    <div style="font-size:11px;opacity:0.8;margin-top:3px;font-family:'Tajawal',sans-serif;direction:rtl;">Digital Marketing Services Agreement</div>
+                    <div style="font-size:18px;font-weight:900;letter-spacing:1px;font-family:'Amiri','Tajawal',sans-serif;direction:rtl;">عقد خدمات تسويق رقمي</div>
+                    <div style="font-size:11px;opacity:0.8;margin-top:3px;font-family:'Amiri','Tajawal',sans-serif;direction:rtl;">Digital Marketing Services Agreement</div>
                 </div>
 
                 <!-- Parties -->
@@ -4437,8 +4424,8 @@
 
                 <!-- Title Band -->
                 <div style="text-align:center;margin:12px 0;padding:10px;background:#111;color:#fff;">
-                    <div style="font-size:18px;font-weight:900;letter-spacing:1px;font-family:'Tajawal',sans-serif;direction:rtl;">عقد توظيف</div>
-                    <div style="font-size:11px;opacity:0.8;margin-top:3px;font-family:'Tajawal',sans-serif;direction:rtl;">Employment Contract</div>
+                    <div style="font-size:18px;font-weight:900;letter-spacing:1px;font-family:'Amiri','Tajawal',sans-serif;direction:rtl;">عقد توظيف</div>
+                    <div style="font-size:11px;opacity:0.8;margin-top:3px;font-family:'Amiri','Tajawal',sans-serif;direction:rtl;">Employment Contract</div>
                 </div>
 
                 <!-- Parties -->
@@ -4701,28 +4688,29 @@
 
             try {
                 const styleBlock = `<style>
+                    @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap');
                     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap');
-                    body { font-family: 'Tajawal', 'Arial', sans-serif; font-size: 11pt; color: #111; direction: rtl; }
+                    body { font-family: 'Amiri', 'Tajawal', 'Arial', sans-serif; font-size: 11pt; color: #111; direction: rtl; }
                     .ct-header-divider { border-top: 3px solid #111; margin: 10pt 0 14pt; }
                     .ct-section-label { background: #111; color: #fff; font-size: 9pt; font-weight: bold; letter-spacing: 1pt; text-transform: uppercase; padding: 5pt 8pt; display: inline-block; margin-bottom: 8pt; }
                     .ct-party-grid { display: table; width: 100%; border-collapse: separate; border-spacing: 10pt; }
                     .ct-party-box { display: table-cell; border: 1.5pt solid #111; padding: 8pt; width: 50%; vertical-align: top; }
                     .ct-party-header { background: #111; color: #fff; font-size: 8pt; font-weight: bold; padding: 5pt 8pt; margin: -8pt -8pt 8pt; display: block; }
-                    .ct-party-name { font-size: 14pt; font-weight: bold; font-family: 'Tajawal', Arial, sans-serif; }
-                    .ct-party-detail { font-size: 9pt; color: #555; margin-top: 2pt; font-family: 'Tajawal', Arial, sans-serif; }
+                    .ct-party-name { font-size: 14pt; font-weight: bold; font-family: 'Amiri', 'Tajawal', Arial, sans-serif; }
+                    .ct-party-detail { font-size: 9pt; color: #555; margin-top: 2pt; font-family: 'Amiri', 'Tajawal', Arial, sans-serif; }
                     .ct-financial-box { border: 1pt solid #ddd; padding: 10pt; background: #f9f9f9; }
                     .ct-financial-row { display: flex; justify-content: space-between; font-size: 10pt; padding: 4pt 0; border-bottom: 1pt solid #eee; }
                     .ct-financial-total { background: #111; color: #fff; padding: 8pt 10pt; font-size: 11pt; font-weight: bold; display: flex; justify-content: space-between; margin: 6pt -10pt -10pt; }
                     .ct-clause { margin-bottom: 10pt; page-break-inside: avoid; }
                     .ct-clause-num { background: #111; color: #fff; font-size: 8pt; font-weight: bold; padding: 2pt 6pt; }
-                    .ct-clause-title-text { font-size: 11pt; font-weight: bold; direction: rtl; text-align: right; font-family: 'Tajawal', Arial, sans-serif; }
-                    .ct-clause-body { font-size: 10pt; line-height: 1.8; direction: rtl; text-align: right; padding-right: 20pt; color: #333; font-family: 'Tajawal', Arial, sans-serif; }
+                    .ct-clause-title-text { font-size: 11pt; font-weight: bold; direction: rtl; text-align: right; font-family: 'Amiri', 'Tajawal', Arial, sans-serif; }
+                    .ct-clause-body { font-size: 10pt; line-height: 1.8; direction: rtl; text-align: right; padding-right: 20pt; color: #333; font-family: 'Amiri', 'Tajawal', Arial, sans-serif; }
                     .ct-sig-grid { display: table; width: 100%; margin-top: 24pt; border-top: 2pt solid #111; padding-top: 14pt; }
                     .ct-sig-block { display: table-cell; width: 50%; text-align: center; padding: 0 20pt; }
                     .ct-sig-party-label { background: #111; color: #fff; font-size: 8pt; font-weight: bold; padding: 3pt 7pt; }
                     .ct-sig-name-line { border-bottom: 1.5pt solid #111; margin: 20pt 0 6pt; }
-                    .ct-sig-name-text { font-size: 10pt; font-weight: bold; font-family: 'Tajawal', Arial, sans-serif; }
-                    .arabic-text { font-family: 'Tajawal', Arial, sans-serif !important; direction: rtl; text-align: right; }
+                    .ct-sig-name-text { font-size: 10pt; font-weight: bold; font-family: 'Amiri', 'Tajawal', Arial, sans-serif; }
+                    .arabic-text { font-family: 'Amiri', 'Tajawal', Arial, sans-serif !important; direction: rtl; text-align: right; }
                 </style>`;
                 const htmlContent = element.innerHTML;
                 const dir = appLang === 'ar' ? 'rtl' : 'ltr';
@@ -4805,7 +4793,7 @@
         // ==========================================================================
         // LANGUAGE SUPPORT & i18n
         // ==========================================================================
-        let appLang = localStorage.getItem('openy_lang') || 'ar';
+        let appLang = 'en';
 
         const i18n = {
             ar: {
@@ -4898,22 +4886,9 @@
             }, 100);
         };
 
-        // Initialize language on load (after DOM ready)
+        // Initialize language on load
         document.addEventListener('DOMContentLoaded', function() {
-            // Apply initial language state (delayed to let main init run first)
-            setTimeout(() => {
-                const savedLang = localStorage.getItem('openy_lang') || 'ar';
-                const langBtn = document.getElementById('lang-toggle-btn');
-                if (langBtn) langBtn.textContent = savedLang === 'ar' ? 'EN' : 'عربي';
-                if (savedLang !== 'en') {
-                    // Apply RTL to modules that start with dir="ltr"
-                    ['invoice-module','quotation-module','contract-module','empcontract-module'].forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el) el.dir = 'rtl';
-                    });
-                    document.querySelectorAll('.a4-page').forEach(el => { el.classList.add('rtl-mode'); el.dir = 'rtl'; });
-                }
-            }, 700);
+            // Language is always English — nothing to do
         }, { once: true });
 
         // ==========================================================================
@@ -4921,7 +4896,7 @@
         // Wait for fonts and set proper direction before export
         // ==========================================================================
         async function prepareElementForExport(element) {
-            // Wait for all fonts (including Tajawal) to load
+            // Wait for all fonts (including Amiri) to load
             try { await document.fonts.ready; } catch(e) {}
             // Additional stabilization delay
             await new Promise(r => setTimeout(r, 250));
@@ -4929,9 +4904,9 @@
             if (appLang === 'ar') {
                 element.style.direction = 'rtl';
                 element.setAttribute('dir', 'rtl');
-                // Ensure Tajawal font is applied
-                if (!element.style.fontFamily || !element.style.fontFamily.includes('Tajawal')) {
-                    element.style.fontFamily = "'Tajawal', sans-serif";
+                // Ensure Amiri font is applied for proper Arabic shaping
+                if (!element.style.fontFamily || !element.style.fontFamily.includes('Amiri')) {
+                    element.style.fontFamily = "'Amiri', 'Tajawal', sans-serif";
                 }
             } else {
                 element.style.direction = 'ltr';
