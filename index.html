@@ -897,6 +897,13 @@
         }
     </style>
     
+    <!-- Scroll Restore Prevention: must run before page renders -->
+    <script>
+        if ('scrollRestoration' in history) {
+            try { history.scrollRestoration = 'manual'; } catch (e) {}
+        }
+    </script>
+
     <!-- Cloud Storage Integration - Deferred to avoid blocking on mobile -->
     <script type="module" defer>
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -3025,6 +3032,7 @@
                 landing.classList.remove('fade-out');
                 requestAnimationFrame(() => { landing.style.opacity = '1'; });
             }
+            window.scrollTo(0, 0);
         };
 
         window.switchMainModule = function(moduleName) {
@@ -3354,6 +3362,9 @@
         // 5. APP INITIALIZATION
         // ==========================================================================
         let isAppBooting = true; // Flag to prevent heavy preview renders on initial load
+
+        // Always scroll to top on page load, refresh, or back/forward navigation
+        window.addEventListener('pageshow', function() { window.scrollTo(0, 0); });
 
         document.addEventListener("DOMContentLoaded", () => {
             try {
