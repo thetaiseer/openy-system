@@ -939,6 +939,11 @@
         .emp-table tbody tr:last-child td { border-bottom: none; }
         .emp-table tbody tr:hover td { background: rgba(37,99,235,0.03); }
         .emp-table .emp-name { font-weight: 600; color: var(--text-main); }
+        .emp-table .emp-cell-id { font-family: monospace; font-size: 0.78rem; }
+        .emp-table .emp-cell-num { text-align: center; }
+        .emp-table .emp-cell-salary { font-weight: 700; color: #0F172A; }
+        .emp-table .emp-cell-addr { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .emp-table .emp-cell-phone { white-space: nowrap; }
         /* Status badges */
         .emp-badge {
             display: inline-block; padding: 2px 10px; border-radius: 999px;
@@ -7366,18 +7371,18 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
 
             tbody.innerHTML = filtered.map(e => {
                 return `<tr>
-                    <td style="font-family:monospace;font-size:0.78rem;">${e.employeeId || '—'}</td>
+                    <td class="emp-cell-id">${e.employeeId || '—'}</td>
                     <td class="emp-name">${e.fullName}</td>
                     <td>${e.jobTitle || '—'}</td>
                     <td>${e.employmentType || '—'}</td>
                     <td>${empFmtDate(e.dob)}</td>
-                    <td style="white-space:nowrap;">${e.phone || '—'}</td>
-                    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${e.address || ''}">${e.address || '—'}</td>
+                    <td class="emp-cell-phone">${e.phone || '—'}</td>
+                    <td class="emp-cell-addr" title="${e.address || ''}">${e.address || '—'}</td>
                     <td>${empFmtDate(e.hireDate)}</td>
-                    <td style="text-align:center;">${e.contractDuration ? e.contractDuration + ' mo' : '—'}</td>
+                    <td class="emp-cell-num">${e.contractDuration ? e.contractDuration + ' mo' : '—'}</td>
                     <td>${empStatusBadge(e.status)}</td>
-                    <td style="text-align:center;">${e.dailyHours ? e.dailyHours + ' hrs' : '—'}</td>
-                    <td style="font-weight:700;color:#0F172A;">${empFmtCurrency(e.currentSalary, e.currency)}</td>
+                    <td class="emp-cell-num">${e.dailyHours ? e.dailyHours + ' hrs' : '—'}</td>
+                    <td class="emp-cell-salary">${empFmtCurrency(e.currentSalary, e.currency)}</td>
                     <td>
                         <div class="emp-actions-cell">
                             <button class="emp-action-btn emp-action-btn-view" onclick="window.openEmployeeProfile('${e.id}')">
@@ -7639,7 +7644,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 bonuses: parseFloat(document.getElementById('ef-bonuses').value) || 0,
                 linkedContractId: document.getElementById('ef-linkedContractId').value.trim(),
                 linkedContractNumber: document.getElementById('ef-linkedContractNumber').value.trim(),
-                contractDuration: document.getElementById('ef-contractDuration').value || '',
+                contractDuration: parseInt(document.getElementById('ef-contractDuration').value, 10) || 0,
                 updatedAt: new Date().toISOString(),
                 createdAt: isNew ? new Date().toISOString() : (localStore.getAll('employees').find(e => e.id === id)?.createdAt || new Date().toISOString())
             };
