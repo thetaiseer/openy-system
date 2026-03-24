@@ -3078,8 +3078,6 @@
             // Use an array of parts and join at the end to avoid repeated string re-allocation with +=
             const parts = [];
             parts.push(`
-            const invoiceRef = generateInvoiceRef();
-            let html = `
                 <div class="scale-wrapper" style="transform-origin: top left; width: 100%;">
                 <div class="avoid-break">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
@@ -4719,7 +4717,6 @@
                     </div>
                 </div>
                 <textarea class="ui-input text-sm resize-y w-full" rows="3" dir="${clauseDir}" style="text-align:${clauseAlign};font-family:${clauseFont};" placeholder="${C.clauseTextPlaceholder}" oninput="window.debouncedRenderEmpContract()">${clause.text || ''}</textarea>`;
-                <textarea class="ui-input text-sm resize-y w-full" rows="3" dir="rtl" style="text-align:right;font-family:'Cairo',sans-serif;" placeholder="Clause text (Arabic)..." oninput="window.debouncedRenderEmpContract()">${clause.text || ''}</textarea>`;
             container.appendChild(row);
         }
 
