@@ -1374,10 +1374,10 @@
                             <select id="inv-history-sort" class="ui-input w-[150px]" onchange="if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList()">
                                 <option value="newest">Newest First</option>
                                 <option value="oldest">Oldest First</option>
-                                <option value="client-asc">Client A→Z</option>
-                                <option value="client-desc">Client Z→A</option>
-                                <option value="amount-desc">Amount ↓</option>
-                                <option value="amount-asc">Amount ↑</option>
+                                <option value="client-asc">Client A-Z</option>
+                                <option value="client-desc">Client Z-A</option>
+                                <option value="amount-desc">Amount High-Low</option>
+                                <option value="amount-asc">Amount Low-High</option>
                             </select>
                             <button onclick="if(typeof window.resetInvHistoryFilters === 'function') window.resetInvHistoryFilters()" class="ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-600 text-xs shrink-0">Reset</button>
                         </div>
@@ -1611,10 +1611,10 @@
                             <select id="history-sort" class="ui-input w-[150px]" onchange="if(typeof window.renderHistoryList === 'function') window.renderHistoryList()">
                                 <option value="newest">Newest First</option>
                                 <option value="oldest">Oldest First</option>
-                                <option value="client-asc">Client A→Z</option>
-                                <option value="client-desc">Client Z→A</option>
-                                <option value="amount-desc">Amount ↓</option>
-                                <option value="amount-asc">Amount ↑</option>
+                                <option value="client-asc">Client A-Z</option>
+                                <option value="client-desc">Client Z-A</option>
+                                <option value="amount-desc">Amount High-Low</option>
+                                <option value="amount-asc">Amount Low-High</option>
                             </select>
                             <button onclick="if(typeof window.resetHistoryFilters === 'function') window.resetHistoryFilters()" class="ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-600 text-xs shrink-0">Reset</button>
                         </div>
@@ -1937,10 +1937,10 @@
                             <select id="ct-history-sort" class="ui-input w-[150px]" onchange="window.renderCtHistoryList()">
                                 <option value="newest">Newest First</option>
                                 <option value="oldest">Oldest First</option>
-                                <option value="client-asc">Client A→Z</option>
-                                <option value="client-desc">Client Z→A</option>
-                                <option value="amount-desc">Amount ↓</option>
-                                <option value="amount-asc">Amount ↑</option>
+                                <option value="client-asc">Client A-Z</option>
+                                <option value="client-desc">Client Z-A</option>
+                                <option value="amount-desc">Amount High-Low</option>
+                                <option value="amount-asc">Amount Low-High</option>
                             </select>
                             <button onclick="window.resetCtHistoryFilters()" class="ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-600 text-xs shrink-0">Reset</button>
                         </div>
@@ -2331,10 +2331,10 @@
                             <select id="ec-history-sort" class="ui-input w-[150px]" onchange="window.renderEcHistoryList()">
                                 <option value="newest">Newest First</option>
                                 <option value="oldest">Oldest First</option>
-                                <option value="client-asc">Client A→Z</option>
-                                <option value="client-desc">Client Z→A</option>
-                                <option value="amount-desc">Amount ↓</option>
-                                <option value="amount-asc">Amount ↑</option>
+                                <option value="client-asc">Client A-Z</option>
+                                <option value="client-desc">Client Z-A</option>
+                                <option value="amount-desc">Amount High-Low</option>
+                                <option value="amount-asc">Amount Low-High</option>
                             </select>
                             <button onclick="window.resetEcHistoryFilters()" class="ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-600 text-xs shrink-0">Reset</button>
                         </div>
@@ -5001,13 +5001,14 @@
 
         // Helper: sort records array by the given sort key
         function _sortHistoryRecords(records, sortVal) {
+            const sorted = records.slice();
             switch (sortVal) {
-                case 'oldest':      return records.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-                case 'client-asc':  return records.sort((a, b) => (a.client || '').localeCompare(b.client || ''));
-                case 'client-desc': return records.sort((a, b) => (b.client || '').localeCompare(a.client || ''));
-                case 'amount-desc': return records.sort((a, b) => (b.amount || 0) - (a.amount || 0));
-                case 'amount-asc':  return records.sort((a, b) => (a.amount || 0) - (b.amount || 0));
-                default:            return records.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                case 'oldest':      return sorted.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                case 'client-asc':  return sorted.sort((a, b) => (a.client || '').localeCompare(b.client || '', undefined, { sensitivity: 'base' }));
+                case 'client-desc': return sorted.sort((a, b) => (b.client || '').localeCompare(a.client || '', undefined, { sensitivity: 'base' }));
+                case 'amount-desc': return sorted.sort((a, b) => (b.amount || 0) - (a.amount || 0));
+                case 'amount-asc':  return sorted.sort((a, b) => (a.amount || 0) - (b.amount || 0));
+                default:            return sorted.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
             }
         }
 
@@ -5082,7 +5083,7 @@
                 const matchDay = !filterDay || String(r.day || new Date(r.timestamp || 0).getDate()) === filterDay;
                 return matchSearch && matchStatus && matchClient && matchYear && matchMonth && matchDay;
             });
-            _sortHistoryRecords(records, sortVal);
+            records = _sortHistoryRecords(records, sortVal);
 
             container.innerHTML = '';
             if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
@@ -5118,7 +5119,7 @@
                 const matchDay = !filterDay || String(r.day || new Date(r.timestamp || 0).getDate()) === filterDay;
                 return matchSearch && matchStatus && matchClient && matchYear && matchMonth && matchDay;
             });
-            _sortHistoryRecords(records, sortVal);
+            records = _sortHistoryRecords(records, sortVal);
 
             container.innerHTML = '';
             if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
@@ -5155,7 +5156,7 @@
                 const matchStatus = !filterStatus || r.status === filterStatus;
                 return matchSearch && matchClient && matchYear && matchMonth && matchDay && matchStatus;
             });
-            _sortHistoryRecords(records, sortVal);
+            records = _sortHistoryRecords(records, sortVal);
 
             container.innerHTML = '';
             if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
@@ -5192,7 +5193,7 @@
                 const matchStatus = !filterStatus || r.status === filterStatus;
                 return matchSearch && matchClient && matchYear && matchMonth && matchDay && matchStatus;
             });
-            _sortHistoryRecords(records, sortVal);
+            records = _sortHistoryRecords(records, sortVal);
 
             container.innerHTML = '';
             if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
