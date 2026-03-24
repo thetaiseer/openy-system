@@ -226,7 +226,7 @@
         .app-sidebar { width: 100%; border-right: 1px solid rgba(255, 255, 255, 0.5); background-color: rgba(248, 250, 252, 0.2); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); display: flex; flex-direction: column; }
         @media (min-width: 1024px) { .app-sidebar { width: 45%; max-width: 520px; } }
         
-        .app-editor { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 1.5rem; }
+        .app-editor { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 1.5rem; padding-bottom: 88px; }
 
         /* Desktop: scrollable preview panel — document-viewer style */
         .app-preview {
@@ -237,7 +237,7 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-left: 1px solid rgba(255, 255, 255, 0.45);
-            padding: 2rem 1.5rem;
+            padding: 2rem 1.5rem 6.5rem;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -257,7 +257,7 @@
                 height: auto;
                 min-height: 0;
                 width: 100%;
-                padding: 1.5rem 1rem 3rem;
+                padding: 1.5rem 1rem 6rem;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -274,10 +274,11 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        .export-dock { position: sticky; bottom: 0; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: 1px solid rgba(255, 255, 255, 0.6); padding: 1rem 1.5rem; margin-top: auto; }
+        .export-dock { position: fixed; bottom: 0; left: 0; right: 0; z-index: 90; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-top: 1px solid rgba(255, 255, 255, 0.6); padding: 1rem 1.5rem; transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease; }
+        .export-dock.dock-hidden { transform: translateY(110%); opacity: 0; pointer-events: none; }
 
         @media (max-width: 1023px) {
-            .export-dock { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); position: static; }
+            .export-dock { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(24px); }
             .a4-page { box-shadow: 0 2px 12px rgba(0,0,0,0.09), 0 1px 3px rgba(0,0,0,0.05); }
         }
 
@@ -3624,6 +3625,8 @@
 
             [invMod, quoMod, ctMod, ecMod, empMod].forEach(m => { if(m) m.style.display = 'none'; });
             [navInv, navQuo, navCt, navEc, navEmp].forEach(b => { if(b) b.classList.remove('active'); });
+            // Reset dock visibility whenever a module switch occurs
+            document.querySelectorAll('.export-dock').forEach(d => d.classList.remove('dock-hidden'));
 
             if (moduleName === 'invoice') {
                 if(invMod) invMod.style.display = 'flex';
@@ -3742,13 +3745,17 @@
             if(tabId === 'history' && typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList();
             
             const exportSection = document.getElementById('inv-export-section');
-            if(exportSection) exportSection.style.display = (tabId === 'editor') ? 'flex' : 'none';
+            if(exportSection) {
+                exportSection.style.display = (tabId === 'editor') ? 'flex' : 'none';
+                if (tabId === 'editor') exportSection.classList.remove('dock-hidden');
+            }
         };
 
         window.updateExportVisibility = function(tabId = 'editor') {
             const exportSection = document.getElementById('export-section');
             if(exportSection) {
                 exportSection.style.display = (tabId === 'editor') ? 'flex' : 'none';
+                if (tabId === 'editor') exportSection.classList.remove('dock-hidden');
             }
         };
 
@@ -6109,7 +6116,10 @@
             const pills = document.querySelectorAll('#contract-module .ui-sub-tabs .ui-nav-pill');
             if (editorTab) editorTab.classList.toggle('active', tabId === 'editor');
             if (historyTab) historyTab.classList.toggle('active', tabId === 'history');
-            if (exportDock) exportDock.style.display = tabId === 'editor' ? '' : 'none';
+            if (exportDock) {
+                exportDock.style.display = tabId === 'editor' ? '' : 'none';
+                if (tabId === 'editor') exportDock.classList.remove('dock-hidden');
+            }
             pills.forEach(btn => btn.classList.toggle('active', btn.dataset.ctab === tabId));
             if (tabId === 'history') window.renderCtHistoryList();
         };
@@ -6120,7 +6130,10 @@
             const pills = document.querySelectorAll('#empcontract-module .ui-sub-tabs .ui-nav-pill');
             if (editorTab) editorTab.classList.toggle('active', tabId === 'editor');
             if (historyTab) historyTab.classList.toggle('active', tabId === 'history');
-            if (exportDock) exportDock.style.display = tabId === 'editor' ? '' : 'none';
+            if (exportDock) {
+                exportDock.style.display = tabId === 'editor' ? '' : 'none';
+                if (tabId === 'editor') exportDock.classList.remove('dock-hidden');
+            }
             pills.forEach(btn => btn.classList.toggle('active', btn.dataset.ectab === tabId));
             if (tabId === 'history') window.renderEcHistoryList();
         };
@@ -8254,6 +8267,49 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
             cloudDB.init = async function() {
                 await origInit();
             };
+        }());
+
+        // ── Sticky export-dock: auto-hide on scroll-down, show on scroll-up ──
+        (function () {
+            const scrollState = new WeakMap();
+            const SCROLL_THRESHOLD = 4;  // px delta to trigger show/hide
+            const TOP_THRESHOLD = 20;    // px from top where dock is always visible
+
+            function onScrollEvent(scroller, pos) {
+                const prev = scrollState.get(scroller) || 0;
+                const delta = pos - prev;
+                scrollState.set(scroller, pos);
+
+                const docks = document.querySelectorAll('.export-dock');
+                if (pos <= TOP_THRESHOLD) {
+                    docks.forEach(d => d.classList.remove('dock-hidden'));
+                } else if (delta > SCROLL_THRESHOLD) {
+                    docks.forEach(d => d.classList.add('dock-hidden'));
+                } else if (delta < -SCROLL_THRESHOLD) {
+                    docks.forEach(d => d.classList.remove('dock-hidden'));
+                }
+            }
+
+            function attachScrollListeners() {
+                // Window scroll (mobile / tablet — window is the scroller)
+                window.addEventListener('scroll', () => {
+                    onScrollEvent(window, window.scrollY || window.pageYOffset);
+                }, { passive: true });
+
+                // Direct listeners on .app-editor and .app-preview (desktop)
+                document.querySelectorAll('.app-editor, .app-preview').forEach(el => {
+                    el.addEventListener('scroll', function () {
+                        onScrollEvent(this, this.scrollTop);
+                    }, { passive: true });
+                });
+            }
+
+            // Attach after DOM is fully ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', attachScrollListeners);
+            } else {
+                attachScrollListeners();
+            }
         }());
 
     </script>
