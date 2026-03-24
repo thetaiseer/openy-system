@@ -1337,14 +1337,49 @@
                         </div>
                     </div>
                     
-                    <div class="flex flex-col sm:flex-row gap-3 mb-4">
-                        <div class="ui-form-group mb-0 flex-1">
-                            <input type="text" id="inv-history-search" class="ui-input w-full" placeholder="Search records..." oninput="if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList()">
+                    <div class="flex flex-col gap-3 mb-4">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="ui-form-group mb-0 flex-1">
+                                <input type="text" id="inv-history-search" class="ui-input w-full" placeholder="Search records..." oninput="if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList()">
+                            </div>
+                            <div class="flex gap-2 shrink-0 items-center">
+                                <button class="filter-chip-inv ui-button-ghost !border !border-[rgba(255,255,255,0.8)] !text-blue-700" onclick="if(typeof window.setInvHistoryFilter === 'function') window.setInvHistoryFilter('all')" data-filter="all">All</button>
+                                <button class="filter-chip-inv ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-700" onclick="if(typeof window.setInvHistoryFilter === 'function') window.setInvHistoryFilter('paid')" data-filter="paid">Paid</button>
+                                <button class="filter-chip-inv ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-700" onclick="if(typeof window.setInvHistoryFilter === 'function') window.setInvHistoryFilter('unpaid')" data-filter="unpaid">Unpaid</button>
+                            </div>
                         </div>
-                        <div class="flex gap-2 shrink-0">
-                            <button class="filter-chip-inv ui-button-ghost !border !border-[rgba(255,255,255,0.8)] !text-blue-700" onclick="if(typeof window.setInvHistoryFilter === 'function') window.setInvHistoryFilter('all')" data-filter="all">All</button>
-                            <button class="filter-chip-inv ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-700" onclick="if(typeof window.setInvHistoryFilter === 'function') window.setInvHistoryFilter('paid')" data-filter="paid">Paid</button>
-                            <button class="filter-chip-inv ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-700" onclick="if(typeof window.setInvHistoryFilter === 'function') window.setInvHistoryFilter('unpaid')" data-filter="unpaid">Unpaid</button>
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <select id="inv-history-filter-client" class="ui-input flex-1 min-w-[140px]" onchange="if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList()">
+                                <option value="">All Clients</option>
+                            </select>
+                            <select id="inv-history-filter-year" class="ui-input w-[110px]" onchange="if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList()">
+                                <option value="">All Years</option>
+                            </select>
+                            <select id="inv-history-filter-month" class="ui-input w-[130px]" onchange="if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList()">
+                                <option value="">All Months</option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                            <input type="number" id="inv-history-filter-day" class="ui-input w-[90px]" placeholder="Day" min="1" max="31" oninput="if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList()">
+                            <select id="inv-history-sort" class="ui-input w-[150px]" onchange="if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList()">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="client-asc">Client A-Z</option>
+                                <option value="client-desc">Client Z-A</option>
+                                <option value="amount-desc">Amount High-Low</option>
+                                <option value="amount-asc">Amount Low-High</option>
+                            </select>
+                            <button onclick="if(typeof window.resetInvHistoryFilters === 'function') window.resetInvHistoryFilters()" class="ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-600 text-xs shrink-0">Reset</button>
                         </div>
                     </div>
 
@@ -1539,14 +1574,49 @@
                         </div>
                     </div>
                     
-                    <div class="flex flex-col sm:flex-row gap-3 mb-4">
-                        <div class="ui-form-group mb-0 flex-1">
-                            <input type="text" id="history-search" class="ui-input w-full" placeholder="Search records..." oninput="if(typeof window.renderHistoryList === 'function') window.renderHistoryList()">
+                    <div class="flex flex-col gap-3 mb-4">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="ui-form-group mb-0 flex-1">
+                                <input type="text" id="history-search" class="ui-input w-full" placeholder="Search records..." oninput="if(typeof window.renderHistoryList === 'function') window.renderHistoryList()">
+                            </div>
+                            <div class="flex gap-2 shrink-0 items-center">
+                                <button class="filter-chip ui-button-ghost !border !border-[rgba(255,255,255,0.8)] !text-blue-700" onclick="if(typeof window.setHistoryFilter === 'function') window.setHistoryFilter('all')" data-filter="all">All</button>
+                                <button class="filter-chip ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-700" onclick="if(typeof window.setHistoryFilter === 'function') window.setHistoryFilter('paid')" data-filter="paid">Paid</button>
+                                <button class="filter-chip ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-700" onclick="if(typeof window.setHistoryFilter === 'function') window.setHistoryFilter('unpaid')" data-filter="unpaid">Unpaid</button>
+                            </div>
                         </div>
-                        <div class="flex gap-2 shrink-0">
-                            <button class="filter-chip ui-button-ghost !border !border-[rgba(255,255,255,0.8)] !text-blue-700" onclick="if(typeof window.setHistoryFilter === 'function') window.setHistoryFilter('all')" data-filter="all">All</button>
-                            <button class="filter-chip ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-700" onclick="if(typeof window.setHistoryFilter === 'function') window.setHistoryFilter('paid')" data-filter="paid">Paid</button>
-                            <button class="filter-chip ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-700" onclick="if(typeof window.setHistoryFilter === 'function') window.setHistoryFilter('unpaid')" data-filter="unpaid">Unpaid</button>
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <select id="history-filter-client" class="ui-input flex-1 min-w-[140px]" onchange="if(typeof window.renderHistoryList === 'function') window.renderHistoryList()">
+                                <option value="">All Clients</option>
+                            </select>
+                            <select id="history-filter-year" class="ui-input w-[110px]" onchange="if(typeof window.renderHistoryList === 'function') window.renderHistoryList()">
+                                <option value="">All Years</option>
+                            </select>
+                            <select id="history-filter-month" class="ui-input w-[130px]" onchange="if(typeof window.renderHistoryList === 'function') window.renderHistoryList()">
+                                <option value="">All Months</option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                            <input type="number" id="history-filter-day" class="ui-input w-[90px]" placeholder="Day" min="1" max="31" oninput="if(typeof window.renderHistoryList === 'function') window.renderHistoryList()">
+                            <select id="history-sort" class="ui-input w-[150px]" onchange="if(typeof window.renderHistoryList === 'function') window.renderHistoryList()">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="client-asc">Client A-Z</option>
+                                <option value="client-desc">Client Z-A</option>
+                                <option value="amount-desc">Amount High-Low</option>
+                                <option value="amount-asc">Amount Low-High</option>
+                            </select>
+                            <button onclick="if(typeof window.resetHistoryFilters === 'function') window.resetHistoryFilters()" class="ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-600 text-xs shrink-0">Reset</button>
                         </div>
                     </div>
 
@@ -1830,8 +1900,50 @@
                             <button onclick="window.clearCtHistory()" class="ui-button-ghost !border !border-[rgba(255,255,255,0.8)] !text-red-600">Clear</button>
                         </div>
                     </div>
-                    <div class="ui-form-group mb-4">
-                        <input type="text" id="ct-history-search" class="ui-input w-full" placeholder="Search contracts..." oninput="window.renderCtHistoryList()">
+                    <div class="flex flex-col gap-3 mb-4">
+                        <div class="ui-form-group mb-0">
+                            <input type="text" id="ct-history-search" class="ui-input w-full" placeholder="Search contracts..." oninput="window.renderCtHistoryList()">
+                        </div>
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <select id="ct-history-filter-client" class="ui-input flex-1 min-w-[140px]" onchange="window.renderCtHistoryList()">
+                                <option value="">All Clients</option>
+                            </select>
+                            <select id="ct-history-filter-year" class="ui-input w-[110px]" onchange="window.renderCtHistoryList()">
+                                <option value="">All Years</option>
+                            </select>
+                            <select id="ct-history-filter-month" class="ui-input w-[130px]" onchange="window.renderCtHistoryList()">
+                                <option value="">All Months</option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                            <input type="number" id="ct-history-filter-day" class="ui-input w-[90px]" placeholder="Day" min="1" max="31" oninput="window.renderCtHistoryList()">
+                            <select id="ct-history-filter-status" class="ui-input w-[130px]" onchange="window.renderCtHistoryList()">
+                                <option value="">All Statuses</option>
+                                <option value="Draft">Draft</option>
+                                <option value="Active">Active</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Terminated">Terminated</option>
+                            </select>
+                            <select id="ct-history-sort" class="ui-input w-[150px]" onchange="window.renderCtHistoryList()">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="client-asc">Client A-Z</option>
+                                <option value="client-desc">Client Z-A</option>
+                                <option value="amount-desc">Amount High-Low</option>
+                                <option value="amount-asc">Amount Low-High</option>
+                            </select>
+                            <button onclick="window.resetCtHistoryFilters()" class="ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-600 text-xs shrink-0">Reset</button>
+                        </div>
                     </div>
                     <div id="ct-history-list-container"></div>
                     <div id="ct-history-empty" class="text-center py-10 rounded-xl hidden mt-4">
@@ -2182,8 +2294,50 @@
                             <button onclick="window.clearEcHistory()" class="ui-button-ghost !border !border-[rgba(255,255,255,0.8)] !text-red-600">Clear</button>
                         </div>
                     </div>
-                    <div class="ui-form-group mb-4">
-                        <input type="text" id="ec-history-search" class="ui-input w-full" placeholder="Search employee contracts..." oninput="window.renderEcHistoryList()">
+                    <div class="flex flex-col gap-3 mb-4">
+                        <div class="ui-form-group mb-0">
+                            <input type="text" id="ec-history-search" class="ui-input w-full" placeholder="Search employee contracts..." oninput="window.renderEcHistoryList()">
+                        </div>
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <select id="ec-history-filter-client" class="ui-input flex-1 min-w-[140px]" onchange="window.renderEcHistoryList()">
+                                <option value="">All Clients</option>
+                            </select>
+                            <select id="ec-history-filter-year" class="ui-input w-[110px]" onchange="window.renderEcHistoryList()">
+                                <option value="">All Years</option>
+                            </select>
+                            <select id="ec-history-filter-month" class="ui-input w-[130px]" onchange="window.renderEcHistoryList()">
+                                <option value="">All Months</option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                            <input type="number" id="ec-history-filter-day" class="ui-input w-[90px]" placeholder="Day" min="1" max="31" oninput="window.renderEcHistoryList()">
+                            <select id="ec-history-filter-status" class="ui-input w-[130px]" onchange="window.renderEcHistoryList()">
+                                <option value="">All Statuses</option>
+                                <option value="Draft">Draft</option>
+                                <option value="Active">Active</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Terminated">Terminated</option>
+                            </select>
+                            <select id="ec-history-sort" class="ui-input w-[150px]" onchange="window.renderEcHistoryList()">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="client-asc">Client A-Z</option>
+                                <option value="client-desc">Client Z-A</option>
+                                <option value="amount-desc">Amount High-Low</option>
+                                <option value="amount-asc">Amount Low-High</option>
+                            </select>
+                            <button onclick="window.resetEcHistoryFilters()" class="ui-button-ghost !border !border-[rgba(255,255,255,0.6)] !text-slate-600 text-xs shrink-0">Reset</button>
+                        </div>
                     </div>
                     <div id="ec-history-list-container"></div>
                     <div id="ec-history-empty" class="text-center py-10 rounded-xl hidden mt-4">
@@ -4827,7 +4981,53 @@
             );
         }
 
-        // Helper: render a single history card (shared by all 4 modules)
+        // Helper: populate a select element with unique values from records, preserving current selection
+        function _populateHistorySelect(selectId, values, defaultLabel) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            const currentVal = select.value;
+            const optionValues = ['', ...values.map(String)];
+            const currentOptions = Array.from(select.options).map(o => o.value);
+            if (JSON.stringify(currentOptions) === JSON.stringify(optionValues)) return;
+            select.innerHTML = `<option value="">${defaultLabel}</option>`;
+            values.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = String(v);
+                opt.textContent = String(v);
+                select.appendChild(opt);
+            });
+            select.value = currentVal;
+        }
+
+        // Helper: sort records array by the given sort key
+        function _sortHistoryRecords(records, sortVal) {
+            const sorted = records.slice();
+            switch (sortVal) {
+                case 'oldest':      return sorted.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                case 'client-asc':  return sorted.sort((a, b) => (a.client || '').localeCompare(b.client || '', undefined, { sensitivity: 'base' }));
+                case 'client-desc': return sorted.sort((a, b) => (b.client || '').localeCompare(a.client || '', undefined, { sensitivity: 'base' }));
+                case 'amount-desc': return sorted.sort((a, b) => (b.amount || 0) - (a.amount || 0));
+                case 'amount-asc':  return sorted.sort((a, b) => (a.amount || 0) - (b.amount || 0));
+                default:            return sorted.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            }
+        }
+
+        // Helper: render a list of filtered+sorted records into a container, with optional year/month grouping
+        function _renderHistoryRecords(records, storeName, container, sortVal) {
+            if (sortVal === 'newest' || sortVal === 'oldest') {
+                _groupByYearMonth(records).forEach(group => {
+                    const header = document.createElement('div');
+                    header.className = 'text-xs font-extrabold text-slate-500 uppercase tracking-widest px-1 mt-4 mb-2';
+                    header.textContent = `${group.year}  •  ${_monthName(group.month)}`;
+                    container.appendChild(header);
+                    group.records.forEach(r => _renderHistoryCard(r, storeName, container));
+                });
+            } else {
+                records.forEach(r => _renderHistoryCard(r, storeName, container));
+            }
+        }
+
+
         function _renderHistoryCard(r, storeName, container) {
             const isPaid = r.status === 'paid';
             const statusColor = isPaid ? 'bg-green-100 text-green-700 border-green-200' : 'bg-orange-100 text-orange-700 border-orange-200';
@@ -4858,105 +5058,147 @@
         window.renderHistoryList = async function() {
             const container = document.getElementById('history-list-container');
             const emptyEl = document.getElementById('history-empty');
-            const searchVal = (document.getElementById('history-search')?.value || '').toLowerCase();
             if (!container) return;
 
-            let records = await cloudDB.getAll('history');
-            records = records.filter(r => {
-                const matchSearch = (r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal));
-                const matchFilter = currentHistoryFilter === 'all' || r.status === currentHistoryFilter;
-                return matchSearch && matchFilter;
+            const searchVal = (document.getElementById('history-search')?.value || '').toLowerCase();
+            const filterClient = document.getElementById('history-filter-client')?.value || '';
+            const filterYear = document.getElementById('history-filter-year')?.value || '';
+            const filterMonth = document.getElementById('history-filter-month')?.value || '';
+            const filterDay = document.getElementById('history-filter-day')?.value || '';
+            const sortVal = document.getElementById('history-sort')?.value || 'newest';
+
+            const allRecords = await cloudDB.getAll('history');
+
+            const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
+            const uniqueYears = [...new Set(allRecords.map(r => r.year || new Date(r.timestamp || 0).getFullYear()).filter(Boolean))].sort((a, b) => b - a);
+            _populateHistorySelect('history-filter-client', uniqueClients, 'All Clients');
+            _populateHistorySelect('history-filter-year', uniqueYears, 'All Years');
+
+            let records = allRecords.filter(r => {
+                const matchSearch = !searchVal || (r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal));
+                const matchStatus = currentHistoryFilter === 'all' || r.status === currentHistoryFilter;
+                const matchClient = !filterClient || r.client === filterClient;
+                const matchYear = !filterYear || String(r.year || new Date(r.timestamp || 0).getFullYear()) === filterYear;
+                const matchMonth = !filterMonth || String(r.month || (new Date(r.timestamp || 0).getMonth() + 1)) === filterMonth;
+                const matchDay = !filterDay || String(r.day || new Date(r.timestamp || 0).getDate()) === filterDay;
+                return matchSearch && matchStatus && matchClient && matchYear && matchMonth && matchDay;
             });
-            records.sort((a, b) => b.timestamp - a.timestamp);
+            records = _sortHistoryRecords(records, sortVal);
 
             container.innerHTML = '';
             if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
             if (emptyEl) emptyEl.classList.add('hidden');
-
-            _groupByYearMonth(records).forEach(group => {
-                const header = document.createElement('div');
-                header.className = 'text-xs font-extrabold text-slate-500 uppercase tracking-widest px-1 mt-4 mb-2';
-                header.textContent = `${group.year}  •  ${_monthName(group.month)}`;
-                container.appendChild(header);
-                group.records.forEach(r => _renderHistoryCard(r, 'history', container));
-            });
+            _renderHistoryRecords(records, 'history', container, sortVal);
         };
 
         window.renderInvHistoryList = async function() {
             const container = document.getElementById('inv-history-list-container');
             const emptyEl = document.getElementById('inv-history-empty');
-            const searchVal = (document.getElementById('inv-history-search')?.value || '').toLowerCase();
             if (!container) return;
 
-            let records = await cloudDB.getAll('inv_history');
-            records = records.filter(r => {
-                const matchSearch = (r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal));
-                const matchFilter = currentInvHistoryFilter === 'all' || r.status === currentInvHistoryFilter;
-                return matchSearch && matchFilter;
+            const searchVal = (document.getElementById('inv-history-search')?.value || '').toLowerCase();
+            const filterClient = document.getElementById('inv-history-filter-client')?.value || '';
+            const filterYear = document.getElementById('inv-history-filter-year')?.value || '';
+            const filterMonth = document.getElementById('inv-history-filter-month')?.value || '';
+            const filterDay = document.getElementById('inv-history-filter-day')?.value || '';
+            const sortVal = document.getElementById('inv-history-sort')?.value || 'newest';
+
+            const allRecords = await cloudDB.getAll('inv_history');
+
+            const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
+            const uniqueYears = [...new Set(allRecords.map(r => r.year || new Date(r.timestamp || 0).getFullYear()).filter(Boolean))].sort((a, b) => b - a);
+            _populateHistorySelect('inv-history-filter-client', uniqueClients, 'All Clients');
+            _populateHistorySelect('inv-history-filter-year', uniqueYears, 'All Years');
+
+            let records = allRecords.filter(r => {
+                const matchSearch = !searchVal || (r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal));
+                const matchStatus = currentInvHistoryFilter === 'all' || r.status === currentInvHistoryFilter;
+                const matchClient = !filterClient || r.client === filterClient;
+                const matchYear = !filterYear || String(r.year || new Date(r.timestamp || 0).getFullYear()) === filterYear;
+                const matchMonth = !filterMonth || String(r.month || (new Date(r.timestamp || 0).getMonth() + 1)) === filterMonth;
+                const matchDay = !filterDay || String(r.day || new Date(r.timestamp || 0).getDate()) === filterDay;
+                return matchSearch && matchStatus && matchClient && matchYear && matchMonth && matchDay;
             });
-            records.sort((a, b) => b.timestamp - a.timestamp);
+            records = _sortHistoryRecords(records, sortVal);
 
             container.innerHTML = '';
             if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
             if (emptyEl) emptyEl.classList.add('hidden');
-
-            _groupByYearMonth(records).forEach(group => {
-                const header = document.createElement('div');
-                header.className = 'text-xs font-extrabold text-slate-500 uppercase tracking-widest px-1 mt-4 mb-2';
-                header.textContent = `${group.year}  •  ${_monthName(group.month)}`;
-                container.appendChild(header);
-                group.records.forEach(r => _renderHistoryCard(r, 'inv_history', container));
-            });
+            _renderHistoryRecords(records, 'inv_history', container, sortVal);
         };
 
         window.renderCtHistoryList = async function() {
             const container = document.getElementById('ct-history-list-container');
             const emptyEl = document.getElementById('ct-history-empty');
-            const searchVal = (document.getElementById('ct-history-search')?.value || '').toLowerCase();
             if (!container) return;
 
-            let records = await cloudDB.getAll('ct_history');
-            records = records.filter(r =>
-                r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal)
-            );
-            records.sort((a, b) => b.timestamp - a.timestamp);
+            const searchVal = (document.getElementById('ct-history-search')?.value || '').toLowerCase();
+            const filterClient = document.getElementById('ct-history-filter-client')?.value || '';
+            const filterYear = document.getElementById('ct-history-filter-year')?.value || '';
+            const filterMonth = document.getElementById('ct-history-filter-month')?.value || '';
+            const filterDay = document.getElementById('ct-history-filter-day')?.value || '';
+            const filterStatus = document.getElementById('ct-history-filter-status')?.value || '';
+            const sortVal = document.getElementById('ct-history-sort')?.value || 'newest';
+
+            const allRecords = await cloudDB.getAll('ct_history');
+
+            const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
+            const uniqueYears = [...new Set(allRecords.map(r => r.year || new Date(r.timestamp || 0).getFullYear()).filter(Boolean))].sort((a, b) => b - a);
+            _populateHistorySelect('ct-history-filter-client', uniqueClients, 'All Clients');
+            _populateHistorySelect('ct-history-filter-year', uniqueYears, 'All Years');
+
+            let records = allRecords.filter(r => {
+                const matchSearch = !searchVal || (r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal));
+                const matchClient = !filterClient || r.client === filterClient;
+                const matchYear = !filterYear || String(r.year || new Date(r.timestamp || 0).getFullYear()) === filterYear;
+                const matchMonth = !filterMonth || String(r.month || (new Date(r.timestamp || 0).getMonth() + 1)) === filterMonth;
+                const matchDay = !filterDay || String(r.day || new Date(r.timestamp || 0).getDate()) === filterDay;
+                const matchStatus = !filterStatus || r.status === filterStatus;
+                return matchSearch && matchClient && matchYear && matchMonth && matchDay && matchStatus;
+            });
+            records = _sortHistoryRecords(records, sortVal);
 
             container.innerHTML = '';
             if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
             if (emptyEl) emptyEl.classList.add('hidden');
-
-            _groupByYearMonth(records).forEach(group => {
-                const header = document.createElement('div');
-                header.className = 'text-xs font-extrabold text-slate-500 uppercase tracking-widest px-1 mt-4 mb-2';
-                header.textContent = `${group.year}  •  ${_monthName(group.month)}`;
-                container.appendChild(header);
-                group.records.forEach(r => _renderHistoryCard(r, 'ct_history', container));
-            });
+            _renderHistoryRecords(records, 'ct_history', container, sortVal);
         };
 
         window.renderEcHistoryList = async function() {
             const container = document.getElementById('ec-history-list-container');
             const emptyEl = document.getElementById('ec-history-empty');
-            const searchVal = (document.getElementById('ec-history-search')?.value || '').toLowerCase();
             if (!container) return;
 
-            let records = await cloudDB.getAll('ec_history');
-            records = records.filter(r =>
-                r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal)
-            );
-            records.sort((a, b) => b.timestamp - a.timestamp);
+            const searchVal = (document.getElementById('ec-history-search')?.value || '').toLowerCase();
+            const filterClient = document.getElementById('ec-history-filter-client')?.value || '';
+            const filterYear = document.getElementById('ec-history-filter-year')?.value || '';
+            const filterMonth = document.getElementById('ec-history-filter-month')?.value || '';
+            const filterDay = document.getElementById('ec-history-filter-day')?.value || '';
+            const filterStatus = document.getElementById('ec-history-filter-status')?.value || '';
+            const sortVal = document.getElementById('ec-history-sort')?.value || 'newest';
+
+            const allRecords = await cloudDB.getAll('ec_history');
+
+            const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
+            const uniqueYears = [...new Set(allRecords.map(r => r.year || new Date(r.timestamp || 0).getFullYear()).filter(Boolean))].sort((a, b) => b - a);
+            _populateHistorySelect('ec-history-filter-client', uniqueClients, 'All Clients');
+            _populateHistorySelect('ec-history-filter-year', uniqueYears, 'All Years');
+
+            let records = allRecords.filter(r => {
+                const matchSearch = !searchVal || (r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal));
+                const matchClient = !filterClient || r.client === filterClient;
+                const matchYear = !filterYear || String(r.year || new Date(r.timestamp || 0).getFullYear()) === filterYear;
+                const matchMonth = !filterMonth || String(r.month || (new Date(r.timestamp || 0).getMonth() + 1)) === filterMonth;
+                const matchDay = !filterDay || String(r.day || new Date(r.timestamp || 0).getDate()) === filterDay;
+                const matchStatus = !filterStatus || r.status === filterStatus;
+                return matchSearch && matchClient && matchYear && matchMonth && matchDay && matchStatus;
+            });
+            records = _sortHistoryRecords(records, sortVal);
 
             container.innerHTML = '';
             if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
             if (emptyEl) emptyEl.classList.add('hidden');
-
-            _groupByYearMonth(records).forEach(group => {
-                const header = document.createElement('div');
-                header.className = 'text-xs font-extrabold text-slate-500 uppercase tracking-widest px-1 mt-4 mb-2';
-                header.textContent = `${group.year}  •  ${_monthName(group.month)}`;
-                container.appendChild(header);
-                group.records.forEach(r => _renderHistoryCard(r, 'ec_history', container));
-            });
+            _renderHistoryRecords(records, 'ec_history', container, sortVal);
         };
 
         window.toggleStatus = async function(id, storeName, currentStatus) {
@@ -5008,6 +5250,53 @@
             });
             window.renderInvHistoryList();
         };
+
+        window.resetHistoryFilters = function() {
+            const el = id => document.getElementById(id);
+            if (el('history-filter-client')) el('history-filter-client').value = '';
+            if (el('history-filter-year')) el('history-filter-year').value = '';
+            if (el('history-filter-month')) el('history-filter-month').value = '';
+            if (el('history-filter-day')) el('history-filter-day').value = '';
+            if (el('history-sort')) el('history-sort').value = 'newest';
+            if (el('history-search')) el('history-search').value = '';
+            window.setHistoryFilter('all');
+        };
+
+        window.resetInvHistoryFilters = function() {
+            const el = id => document.getElementById(id);
+            if (el('inv-history-filter-client')) el('inv-history-filter-client').value = '';
+            if (el('inv-history-filter-year')) el('inv-history-filter-year').value = '';
+            if (el('inv-history-filter-month')) el('inv-history-filter-month').value = '';
+            if (el('inv-history-filter-day')) el('inv-history-filter-day').value = '';
+            if (el('inv-history-sort')) el('inv-history-sort').value = 'newest';
+            if (el('inv-history-search')) el('inv-history-search').value = '';
+            window.setInvHistoryFilter('all');
+        };
+
+        window.resetCtHistoryFilters = function() {
+            const el = id => document.getElementById(id);
+            if (el('ct-history-search')) el('ct-history-search').value = '';
+            if (el('ct-history-filter-client')) el('ct-history-filter-client').value = '';
+            if (el('ct-history-filter-year')) el('ct-history-filter-year').value = '';
+            if (el('ct-history-filter-month')) el('ct-history-filter-month').value = '';
+            if (el('ct-history-filter-day')) el('ct-history-filter-day').value = '';
+            if (el('ct-history-filter-status')) el('ct-history-filter-status').value = '';
+            if (el('ct-history-sort')) el('ct-history-sort').value = 'newest';
+            window.renderCtHistoryList();
+        };
+
+        window.resetEcHistoryFilters = function() {
+            const el = id => document.getElementById(id);
+            if (el('ec-history-search')) el('ec-history-search').value = '';
+            if (el('ec-history-filter-client')) el('ec-history-filter-client').value = '';
+            if (el('ec-history-filter-year')) el('ec-history-filter-year').value = '';
+            if (el('ec-history-filter-month')) el('ec-history-filter-month').value = '';
+            if (el('ec-history-filter-day')) el('ec-history-filter-day').value = '';
+            if (el('ec-history-filter-status')) el('ec-history-filter-status').value = '';
+            if (el('ec-history-sort')) el('ec-history-sort').value = 'newest';
+            window.renderEcHistoryList();
+        };
+
 
         window.clearHistory = async function() {
             window.openConfirmModal("Clear History", "Are you sure you want to clear all Quotation records?", async () => {
