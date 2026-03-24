@@ -101,6 +101,9 @@
             box-shadow: var(--shadow-card); 
             margin-bottom: 1.5rem; 
             transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+            box-sizing: border-box;
+            min-width: 0;
+            width: 100%;
         }
         .ui-card:hover { 
             box-shadow: var(--shadow-hover); 
@@ -111,7 +114,7 @@
         .ui-card-title { font-size: 1rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; }
         .ui-card-title svg { color: var(--primary); opacity: 0.8; width: 1.25rem; height: 1.25rem; flex-shrink: 0; } /* Adds a nice touch of color */
 
-        .ui-form-group { display: flex; flex-direction: column; margin-bottom: 1rem; min-width: 0; }
+        .ui-form-group { display: flex; flex-direction: column; margin-bottom: 1rem; min-width: 0; box-sizing: border-box; width: 100%; }
         .ui-label { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem; letter-spacing: 0.2px; }
 
         /* Highly Visible Input Fields */
@@ -132,6 +135,8 @@
             -webkit-backdrop-filter: blur(10px);
             min-height: 2.875rem; /* consistent height across input/select */
             line-height: 1.4;
+            display: block;
+            min-width: 0;
         }
         textarea.ui-input { min-height: 2.875rem; height: auto; resize: vertical; line-height: 1.5; }
         .ui-input:focus { 
@@ -147,6 +152,7 @@
             appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748B'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
             background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 36px; cursor: pointer;
             height: 2.875rem; /* pin height equal to text inputs */
+            min-height: 2.875rem;
         }
         [dir="rtl"] select.ui-input { background-position: left 12px center; padding-right: 1rem; padding-left: 36px; }
 
@@ -218,7 +224,7 @@
         .app-sidebar { width: 100%; border-right: 1px solid rgba(255, 255, 255, 0.5); background-color: rgba(248, 250, 252, 0.2); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); display: flex; flex-direction: column; }
         @media (min-width: 1024px) { .app-sidebar { width: 45%; max-width: 520px; } }
         
-        .app-editor { flex: 1; overflow-y: auto; padding: 1.5rem; }
+        .app-editor { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 1.5rem; }
 
         /* Desktop: scrollable preview panel — document-viewer style */
         .app-preview {
@@ -412,6 +418,29 @@
         .grid > .ui-form-group {
             margin-top: 0 !important;
             margin-bottom: 0 !important;
+        }
+
+        /* Grid containment — ensure grid containers never overflow their parent card */
+        .ui-card .grid,
+        .ui-inner-box .grid,
+        .emp-form-grid {
+            box-sizing: border-box;
+            width: 100%;
+            min-width: 0;
+        }
+
+        /* Date / month / time inputs — prevent browser intrinsic minimum-width overflow */
+        input[type="date"].ui-input,
+        input[type="month"].ui-input,
+        input[type="time"].ui-input {
+            min-width: 0;
+        }
+        input[type="date"].ui-input::-webkit-calendar-picker-indicator,
+        input[type="month"].ui-input::-webkit-calendar-picker-indicator,
+        input[type="time"].ui-input::-webkit-calendar-picker-indicator {
+            opacity: 0.6;
+            cursor: pointer;
+            flex-shrink: 0;
         }
 
         /* Cards that stack form groups vertically (no grid) should still have
@@ -1354,7 +1383,7 @@
                                     <option value="USD">USD — US Dollar</option>
                                 </select>
                             </div>
-                            <div class="ui-form-group sm:col-span-2 mb-0 mt-1">
+                            <div class="ui-form-group sm:col-span-2 mb-0">
                                 <label class="ui-label">Client Name</label>
                                 <select id="clientName" onchange="if (typeof window.toggleDetailedOptions === 'function') window.toggleDetailedOptions()" class="ui-input">
                                     <option value="" disabled hidden>Select Client</option>
@@ -1365,11 +1394,11 @@
                                     <option value="custom">Other / New Client</option>
                                 </select>
                             </div>
-                            <div class="ui-form-group mb-0 mt-1">
+                            <div class="ui-form-group mb-0">
                                 <label class="ui-label">Campaign Month</label>
                                 <input type="month" id="campaignMonth" class="ui-input" oninput="if(typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations()">
                             </div>
-                            <div class="ui-form-group mb-0 mt-1">
+                            <div class="ui-form-group mb-0">
                                 <label class="ui-label">Invoice Date</label>
                                 <input type="month" id="invoiceDate" class="ui-input" oninput="if(typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations()">
                             </div>
@@ -1393,7 +1422,7 @@
                                 <label class="ui-label">Project / Service Title</label>
                                 <input type="text" id="inv-custom-project" class="ui-input" placeholder="e.g. Content Strategy" oninput="if(typeof window.debouncedSaveAndRenderInv === 'function') window.debouncedSaveAndRenderInv()">
                             </div>
-                            <div class="ui-form-group sm:col-span-2 mb-0 mt-1">
+                            <div class="ui-form-group sm:col-span-2 mb-0">
                                 <label class="ui-label mb-0">Short Description (Optional)</label>
                                 <textarea id="inv-custom-desc" class="ui-input resize-y" rows="2" placeholder="Brief description of the invoice context" oninput="if(typeof window.debouncedSaveAndRenderInv === 'function') window.debouncedSaveAndRenderInv()"></textarea>
                             </div>
@@ -1708,7 +1737,7 @@
                                 <label class="ui-label">Quote #</label>
                                 <input type="text" id="in-quote-num" class="ui-input" oninput="if(typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender()">
                             </div>
-                            <div class="ui-form-group sm:col-span-2 mb-0 mt-1">
+                            <div class="ui-form-group sm:col-span-2 mb-0">
                                 <label class="ui-label">Currency</label>
                                 <select id="in-currency" class="ui-input" onchange="if(typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender()">
                                     <option value="EGP" selected>EGP — Egyptian Pound</option>
@@ -1806,7 +1835,7 @@
                                 </select>
                                 <input type="text" id="in-terms-method-custom" class="ui-input mt-2 hidden" placeholder="Specify method" oninput="if(typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender()">
                             </div>
-                            <div class="ui-form-group sm:col-span-2 mb-0 mt-1">
+                            <div class="ui-form-group sm:col-span-2 mb-0">
                                 <label class="ui-label">Additional notes (optional)</label>
                                 <textarea id="in-terms-notes" class="ui-input resize-y" rows="2" placeholder="e.g. Work commences upon payment clearance." oninput="if(typeof window.debouncedSaveAndRender === 'function') window.debouncedSaveAndRender()"></textarea>
                             </div>
