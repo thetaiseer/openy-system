@@ -2807,6 +2807,40 @@
                     <div class="emp-empty-state">No recent changes.</div>
                 </div>
             </div>
+
+            <!-- Per-employee payroll breakdown -->
+            <div class="ui-card" style="margin-top:1.5rem;">
+                <div class="ui-card-header">
+                    <span class="ui-card-title">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Employee Payroll Breakdown
+                    </span>
+                    <button onclick="window.exportPayrollCSV()" class="ui-button ui-button-secondary" style="font-size:0.78rem;padding:0.35rem 0.9rem;display:flex;align-items:center;gap:5px;">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Export CSV
+                    </button>
+                </div>
+                <div class="emp-table-wrap" id="pr-breakdown-wrap">
+                    <table class="emp-table" id="pr-breakdown-table">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Department</th>
+                                <th>Job Title</th>
+                                <th>Status</th>
+                                <th>Base Salary</th>
+                                <th>Allowances</th>
+                                <th>Bonuses</th>
+                                <th>Monthly Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pr-breakdown-body">
+                            <tr><td colspan="8" class="emp-empty-state" style="text-align:center;padding:24px;">No employees found.</td></tr>
+                        </tbody>
+                        <tfoot id="pr-breakdown-foot"></tfoot>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -7408,6 +7442,66 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                     }).join('')}</div>`;
                 }
             }
+
+            // Per-employee payroll breakdown table
+            const tbody2 = document.getElementById('pr-breakdown-body');
+            const tfoot = document.getElementById('pr-breakdown-foot');
+            if (tbody2) {
+                // Show all non-archived employees sorted by department then name
+                const payrollEmps = [...employees]
+                    .filter(e => !['Archived'].includes(e.status))
+                    .sort((a, b) => {
+                        const dCmp = (a.department || '').localeCompare(b.department || '');
+                        return dCmp !== 0 ? dCmp : (a.fullName || '').localeCompare(b.fullName || '');
+                    });
+                if (payrollEmps.length === 0) {
+                    tbody2.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:#94A3B8;">No employees found.</td></tr>';
+                    if (tfoot) tfoot.innerHTML = '';
+                } else {
+                    // Group totals by currency to handle mixed-currency payrolls
+                    const currencyTotals = {};
+                    tbody2.innerHTML = payrollEmps.map(e => {
+                        const base = parseFloat(e.currentSalary) || 0;
+                        const allowances = parseFloat(e.allowances) || 0;
+                        const bonuses = parseFloat(e.bonuses) || 0;
+                        const monthlyCost = base + allowances + bonuses;
+                        const cur = e.currency || 'EGP';
+                        if (!currencyTotals[cur]) currencyTotals[cur] = { base: 0, allowances: 0, bonuses: 0, cost: 0, count: 0 };
+                        currencyTotals[cur].base += base;
+                        currencyTotals[cur].allowances += allowances;
+                        currencyTotals[cur].bonuses += bonuses;
+                        currencyTotals[cur].cost += monthlyCost;
+                        currencyTotals[cur].count++;
+                        const isActive = e.status === 'Active';
+                        return `<tr style="${!isActive ? 'opacity:0.6;' : ''}">
+                            <td class="emp-name">${e.fullName}</td>
+                            <td>${e.department || '—'}</td>
+                            <td>${e.jobTitle || '—'}</td>
+                            <td>${empStatusBadge(e.status)}</td>
+                            <td style="font-weight:600;">${empFmtCurrency(base, cur)}</td>
+                            <td style="color:#059669;">${allowances > 0 ? empFmtCurrency(allowances, cur) : '—'}</td>
+                            <td style="color:#7C3AED;">${bonuses > 0 ? empFmtCurrency(bonuses, cur) : '—'}</td>
+                            <td style="font-weight:800;color:#0F172A;">${empFmtCurrency(monthlyCost, cur)}</td>
+                        </tr>`;
+                    }).join('');
+                    if (tfoot) {
+                        const currencies = Object.keys(currencyTotals);
+                        tfoot.innerHTML = currencies.map((cur, i) => {
+                            const t = currencyTotals[cur];
+                            const label = currencies.length > 1
+                                ? `Total — ${cur} (${t.count} employee${t.count !== 1 ? 's' : ''})`
+                                : `Total (${payrollEmps.length} employee${payrollEmps.length !== 1 ? 's' : ''})`;
+                            return `<tr style="background:#F8FAFC;border-top:${i === 0 ? '2px' : '1px'} solid #E2E8F0;">
+                                <td colspan="4" style="font-weight:700;color:#0F172A;padding:10px 12px;">${label}</td>
+                                <td style="font-weight:700;">${empFmtCurrency(t.base, cur)}</td>
+                                <td style="font-weight:700;color:#059669;">${empFmtCurrency(t.allowances, cur)}</td>
+                                <td style="font-weight:700;color:#7C3AED;">${empFmtCurrency(t.bonuses, cur)}</td>
+                                <td style="font-weight:800;color:#2563EB;">${empFmtCurrency(t.cost, cur)}</td>
+                            </tr>`;
+                        }).join('');
+                    }
+                }
+            }
         };
 
         // ── Add Employee Modal ──
@@ -7606,12 +7700,18 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 contractSection = `
                     <div class="emp-profile-field col-span-2">
                         <label>Linked Contract</label>
-                        <p><span class="emp-contract-linked"
-                            onclick="window.openLinkedContract('${emp.linkedContractId || ''}')"
-                            title="Open HR Contract">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                            ${emp.linkedContractNumber}
-                        </span></p>
+                        <p style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <span class="emp-contract-linked"
+                                onclick="window.openLinkedContract('${emp.linkedContractId || ''}', '${id}')"
+                                title="View & Download HR Contract">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                ${emp.linkedContractNumber}
+                            </span>
+                            <button onclick="window.openLinkedContract('${emp.linkedContractId || ''}', '${id}')" class="ui-button" style="font-size:0.75rem;padding:3px 10px;background:rgba(37,99,235,0.08);color:#2563EB;border:1px solid rgba(37,99,235,0.2);">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;display:inline;margin-right:3px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                View / Download
+                            </button>
+                        </p>
                     </div>`;
             } else {
                 contractSection = `<div class="emp-profile-field col-span-2"><label>Linked Contract</label><p class="emp-no-contract">No contract linked</p></div>`;
@@ -7721,12 +7821,66 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
             document.getElementById('emp-profile-modal').classList.add('hidden');
         };
 
-        window.openLinkedContract = function(contractId) {
-            if (!contractId) return;
-            // Switch to HR Contract module and note the contract
+        window.openLinkedContract = function(contractId, empId) {
+            const employees = localStore.getAll('employees');
+            const emp = empId ? employees.find(e => e.id === empId) : null;
             window.closeEmpProfileModal();
             showToast('Opening HR Contract module…');
-            setTimeout(() => { window.switchMainModule('empcontract'); }, 400);
+            setTimeout(() => {
+                window.switchMainModule('empcontract');
+                if (emp) {
+                    setTimeout(() => {
+                        const setV = (elId, val) => { const el = document.getElementById(elId); if (el && val !== undefined && val !== null && val !== '') el.value = val; };
+                        setV('ec-emp-name', emp.fullName);
+                        setV('ec-job-title', emp.jobTitle);
+                        setV('ec-job-dept', emp.department);
+                        setV('ec-salary', emp.currentSalary);
+                        setV('ec-currency', emp.currency);
+                        if (emp.linkedContractNumber) setV('ec-num', emp.linkedContractNumber);
+                        if (typeof window.debouncedRenderEmpContract === 'function') window.debouncedRenderEmpContract();
+                        showToast('Employee data loaded in HR Contract ✓');
+                    }, 500);
+                }
+            }, 300);
+        };
+
+        // ── Export Payroll CSV ──
+        window.exportPayrollCSV = function() {
+            const employees = localStore.getAll('employees');
+            const payrollEmps = [...employees]
+                .filter(e => !['Archived'].includes(e.status))
+                .sort((a, b) => {
+                    const dCmp = (a.department || '').localeCompare(b.department || '');
+                    return dCmp !== 0 ? dCmp : (a.fullName || '').localeCompare(b.fullName || '');
+                });
+            if (payrollEmps.length === 0) { showToast('No employees to export.'); return; }
+            const header = ['Employee ID', 'Full Name', 'Department', 'Job Title', 'Status', 'Currency', 'Base Salary', 'Allowances', 'Bonuses', 'Total Monthly Cost'];
+            const rows = payrollEmps.map(e => {
+                const base = parseFloat(e.currentSalary) || 0;
+                const allowances = parseFloat(e.allowances) || 0;
+                const bonuses = parseFloat(e.bonuses) || 0;
+                return [
+                    e.employeeId || '',
+                    e.fullName || '',
+                    e.department || '',
+                    e.jobTitle || '',
+                    e.status || '',
+                    e.currency || 'EGP',
+                    base.toFixed(2),
+                    allowances.toFixed(2),
+                    bonuses.toFixed(2),
+                    (base + allowances + bonuses).toFixed(2)
+                ];
+            });
+            const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `payroll_summary_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Payroll CSV exported ✓');
         };
 
         // ── Salary History Modal ──
