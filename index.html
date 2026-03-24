@@ -962,6 +962,8 @@
         .emp-action-btn-salary:hover { background: rgba(16,185,129,0.2); }
         .emp-action-btn-danger { background: rgba(239,68,68,0.1); color: #DC2626; }
         .emp-action-btn-danger:hover { background: rgba(239,68,68,0.2); }
+        .emp-action-btn-delete { background: rgba(127,29,29,0.1); color: #991B1B; }
+        .emp-action-btn-delete:hover { background: rgba(127,29,29,0.25); }
         .emp-actions-cell { display: flex; gap: 4px; flex-wrap: wrap; }
         /* Form section titles */
         .emp-form-section-title {
@@ -7343,6 +7345,10 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
                                 Archive
                             </button>
+                            <button class="emp-action-btn emp-action-btn-delete" onclick="window.deleteEmployee('${e.id}')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                Delete
+                            </button>
                         </div>
                     </td>
                 </tr>`;
@@ -7900,6 +7906,27 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                     await cloudDB.put(updated, 'employees');
                     window.refreshEmployeesModule();
                     showToast('Employee archived ✓');
+                }
+            );
+        };
+
+        // DELETE - Permanent hard delete
+        window.deleteEmployee = function(id) {
+            const employees = localStore.getAll('employees');
+            const emp = employees.find(e => e.id === id);
+            if (!emp) return;
+            window.openConfirmModal(
+                'Delete Employee',
+                `Permanently delete ${emp.fullName}? This will also remove all their salary history and cannot be undone.`,
+                async () => {
+                    // Remove all related salary history records first
+                    const salaryHistory = localStore.getAll('salary_history');
+                    const relatedIds = salaryHistory.filter(s => s.employeeId === id).map(s => s.id);
+                    await Promise.all(relatedIds.map(shId => cloudDB.delete(shId, 'salary_history')));
+                    // Remove the employee record
+                    await cloudDB.delete(id, 'employees');
+                    window.refreshEmployeesModule();
+                    showToast('Employee deleted ✓');
                 }
             );
         };
