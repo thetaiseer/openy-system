@@ -3492,6 +3492,7 @@
                 const mBtn = document.getElementById('mnav-' + m);
                 if (mBtn) mBtn.classList.toggle('active', m === moduleName);
             });
+            window.scrollTo(0, 0);
         };
 
         // ── Mobile hamburger menu ──
@@ -3771,6 +3772,7 @@
         window.addEventListener('pageshow', function() { window.scrollTo(0, 0); });
 
         document.addEventListener("DOMContentLoaded", () => {
+            window.scrollTo(0, 0);
             try {
                 // Don't auto-switch to invoice — landing screen handles initial module selection
                 // but still initialize the invoice module in background so it's ready
@@ -3845,6 +3847,7 @@
                     if(typeof window.updateAllocations === 'function') window.updateAllocations(); 
                     if(typeof window.saveAndRender === 'function') window.saveAndRender(); 
                     if(typeof window.adjustLayout === 'function') window.adjustLayout();
+                    window.scrollTo(0, 0);
                 }, 600);
 
             } catch(e) { console.error("Initialization error", e); }
