@@ -662,6 +662,239 @@
         .landing-card-title { font-size: 1.1rem; font-weight: 800; color: #0F172A; margin: 0; }
         .landing-card-desc { font-size: 0.83rem; color: #64748B; font-weight: 500; line-height: 1.5; margin: 0; }
         .landing-card-arrow { display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 700; color: #2563EB; margin-top: auto; padding-top: 0.5rem; }
+
+        /* ── Employees Module Layout ── */
+        .employees-full-layout {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 60px);
+            padding: 1.5rem 2rem 2.5rem;
+            gap: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .emp-tabs-bar {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .emp-tab-content { display: none; flex-direction: column; gap: 1.5rem; }
+        .emp-tab-content.active { display: flex; }
+        /* Stats grid */
+        .emp-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .emp-stat-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px) saturate(1.4);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-card);
+            padding: 1.1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .emp-stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+        .emp-stat-icon {
+            width: 46px; height: 46px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            color: #fff;
+        }
+        .emp-stat-value { font-size: 1.45rem; font-weight: 800; color: var(--text-main); line-height: 1.1; }
+        .emp-stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+        /* Two column section */
+        .emp-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        @media (max-width: 768px) { .emp-two-col { grid-template-columns: 1fr; } }
+        /* Recent list */
+        .emp-recent-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .emp-recent-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.5);
+            border: 1px solid rgba(255,255,255,0.7);
+            font-size: 0.82rem;
+        }
+        .emp-recent-item .emp-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg,#7C3AED,#2563EB);
+            color: #fff; font-size: 0.75rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .emp-empty-state { color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0; text-align: center; }
+        /* Toolbar */
+        .emp-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .emp-search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+            max-width: 360px;
+        }
+        .emp-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #94A3B8; pointer-events: none; }
+        .emp-search-input { padding-left: 36px !important; }
+        .emp-filters-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+        .emp-filter-select { min-width: 130px; max-width: 160px; font-size: 0.82rem !important; padding: 0.45rem 0.7rem !important; }
+        /* Table */
+        .emp-table-wrap {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px) saturate(1.4);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-card);
+            overflow-x: auto;
+            box-shadow: var(--shadow-card);
+        }
+        .emp-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+        .emp-table thead tr { background: rgba(37,99,235,0.06); border-bottom: 1px solid var(--border-soft); }
+        .emp-table th { padding: 0.8rem 1rem; text-align: left; font-weight: 700; color: var(--text-main); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+        .emp-table td { padding: 0.75rem 1rem; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.6); vertical-align: middle; }
+        .emp-table tbody tr:last-child td { border-bottom: none; }
+        .emp-table tbody tr:hover td { background: rgba(37,99,235,0.03); }
+        .emp-table .emp-name { font-weight: 600; color: var(--text-main); }
+        /* Status badges */
+        .emp-badge {
+            display: inline-block; padding: 2px 10px; border-radius: 999px;
+            font-size: 0.72rem; font-weight: 700; white-space: nowrap;
+        }
+        .emp-badge-active { background: #D1FAE5; color: #065F46; }
+        .emp-badge-onleave { background: #FEF3C7; color: #92400E; }
+        .emp-badge-resigned, .emp-badge-terminated { background: #FEE2E2; color: #991B1B; }
+        .emp-badge-archived { background: #F1F5F9; color: #475569; }
+        /* Action buttons in table */
+        .emp-action-btn {
+            display: inline-flex; align-items: center; gap: 3px;
+            padding: 4px 8px; border-radius: 7px; font-size: 0.73rem; font-weight: 600;
+            cursor: pointer; border: none; transition: background 0.15s;
+        }
+        .emp-action-btn-view { background: rgba(37,99,235,0.1); color: #2563EB; }
+        .emp-action-btn-view:hover { background: rgba(37,99,235,0.2); }
+        .emp-action-btn-edit { background: rgba(124,58,237,0.1); color: #7C3AED; }
+        .emp-action-btn-edit:hover { background: rgba(124,58,237,0.2); }
+        .emp-action-btn-salary { background: rgba(16,185,129,0.1); color: #059669; }
+        .emp-action-btn-salary:hover { background: rgba(16,185,129,0.2); }
+        .emp-action-btn-danger { background: rgba(239,68,68,0.1); color: #DC2626; }
+        .emp-action-btn-danger:hover { background: rgba(239,68,68,0.2); }
+        .emp-actions-cell { display: flex; gap: 4px; flex-wrap: wrap; }
+        /* Form section titles */
+        .emp-form-section-title {
+            font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #2563EB;
+            padding-bottom: 0.4rem;
+            border-bottom: 2px solid rgba(37,99,235,0.15);
+            margin-bottom: 0.75rem;
+        }
+        .emp-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        @media (max-width: 520px) { .emp-form-grid { grid-template-columns: 1fr; } }
+        .emp-form-grid .col-span-2 { grid-column: span 2; }
+        /* Modals */
+        .emp-modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(15,23,42,0.55);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem;
+        }
+        .emp-modal-overlay.hidden { display: none; }
+        .emp-modal-box {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.18);
+            width: 100%;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        .emp-modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1.25rem 1.5rem 1rem;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .emp-modal-title { font-size: 1.1rem; font-weight: 800; color: #0F172A; margin: 0; }
+        .emp-modal-close {
+            color: #94A3B8; background: none; border: none; cursor: pointer;
+            padding: 4px; border-radius: 8px; display: flex; align-items: center;
+        }
+        .emp-modal-close:hover { background: #F1F5F9; color: #475569; }
+        .emp-modal-body { padding: 1.25rem 1.5rem; }
+        .emp-modal-footer {
+            display: flex; gap: 0.75rem; justify-content: flex-end;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #F1F5F9;
+            background: #FAFAFA;
+        }
+        /* Profile sections */
+        .emp-profile-section { margin-bottom: 1.25rem; }
+        .emp-profile-section-title {
+            font-size: 0.73rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #2563EB;
+            padding-bottom: 0.35rem;
+            border-bottom: 2px solid rgba(37,99,235,0.15);
+            margin-bottom: 0.75rem;
+        }
+        .emp-profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1.25rem; }
+        @media (max-width: 520px) { .emp-profile-grid { grid-template-columns: 1fr; } }
+        .emp-profile-field label { font-size: 0.72rem; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em; display: block; }
+        .emp-profile-field p { font-size: 0.9rem; font-weight: 600; color: #0F172A; margin: 2px 0 0; }
+        /* Salary history timeline */
+        .emp-salary-timeline { display: flex; flex-direction: column; gap: 0.75rem; }
+        .emp-salary-entry {
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 0.75rem;
+            align-items: start;
+        }
+        .emp-salary-entry-dot {
+            width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0;
+        }
+        .emp-salary-entry-dot-increase { background: #10B981; }
+        .emp-salary-entry-dot-decrease { background: #EF4444; }
+        .emp-salary-entry-dot-adjustment { background: #F59E0B; }
+        .emp-salary-entry-badge { font-size: 0.72rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+        .emp-salary-entry-badge-increase { background: #D1FAE5; color: #065F46; }
+        .emp-salary-entry-badge-decrease { background: #FEE2E2; color: #991B1B; }
+        .emp-salary-entry-badge-adjustment { background: #FEF3C7; color: #92400E; }
+        /* Contract link badge */
+        .emp-contract-linked {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(37,99,235,0.08); color: #2563EB;
+            border: 1px solid rgba(37,99,235,0.2);
+            border-radius: 8px; padding: 4px 10px; font-size: 0.78rem; font-weight: 600;
+            cursor: pointer; text-decoration: none;
+        }
+        .emp-contract-linked:hover { background: rgba(37,99,235,0.14); }
+        .emp-no-contract { color: #94A3B8; font-size: 0.8rem; font-style: italic; }
+        @media (max-width: 768px) {
+            .employees-full-layout { padding: 1rem; }
+            .emp-toolbar { flex-direction: column; align-items: stretch; }
+            .emp-search-wrap { max-width: 100%; }
+        }
     </style>
     
     <!-- Cloud Storage Integration - Deferred to avoid blocking on mobile -->
@@ -723,6 +956,15 @@
                 <div class="landing-card-desc">Create employment contracts with salary, job details, benefits, and legal terms for HR.</div>
                 <div class="landing-card-arrow" style="color:#D97706;">Open HR Contract <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg></div>
             </div>
+            <!-- Employees -->
+            <div class="landing-card" onclick="window.openModule('employees')">
+                <div class="landing-card-icon" style="background:linear-gradient(135deg,#7C3AED,#2563EB);">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </div>
+                <div class="landing-card-title">Employees</div>
+                <div class="landing-card-desc">Manage employees, track salaries, link HR contracts, and monitor payroll &amp; history.</div>
+                <div class="landing-card-arrow" style="color:#7C3AED;">Open Employees <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg></div>
+            </div>
         </div>
     </div>
 
@@ -760,6 +1002,7 @@
             <button id="nav-quotation" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('quotation')" class="ui-nav-pill">Quotation</button>
             <button id="nav-contract" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('contract')" class="ui-nav-pill">Client Contract</button>
             <button id="nav-empcontract" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('empcontract')" class="ui-nav-pill">HR Contract</button>
+            <button id="nav-employees" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('employees')" class="ui-nav-pill">Employees</button>
         </div>
         <div class="flex items-center justify-end gap-2" style="position:relative;">
             <button onclick="window.openLanding()" class="lang-toggle-btn no-print ui-nav-home-desktop" title="Back to Home">
@@ -797,6 +1040,10 @@
                 <button class="mobile-nav-item" id="mnav-empcontract" onclick="window.switchMainModule('empcontract'); window.closeMobileMenu();" role="menuitem">
                     <span class="mobile-nav-dot"></span>
                     HR Contract
+                </button>
+                <button class="mobile-nav-item" id="mnav-employees" onclick="window.switchMainModule('employees'); window.closeMobileMenu();" role="menuitem">
+                    <span class="mobile-nav-dot"></span>
+                    Employees
                 </button>
             </div>
         </div>
@@ -1964,7 +2211,506 @@
         </main>
     </div>
 
-    <script>
+    <!-- ============================================== -->
+    <!-- MODULE 5: EMPLOYEES                           -->
+    <!-- ============================================== -->
+    <div id="employees-module" class="employees-full-layout" style="display:none;" dir="ltr">
+
+        <!-- Sub-tabs bar -->
+        <div class="emp-tabs-bar no-print">
+            <button class="ui-nav-pill active" data-emptab="overview" onclick="window.switchEmpTab('overview')">Overview</button>
+            <button class="ui-nav-pill" data-emptab="list" onclick="window.switchEmpTab('list')">Employees List</button>
+            <button class="ui-nav-pill" data-emptab="payroll" onclick="window.switchEmpTab('payroll')">Payroll Summary</button>
+        </div>
+
+        <!-- ── TAB: Overview ── -->
+        <div id="emp-tab-overview" class="emp-tab-content active">
+            <!-- Stats Row -->
+            <div class="emp-stats-grid">
+                <div class="emp-stat-card">
+                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#7C3AED,#2563EB);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </div>
+                    <div class="emp-stat-body">
+                        <div class="emp-stat-value" id="stat-total-emp">0</div>
+                        <div class="emp-stat-label">Total Employees</div>
+                    </div>
+                </div>
+                <div class="emp-stat-card">
+                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#059669,#10B981);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div class="emp-stat-body">
+                        <div class="emp-stat-value" id="stat-active-emp">0</div>
+                        <div class="emp-stat-label">Active Employees</div>
+                    </div>
+                </div>
+                <div class="emp-stat-card">
+                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#F59E0B,#EF4444);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div class="emp-stat-body">
+                        <div class="emp-stat-value" id="stat-onleave-emp">0</div>
+                        <div class="emp-stat-label">On Leave</div>
+                    </div>
+                </div>
+                <div class="emp-stat-card">
+                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#6B7280,#374151);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                    </div>
+                    <div class="emp-stat-body">
+                        <div class="emp-stat-value" id="stat-inactive-emp">0</div>
+                        <div class="emp-stat-label">Inactive / Archived</div>
+                    </div>
+                </div>
+                <div class="emp-stat-card">
+                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#2563EB,#0EA5E9);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div class="emp-stat-body">
+                        <div class="emp-stat-value" id="stat-monthly-payroll">0</div>
+                        <div class="emp-stat-label">Total Monthly Payroll</div>
+                    </div>
+                </div>
+                <div class="emp-stat-card">
+                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#7C3AED,#DB2777);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    </div>
+                    <div class="emp-stat-body">
+                        <div class="emp-stat-value" id="stat-annual-payroll">0</div>
+                        <div class="emp-stat-label">Annual Payroll Cost</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent activity row -->
+            <div class="emp-two-col">
+                <!-- Recent Hires -->
+                <div class="ui-card">
+                    <div class="ui-card-header">
+                        <span class="ui-card-title">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                            Recent Hires
+                        </span>
+                    </div>
+                    <div id="emp-recent-hires" class="emp-recent-list">
+                        <div class="emp-empty-state">No employees added yet.</div>
+                    </div>
+                </div>
+                <!-- Recent Salary Changes -->
+                <div class="ui-card">
+                    <div class="ui-card-header">
+                        <span class="ui-card-title">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                            Recent Salary Changes
+                        </span>
+                    </div>
+                    <div id="emp-recent-salary-changes" class="emp-recent-list">
+                        <div class="emp-empty-state">No salary changes recorded yet.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── TAB: Employees List ── -->
+        <div id="emp-tab-list" class="emp-tab-content">
+            <!-- Toolbar -->
+            <div class="emp-toolbar">
+                <div class="emp-search-wrap">
+                    <svg class="emp-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" id="emp-search" class="ui-input emp-search-input" placeholder="Search by name, ID, title, department…" oninput="window.renderEmployeesList()">
+                </div>
+                <div class="emp-filters-row">
+                    <select id="emp-filter-dept" class="ui-input emp-filter-select" onchange="window.renderEmployeesList()">
+                        <option value="">All Departments</option>
+                    </select>
+                    <select id="emp-filter-status" class="ui-input emp-filter-select" onchange="window.renderEmployeesList()">
+                        <option value="">All Statuses</option>
+                        <option value="Active">Active</option>
+                        <option value="On Leave">On Leave</option>
+                        <option value="Resigned">Resigned</option>
+                        <option value="Terminated">Terminated</option>
+                        <option value="Archived">Archived</option>
+                    </select>
+                    <select id="emp-filter-type" class="ui-input emp-filter-select" onchange="window.renderEmployeesList()">
+                        <option value="">All Types</option>
+                        <option value="Full-time">Full-time</option>
+                        <option value="Part-time">Part-time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Temporary">Temporary</option>
+                    </select>
+                    <button class="ui-button ui-button-primary" onclick="window.openAddEmployeeModal()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px;display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Add Employee
+                    </button>
+                </div>
+            </div>
+            <!-- Table -->
+            <div class="emp-table-wrap">
+                <table class="emp-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Job Title</th>
+                            <th>Department</th>
+                            <th>Type</th>
+                            <th>Hire Date</th>
+                            <th>Salary</th>
+                            <th>Status</th>
+                            <th>Contract</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="emp-table-body">
+                        <tr><td colspan="10" class="emp-empty-state" style="text-align:center;padding:32px;">No employees found.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ── TAB: Payroll Summary ── -->
+        <div id="emp-tab-payroll" class="emp-tab-content">
+            <div class="emp-stats-grid">
+                <div class="emp-stat-card">
+                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#2563EB,#0EA5E9);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div class="emp-stat-body">
+                        <div class="emp-stat-value" id="pr-monthly">0</div>
+                        <div class="emp-stat-label">Total Monthly Payroll</div>
+                    </div>
+                </div>
+                <div class="emp-stat-card">
+                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#7C3AED,#DB2777);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    </div>
+                    <div class="emp-stat-body">
+                        <div class="emp-stat-value" id="pr-annual">0</div>
+                        <div class="emp-stat-label">Total Annual Payroll</div>
+                    </div>
+                </div>
+                <div class="emp-stat-card">
+                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#059669,#10B981);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div class="emp-stat-body">
+                        <div class="emp-stat-value" id="pr-active">0</div>
+                        <div class="emp-stat-label">Active Payroll</div>
+                    </div>
+                </div>
+                <div class="emp-stat-card">
+                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#F59E0B,#EF4444);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    </div>
+                    <div class="emp-stat-body">
+                        <div class="emp-stat-value" id="pr-increases-month">0</div>
+                        <div class="emp-stat-label">Salary Increases This Month</div>
+                    </div>
+                </div>
+                <div class="emp-stat-card">
+                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#0F172A,#334155);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <div class="emp-stat-body">
+                        <div class="emp-stat-value" id="pr-increases-year">0</div>
+                        <div class="emp-stat-label">Salary Increases This Year</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Employees with recent salary changes -->
+            <div class="ui-card" style="margin-top:1.5rem;">
+                <div class="ui-card-header">
+                    <span class="ui-card-title">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                        Employees with Recent Salary Changes
+                    </span>
+                </div>
+                <div id="pr-recent-changes-list">
+                    <div class="emp-empty-state">No recent changes.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- EMPLOYEES MODALS                                       -->
+    <!-- ══════════════════════════════════════════════════════ -->
+
+    <!-- Add / Edit Employee Modal -->
+    <div id="emp-form-modal" class="emp-modal-overlay hidden">
+        <div class="emp-modal-box" style="max-width:680px;">
+            <div class="emp-modal-header">
+                <h2 id="emp-form-modal-title" class="emp-modal-title">Add Employee</h2>
+                <button onclick="window.closeEmpFormModal()" class="emp-modal-close" aria-label="Close">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px;height:20px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="emp-modal-body" style="max-height:72vh;overflow-y:auto;">
+                <input type="hidden" id="emp-form-id">
+
+                <!-- Basic Info -->
+                <div class="emp-form-section-title">Basic Info</div>
+                <div class="emp-form-grid">
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Full Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="ef-fullName" class="ui-input" placeholder="Full name">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Employee ID</label>
+                        <input type="text" id="ef-employeeId" class="ui-input" placeholder="EMP-001 (auto-generated)">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">National ID / Passport</label>
+                        <input type="text" id="ef-nationalId" class="ui-input" placeholder="National ID or passport">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Phone</label>
+                        <input type="text" id="ef-phone" class="ui-input" placeholder="+20 1XX XXXX XXX">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Email</label>
+                        <input type="email" id="ef-email" class="ui-input" placeholder="employee@company.com">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Date of Birth</label>
+                        <input type="date" id="ef-dob" class="ui-input">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Nationality</label>
+                        <input type="text" id="ef-nationality" class="ui-input" placeholder="e.g. Egyptian">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Marital Status</label>
+                        <select id="ef-maritalStatus" class="ui-input">
+                            <option value="">-- Select --</option>
+                            <option value="Single">Single</option>
+                            <option value="Married">Married</option>
+                            <option value="Divorced">Divorced</option>
+                            <option value="Widowed">Widowed</option>
+                        </select>
+                    </div>
+                    <div class="ui-form-group mb-0 col-span-2">
+                        <label class="ui-label">Address</label>
+                        <input type="text" id="ef-address" class="ui-input" placeholder="Full address">
+                    </div>
+                </div>
+
+                <!-- Job Info -->
+                <div class="emp-form-section-title" style="margin-top:1.25rem;">Job Info</div>
+                <div class="emp-form-grid">
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Job Title <span class="text-red-500">*</span></label>
+                        <input type="text" id="ef-jobTitle" class="ui-input" placeholder="e.g. Marketing Manager">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Department <span class="text-red-500">*</span></label>
+                        <input type="text" id="ef-department" class="ui-input" placeholder="e.g. Marketing" list="emp-dept-datalist">
+                        <datalist id="emp-dept-datalist"></datalist>
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Direct Manager</label>
+                        <input type="text" id="ef-manager" class="ui-input" placeholder="Manager name">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Employment Type</label>
+                        <select id="ef-employmentType" class="ui-input">
+                            <option value="Full-time">Full-time</option>
+                            <option value="Part-time">Part-time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Temporary">Temporary</option>
+                        </select>
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Hire Date <span class="text-red-500">*</span></label>
+                        <input type="date" id="ef-hireDate" class="ui-input">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Status</label>
+                        <select id="ef-status" class="ui-input">
+                            <option value="Active">Active</option>
+                            <option value="On Leave">On Leave</option>
+                            <option value="Resigned">Resigned</option>
+                            <option value="Terminated">Terminated</option>
+                            <option value="Archived">Archived</option>
+                        </select>
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Work Location</label>
+                        <input type="text" id="ef-workLocation" class="ui-input" placeholder="Office / Remote / Hybrid">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Probation Period (months)</label>
+                        <input type="number" id="ef-probation" class="ui-input" placeholder="3" min="0">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Work Days / Week</label>
+                        <input type="text" id="ef-workDays" class="ui-input" placeholder="5 days / Sun-Thu">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Daily Hours</label>
+                        <input type="number" id="ef-dailyHours" class="ui-input" placeholder="8" min="1" max="24">
+                    </div>
+                </div>
+
+                <!-- Salary Info -->
+                <div class="emp-form-section-title" style="margin-top:1.25rem;">Salary Info</div>
+                <div class="emp-form-grid">
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Current Salary <span class="text-red-500">*</span></label>
+                        <input type="number" id="ef-currentSalary" class="ui-input" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Currency</label>
+                        <select id="ef-currency" class="ui-input">
+                            <option value="EGP">EGP — Egyptian Pound</option>
+                            <option value="SAR">SAR — Saudi Riyal</option>
+                            <option value="AED">AED — UAE Dirham</option>
+                            <option value="USD">USD — US Dollar</option>
+                            <option value="EUR">EUR — Euro</option>
+                            <option value="GBP">GBP — British Pound</option>
+                        </select>
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Payment Method</label>
+                        <select id="ef-paymentMethod" class="ui-input">
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Cheque">Cheque</option>
+                        </select>
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Payroll Cycle</label>
+                        <select id="ef-payrollCycle" class="ui-input">
+                            <option value="Monthly">Monthly</option>
+                            <option value="Bi-weekly">Bi-weekly</option>
+                            <option value="Weekly">Weekly</option>
+                        </select>
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Allowances</label>
+                        <input type="number" id="ef-allowances" class="ui-input" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Bonuses</label>
+                        <input type="number" id="ef-bonuses" class="ui-input" placeholder="0.00" min="0" step="0.01">
+                    </div>
+                </div>
+
+                <!-- Contract Info -->
+                <div class="emp-form-section-title" style="margin-top:1.25rem;">Linked HR Contract (optional)</div>
+                <div class="emp-form-grid">
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Contract ID / Reference</label>
+                        <input type="text" id="ef-linkedContractId" class="ui-input" placeholder="Search contract number…" list="emp-contract-datalist" oninput="window.onContractSearch(this.value)">
+                        <datalist id="emp-contract-datalist"></datalist>
+                    </div>
+                    <div class="ui-form-group mb-0">
+                        <label class="ui-label">Contract Number</label>
+                        <input type="text" id="ef-linkedContractNumber" class="ui-input" placeholder="EC-2025-001" readonly>
+                    </div>
+                </div>
+
+                <!-- Salary adjustment note (shown only on add) -->
+                <div id="ef-salary-note-wrap" class="ui-form-group mb-0" style="margin-top:1rem;">
+                    <label class="ui-label">Initial Salary Note</label>
+                    <input type="text" id="ef-salaryNote" class="ui-input" placeholder="e.g. Starting salary at hire">
+                </div>
+            </div>
+            <div class="emp-modal-footer">
+                <button class="ui-button ui-button-secondary" onclick="window.closeEmpFormModal()">Cancel</button>
+                <button class="ui-button ui-button-primary" onclick="window.saveEmployee()">Save Employee</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Profile Modal -->
+    <div id="emp-profile-modal" class="emp-modal-overlay hidden">
+        <div class="emp-modal-box" style="max-width:720px;">
+            <div class="emp-modal-header">
+                <h2 class="emp-modal-title">Employee Profile</h2>
+                <button onclick="window.closeEmpProfileModal()" class="emp-modal-close" aria-label="Close">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px;height:20px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="emp-modal-body" style="max-height:75vh;overflow-y:auto;" id="emp-profile-content">
+                <!-- Filled dynamically -->
+            </div>
+            <div class="emp-modal-footer" id="emp-profile-actions">
+                <!-- Filled dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Salary History Modal -->
+    <div id="emp-salary-history-modal" class="emp-modal-overlay hidden">
+        <div class="emp-modal-box" style="max-width:640px;">
+            <div class="emp-modal-header">
+                <h2 class="emp-modal-title" id="emp-salary-history-title">Salary History</h2>
+                <button onclick="window.closeEmpSalaryHistoryModal()" class="emp-modal-close" aria-label="Close">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px;height:20px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="emp-modal-body" style="max-height:72vh;overflow-y:auto;" id="emp-salary-history-content">
+                <!-- Filled dynamically -->
+            </div>
+            <div class="emp-modal-footer">
+                <button class="ui-button ui-button-secondary" onclick="window.closeEmpSalaryHistoryModal()">Close</button>
+                <button class="ui-button ui-button-primary" id="btn-add-salary-adj" onclick="">Add Adjustment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Salary Adjustment Modal -->
+    <div id="emp-salary-adj-modal" class="emp-modal-overlay hidden">
+        <div class="emp-modal-box" style="max-width:480px;">
+            <div class="emp-modal-header">
+                <h2 class="emp-modal-title">Add Salary Adjustment</h2>
+                <button onclick="window.closeEmpSalaryAdjModal()" class="emp-modal-close" aria-label="Close">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:20px;height:20px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="emp-modal-body">
+                <input type="hidden" id="sa-employee-id">
+                <div class="ui-form-group">
+                    <label class="ui-label">Employee</label>
+                    <input type="text" id="sa-employee-name" class="ui-input" readonly>
+                </div>
+                <div class="ui-form-group">
+                    <label class="ui-label">Current Salary</label>
+                    <input type="text" id="sa-current-salary" class="ui-input" readonly>
+                </div>
+                <div class="ui-form-group">
+                    <label class="ui-label">New Salary <span class="text-red-500">*</span></label>
+                    <input type="number" id="sa-new-salary" class="ui-input" placeholder="0.00" min="0" step="0.01" oninput="window.calcSalaryDiff()">
+                </div>
+                <div class="ui-form-group">
+                    <label class="ui-label">Change Amount (auto-calculated)</label>
+                    <input type="text" id="sa-change-amount" class="ui-input" readonly>
+                </div>
+                <div class="ui-form-group">
+                    <label class="ui-label">Change Type</label>
+                    <select id="sa-change-type" class="ui-input">
+                        <option value="Increase">Increase</option>
+                        <option value="Decrease">Decrease</option>
+                        <option value="Adjustment">Adjustment</option>
+                    </select>
+                </div>
+                <div class="ui-form-group">
+                    <label class="ui-label">Effective Date <span class="text-red-500">*</span></label>
+                    <input type="date" id="sa-effective-date" class="ui-input">
+                </div>
+                <div class="ui-form-group mb-0">
+                    <label class="ui-label">Reason / Notes</label>
+                    <input type="text" id="sa-note" class="ui-input" placeholder="e.g. Annual performance review">
+                </div>
+            </div>
+            <div class="emp-modal-footer">
+                <button class="ui-button ui-button-secondary" onclick="window.closeEmpSalaryAdjModal()">Cancel</button>
+                <button class="ui-button ui-button-primary" onclick="window.saveSalaryAdjustment()">Save Adjustment</button>
+            </div>
+        </div>
+    </div>
         // ==========================================================================
         // 1. STATE & CONSTANTS
         // ==========================================================================
@@ -2284,13 +3030,15 @@
             const quoMod = document.getElementById('quotation-module');
             const ctMod = document.getElementById('contract-module');
             const ecMod = document.getElementById('empcontract-module');
+            const empMod = document.getElementById('employees-module');
             const navInv = document.getElementById('nav-invoice');
             const navQuo = document.getElementById('nav-quotation');
             const navCt = document.getElementById('nav-contract');
             const navEc = document.getElementById('nav-empcontract');
+            const navEmp = document.getElementById('nav-employees');
 
-            [invMod, quoMod, ctMod, ecMod].forEach(m => { if(m) m.style.display = 'none'; });
-            [navInv, navQuo, navCt, navEc].forEach(b => { if(b) b.classList.remove('active'); });
+            [invMod, quoMod, ctMod, ecMod, empMod].forEach(m => { if(m) m.style.display = 'none'; });
+            [navInv, navQuo, navCt, navEc, navEmp].forEach(b => { if(b) b.classList.remove('active'); });
 
             if (moduleName === 'invoice') {
                 if(invMod) invMod.style.display = 'flex';
@@ -2317,10 +3065,16 @@
                     if (typeof window.renderEmpContractPreview === 'function') window.renderEmpContractPreview();
                     if (typeof window.adjustLayout === 'function') window.adjustLayout();
                 }, 80);
+            } else if (moduleName === 'employees') {
+                if(empMod) empMod.style.display = 'flex';
+                if(navEmp) navEmp.classList.add('active');
+                setTimeout(() => {
+                    if (typeof window.refreshEmployeesModule === 'function') window.refreshEmployeesModule();
+                }, 80);
             }
 
             // Sync mobile nav active states
-            ['invoice','quotation','contract','empcontract'].forEach(function(m) {
+            ['invoice','quotation','contract','empcontract','employees'].forEach(function(m) {
                 const mBtn = document.getElementById('mnav-' + m);
                 if (mBtn) mBtn.classList.toggle('active', m === moduleName);
             });
@@ -2494,7 +3248,7 @@
         };
 
         // All known store names – extend here when adding new document types
-        const ALL_STORES = ['history', 'inv_history', 'ct_history', 'ec_history'];
+        const ALL_STORES = ['history', 'inv_history', 'ct_history', 'ec_history', 'employees', 'salary_history'];
 
         const cloudDB = {
             unsubscribers: {},
@@ -5861,6 +6615,787 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 showToast(appLang==='ar'?'تم تطبيق البيانات ✓':'Data applied ✓');
             }, 400);
         };
+
+        // ==========================================================================
+        // EMPLOYEES MODULE
+        // ==========================================================================
+
+        // ── State ──
+        let empCurrentEditId = null;
+        let empSalaryHistoryTargetId = null;
+
+        // ── Helpers ──
+        function empFmtCurrency(amount, currency) {
+            const code = currency || 'EGP';
+            const num = parseFloat(amount) || 0;
+            const numStr = new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num);
+            if (['EGP', 'SAR', 'AED'].includes(code)) return `${numStr} ${code}`;
+            return `${code} ${numStr}`;
+        }
+        function empFmtDate(d) {
+            if (!d) return '—';
+            try { return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); }
+            catch(e) { return d; }
+        }
+        function empInitials(name) {
+            if (!name) return '?';
+            const parts = name.trim().split(/\s+/);
+            return (parts[0][0] + (parts[1]?.[0] || '')).toUpperCase();
+        }
+        function empStatusBadge(status) {
+            const map = { 'Active': 'active', 'On Leave': 'onleave', 'Resigned': 'resigned', 'Terminated': 'terminated', 'Archived': 'archived' };
+            const key = map[status] || 'archived';
+            return `<span class="emp-badge emp-badge-${key}">${status || '—'}</span>`;
+        }
+        function empGenerateId(existing) {
+            const year = new Date().getFullYear();
+            const prefix = `EMP-${year}-`;
+            let maxNum = 0;
+            existing.forEach(e => {
+                if (e.employeeId && e.employeeId.startsWith(prefix)) {
+                    const n = parseInt(e.employeeId.slice(prefix.length), 10);
+                    if (!isNaN(n) && n > maxNum) maxNum = n;
+                }
+            });
+            return `${prefix}${String(maxNum + 1).padStart(3, '0')}`;
+        }
+
+        // ── Tab switcher ──
+        window.switchEmpTab = function(tabId) {
+            const mod = document.getElementById('employees-module');
+            if (!mod) return;
+            mod.querySelectorAll('.emp-tab-content').forEach(c => c.classList.remove('active'));
+            mod.querySelectorAll('.emp-tabs-bar .ui-nav-pill').forEach(b => b.classList.remove('active'));
+            const tab = document.getElementById(`emp-tab-${tabId}`);
+            if (tab) tab.classList.add('active');
+            const btn = mod.querySelector(`.emp-tabs-bar .ui-nav-pill[data-emptab="${tabId}"]`);
+            if (btn) btn.classList.add('active');
+            if (tabId === 'overview') window.renderEmployeesOverview();
+            if (tabId === 'list') window.renderEmployeesList();
+            if (tabId === 'payroll') window.renderPayrollSummary();
+        };
+
+        // ── Refresh entire module ──
+        window.refreshEmployeesModule = function() {
+            window.renderEmployeesOverview();
+            window.renderEmployeesList();
+            window.renderPayrollSummary();
+        };
+
+        // ── Overview ──
+        window.renderEmployeesOverview = function() {
+            const employees = localStore.getAll('employees');
+            const salaryHistory = localStore.getAll('salary_history');
+            const active = employees.filter(e => e.status === 'Active');
+            const onLeave = employees.filter(e => e.status === 'On Leave');
+            const inactive = employees.filter(e => ['Archived', 'Resigned', 'Terminated'].includes(e.status));
+            const totalMonthly = active.reduce((sum, e) => sum + (parseFloat(e.currentSalary) || 0), 0);
+            const totalAnnual = totalMonthly * 12;
+
+            const sv = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            sv('stat-total-emp', employees.length);
+            sv('stat-active-emp', active.length);
+            sv('stat-onleave-emp', onLeave.length);
+            sv('stat-inactive-emp', inactive.length);
+            sv('stat-monthly-payroll', empFmtCurrency(totalMonthly, active[0]?.currency || 'EGP'));
+            sv('stat-annual-payroll', empFmtCurrency(totalAnnual, active[0]?.currency || 'EGP'));
+
+            // Recent hires (last 5)
+            const sorted = [...employees].sort((a, b) => new Date(b.hireDate) - new Date(a.hireDate)).slice(0, 5);
+            const hiresEl = document.getElementById('emp-recent-hires');
+            if (hiresEl) {
+                if (sorted.length === 0) {
+                    hiresEl.innerHTML = '<div class="emp-empty-state">No employees added yet.</div>';
+                } else {
+                    hiresEl.innerHTML = sorted.map(e => `
+                        <div class="emp-recent-item">
+                            <div class="emp-avatar">${empInitials(e.fullName)}</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-weight:600;color:#0F172A;font-size:0.85rem;">${e.fullName}</div>
+                                <div style="color:#94A3B8;font-size:0.75rem;">${e.jobTitle || '—'} · ${empFmtDate(e.hireDate)}</div>
+                            </div>
+                            ${empStatusBadge(e.status)}
+                        </div>`).join('');
+                }
+            }
+
+            // Recent salary changes (last 5)
+            const recentSalary = [...salaryHistory].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+            const salaryEl = document.getElementById('emp-recent-salary-changes');
+            if (salaryEl) {
+                if (recentSalary.length === 0) {
+                    salaryEl.innerHTML = '<div class="emp-empty-state">No salary changes recorded yet.</div>';
+                } else {
+                    salaryEl.innerHTML = recentSalary.map(s => {
+                        const emp = employees.find(e => e.id === s.employeeId);
+                        const changeColor = s.changeType === 'Increase' ? '#059669' : s.changeType === 'Decrease' ? '#DC2626' : '#D97706';
+                        const sign = s.changeType === 'Increase' ? '+' : s.changeType === 'Decrease' ? '-' : '~';
+                        return `<div class="emp-recent-item">
+                            <div class="emp-avatar" style="background:linear-gradient(135deg,#059669,#10B981);">${empInitials(emp?.fullName || '?')}</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-weight:600;color:#0F172A;font-size:0.85rem;">${emp?.fullName || 'Unknown'}</div>
+                                <div style="color:#94A3B8;font-size:0.75rem;">${s.changeType} · ${empFmtDate(s.effectiveDate)}</div>
+                            </div>
+                            <div style="font-weight:700;color:${changeColor};font-size:0.85rem;">${sign}${empFmtCurrency(Math.abs(s.changeAmount), s.currency || emp?.currency || 'EGP')}</div>
+                        </div>`;
+                    }).join('');
+                }
+            }
+        };
+
+        // ── Employees List ──
+        window.renderEmployeesList = function() {
+            const employees = localStore.getAll('employees');
+            const search = (document.getElementById('emp-search')?.value || '').toLowerCase();
+            const filterDept = document.getElementById('emp-filter-dept')?.value || '';
+            const filterStatus = document.getElementById('emp-filter-status')?.value || '';
+            const filterType = document.getElementById('emp-filter-type')?.value || '';
+
+            // Populate dept filter
+            const deptSelect = document.getElementById('emp-filter-dept');
+            if (deptSelect) {
+                const depts = [...new Set(employees.map(e => e.department).filter(Boolean))].sort();
+                const currentVal = deptSelect.value;
+                deptSelect.innerHTML = '<option value="">All Departments</option>' + depts.map(d => `<option value="${d}"${d === currentVal ? ' selected' : ''}>${d}</option>`).join('');
+            }
+
+            // Populate dept datalist for form
+            const datalist = document.getElementById('emp-dept-datalist');
+            if (datalist) {
+                const depts = [...new Set(employees.map(e => e.department).filter(Boolean))].sort();
+                datalist.innerHTML = depts.map(d => `<option value="${d}">`).join('');
+            }
+
+            let filtered = employees.filter(e => {
+                if (search && !`${e.fullName} ${e.employeeId} ${e.jobTitle} ${e.department} ${e.phone} ${e.email}`.toLowerCase().includes(search)) return false;
+                if (filterDept && e.department !== filterDept) return false;
+                if (filterStatus && e.status !== filterStatus) return false;
+                if (filterType && e.employmentType !== filterType) return false;
+                return true;
+            });
+
+            // Sort: active first, then by hire date desc
+            filtered.sort((a, b) => {
+                const statusOrder = ['Active', 'On Leave', 'Resigned', 'Terminated', 'Archived'];
+                const aIdx = statusOrder.indexOf(a.status);
+                const bIdx = statusOrder.indexOf(b.status);
+                if (aIdx !== bIdx) return aIdx - bIdx;
+                return new Date(b.hireDate) - new Date(a.hireDate);
+            });
+
+            const tbody = document.getElementById('emp-table-body');
+            if (!tbody) return;
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:#94A3B8;">No employees found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(e => {
+                const contractBadge = e.linkedContractNumber
+                    ? `<span class="emp-badge" style="background:rgba(37,99,235,0.1);color:#2563EB;">${e.linkedContractNumber}</span>`
+                    : `<span class="emp-no-contract">No contract</span>`;
+                return `<tr>
+                    <td style="font-family:monospace;font-size:0.78rem;">${e.employeeId || '—'}</td>
+                    <td class="emp-name">${e.fullName}</td>
+                    <td>${e.jobTitle || '—'}</td>
+                    <td>${e.department || '—'}</td>
+                    <td>${e.employmentType || '—'}</td>
+                    <td>${empFmtDate(e.hireDate)}</td>
+                    <td style="font-weight:700;color:#0F172A;">${empFmtCurrency(e.currentSalary, e.currency)}</td>
+                    <td>${empStatusBadge(e.status)}</td>
+                    <td>${contractBadge}</td>
+                    <td>
+                        <div class="emp-actions-cell">
+                            <button class="emp-action-btn emp-action-btn-view" onclick="window.openEmployeeProfile('${e.id}')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                View
+                            </button>
+                            <button class="emp-action-btn emp-action-btn-edit" onclick="window.openEditEmployeeModal('${e.id}')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                Edit
+                            </button>
+                            <button class="emp-action-btn emp-action-btn-salary" onclick="window.openSalaryHistory('${e.id}')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                                Salary
+                            </button>
+                            <button class="emp-action-btn emp-action-btn-danger" onclick="window.archiveEmployee('${e.id}')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                                Archive
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        };
+
+        // ── Payroll Summary ──
+        window.renderPayrollSummary = function() {
+            const employees = localStore.getAll('employees');
+            const salaryHistory = localStore.getAll('salary_history');
+            const now = new Date();
+            const thisMonth = now.getMonth();
+            const thisYear = now.getFullYear();
+
+            const active = employees.filter(e => e.status === 'Active');
+            const allActive = employees.filter(e => ['Active', 'On Leave'].includes(e.status));
+            const totalMonthly = allActive.reduce((s, e) => s + (parseFloat(e.currentSalary) || 0), 0);
+            const totalAnnual = totalMonthly * 12;
+            const activeOnly = active.reduce((s, e) => s + (parseFloat(e.currentSalary) || 0), 0);
+            const incMonth = salaryHistory.filter(s => { const d = new Date(s.effectiveDate); return d.getMonth() === thisMonth && d.getFullYear() === thisYear && s.changeType === 'Increase'; })
+                .reduce((s, r) => s + Math.abs(parseFloat(r.changeAmount) || 0), 0);
+            const incYear = salaryHistory.filter(s => { const d = new Date(s.effectiveDate); return d.getFullYear() === thisYear && s.changeType === 'Increase'; })
+                .reduce((s, r) => s + Math.abs(parseFloat(r.changeAmount) || 0), 0);
+
+            const currency = active[0]?.currency || allActive[0]?.currency || 'EGP';
+            const sv = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            sv('pr-monthly', empFmtCurrency(totalMonthly, currency));
+            sv('pr-annual', empFmtCurrency(totalAnnual, currency));
+            sv('pr-active', empFmtCurrency(activeOnly, currency));
+            sv('pr-increases-month', empFmtCurrency(incMonth, currency));
+            sv('pr-increases-year', empFmtCurrency(incYear, currency));
+
+            // Employees with recent salary changes (last 30 days)
+            const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+            const recentChanges = salaryHistory.filter(s => new Date(s.createdAt).getTime() > cutoff)
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            const listEl = document.getElementById('pr-recent-changes-list');
+            if (listEl) {
+                if (recentChanges.length === 0) {
+                    listEl.innerHTML = '<div class="emp-empty-state">No recent salary changes in the last 30 days.</div>';
+                } else {
+                    listEl.innerHTML = `<div class="emp-salary-timeline">${recentChanges.map(s => {
+                        const emp = employees.find(e => e.id === s.employeeId);
+                        const typeKey = (s.changeType || 'adjustment').toLowerCase();
+                        return `<div class="emp-salary-entry">
+                            <div class="emp-salary-entry-dot emp-salary-entry-dot-${typeKey}" style="margin-top:6px;"></div>
+                            <div>
+                                <div style="font-weight:700;font-size:0.88rem;color:#0F172A;">${emp?.fullName || 'Unknown'}</div>
+                                <div style="font-size:0.78rem;color:#64748B;margin-top:2px;">
+                                    ${empFmtCurrency(s.oldSalary, emp?.currency || 'EGP')} → ${empFmtCurrency(s.newSalary, emp?.currency || 'EGP')}
+                                    ${s.note ? `<span style="margin-left:6px;color:#94A3B8;">· ${s.note}</span>` : ''}
+                                </div>
+                                <div style="font-size:0.75rem;color:#94A3B8;margin-top:2px;">Effective: ${empFmtDate(s.effectiveDate)}</div>
+                            </div>
+                            <span class="emp-salary-entry-badge emp-salary-entry-badge-${typeKey}">${s.changeType}</span>
+                        </div>`;
+                    }).join('')}</div>`;
+                }
+            }
+        };
+
+        // ── Add Employee Modal ──
+        window.openAddEmployeeModal = function() {
+            empCurrentEditId = null;
+            document.getElementById('emp-form-modal-title').textContent = 'Add Employee';
+            document.getElementById('emp-form-id').value = '';
+            // Reset fields
+            ['ef-fullName','ef-employeeId','ef-nationalId','ef-phone','ef-email','ef-dob','ef-nationality','ef-address',
+             'ef-jobTitle','ef-department','ef-manager','ef-workLocation','ef-probation','ef-workDays','ef-dailyHours',
+             'ef-currentSalary','ef-allowances','ef-bonuses','ef-linkedContractId','ef-linkedContractNumber','ef-salaryNote'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            document.getElementById('ef-maritalStatus').value = '';
+            document.getElementById('ef-employmentType').value = 'Full-time';
+            document.getElementById('ef-status').value = 'Active';
+            document.getElementById('ef-currency').value = 'EGP';
+            document.getElementById('ef-paymentMethod').value = 'Bank Transfer';
+            document.getElementById('ef-payrollCycle').value = 'Monthly';
+            document.getElementById('ef-hireDate').value = new Date().toISOString().split('T')[0];
+            // Auto-generate ID
+            const existing = localStore.getAll('employees');
+            document.getElementById('ef-employeeId').value = empGenerateId(existing);
+            // Show salary note for new employee
+            const noteWrap = document.getElementById('ef-salary-note-wrap');
+            if (noteWrap) noteWrap.style.display = '';
+            // Populate contract datalist
+            _populateContractDatalist();
+            document.getElementById('emp-form-modal').classList.remove('hidden');
+        };
+
+        window.openEditEmployeeModal = function(id) {
+            const employees = localStore.getAll('employees');
+            const emp = employees.find(e => e.id === id);
+            if (!emp) return;
+            empCurrentEditId = id;
+            document.getElementById('emp-form-modal-title').textContent = 'Edit Employee';
+            document.getElementById('emp-form-id').value = id;
+            const sv = (fId, val) => { const el = document.getElementById(fId); if (el) el.value = val || ''; };
+            sv('ef-fullName', emp.fullName);
+            sv('ef-employeeId', emp.employeeId);
+            sv('ef-nationalId', emp.nationalId);
+            sv('ef-phone', emp.phone);
+            sv('ef-email', emp.email);
+            sv('ef-dob', emp.dob);
+            sv('ef-nationality', emp.nationality);
+            sv('ef-maritalStatus', emp.maritalStatus);
+            sv('ef-address', emp.address);
+            sv('ef-jobTitle', emp.jobTitle);
+            sv('ef-department', emp.department);
+            sv('ef-manager', emp.manager);
+            sv('ef-employmentType', emp.employmentType);
+            sv('ef-hireDate', emp.hireDate);
+            sv('ef-status', emp.status);
+            sv('ef-workLocation', emp.workLocation);
+            sv('ef-probation', emp.probation);
+            sv('ef-workDays', emp.workDays);
+            sv('ef-dailyHours', emp.dailyHours);
+            sv('ef-currentSalary', emp.currentSalary);
+            sv('ef-currency', emp.currency);
+            sv('ef-paymentMethod', emp.paymentMethod);
+            sv('ef-payrollCycle', emp.payrollCycle);
+            sv('ef-allowances', emp.allowances);
+            sv('ef-bonuses', emp.bonuses);
+            sv('ef-linkedContractId', emp.linkedContractId);
+            sv('ef-linkedContractNumber', emp.linkedContractNumber);
+            // Hide salary note on edit (use salary adjustment for that)
+            const noteWrap = document.getElementById('ef-salary-note-wrap');
+            if (noteWrap) noteWrap.style.display = 'none';
+            _populateContractDatalist();
+            document.getElementById('emp-form-modal').classList.remove('hidden');
+        };
+
+        window.closeEmpFormModal = function() {
+            document.getElementById('emp-form-modal').classList.add('hidden');
+            empCurrentEditId = null;
+        };
+
+        window.saveEmployee = async function() {
+            const fullName = document.getElementById('ef-fullName').value.trim();
+            if (!fullName) { showToast('Full Name is required.'); return; }
+            const hireDate = document.getElementById('ef-hireDate').value;
+            if (!hireDate) { showToast('Hire Date is required.'); return; }
+            const currentSalary = parseFloat(document.getElementById('ef-currentSalary').value) || 0;
+
+            const isNew = !empCurrentEditId;
+            const existingId = document.getElementById('emp-form-id').value;
+            const id = isNew ? ('emp-' + Date.now() + '-' + Math.floor(Math.random() * 10000)) : existingId;
+
+            const emp = {
+                id,
+                employeeId: document.getElementById('ef-employeeId').value.trim(),
+                fullName,
+                nationalId: document.getElementById('ef-nationalId').value.trim(),
+                phone: document.getElementById('ef-phone').value.trim(),
+                email: document.getElementById('ef-email').value.trim(),
+                dob: document.getElementById('ef-dob').value,
+                nationality: document.getElementById('ef-nationality').value.trim(),
+                maritalStatus: document.getElementById('ef-maritalStatus').value,
+                address: document.getElementById('ef-address').value.trim(),
+                jobTitle: document.getElementById('ef-jobTitle').value.trim(),
+                department: document.getElementById('ef-department').value.trim(),
+                manager: document.getElementById('ef-manager').value.trim(),
+                employmentType: document.getElementById('ef-employmentType').value,
+                hireDate,
+                status: document.getElementById('ef-status').value,
+                workLocation: document.getElementById('ef-workLocation').value.trim(),
+                probation: document.getElementById('ef-probation').value,
+                workDays: document.getElementById('ef-workDays').value.trim(),
+                dailyHours: document.getElementById('ef-dailyHours').value,
+                currentSalary,
+                currency: document.getElementById('ef-currency').value,
+                paymentMethod: document.getElementById('ef-paymentMethod').value,
+                payrollCycle: document.getElementById('ef-payrollCycle').value,
+                allowances: parseFloat(document.getElementById('ef-allowances').value) || 0,
+                bonuses: parseFloat(document.getElementById('ef-bonuses').value) || 0,
+                linkedContractId: document.getElementById('ef-linkedContractId').value.trim(),
+                linkedContractNumber: document.getElementById('ef-linkedContractNumber').value.trim(),
+                updatedAt: new Date().toISOString(),
+                createdAt: isNew ? new Date().toISOString() : (localStore.getAll('employees').find(e => e.id === id)?.createdAt || new Date().toISOString())
+            };
+
+            // If new employee and salary > 0, create initial salary history entry
+            if (isNew && currentSalary > 0) {
+                const note = document.getElementById('ef-salaryNote').value.trim() || 'Starting salary at hire';
+                const sh = {
+                    id: 'sh-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
+                    employeeId: id,
+                    oldSalary: 0,
+                    newSalary: currentSalary,
+                    changeAmount: currentSalary,
+                    changeType: 'Increase',
+                    effectiveDate: hireDate,
+                    note,
+                    createdAt: new Date().toISOString()
+                };
+                await cloudDB.put(sh, 'salary_history');
+            }
+
+            // If editing and salary changed, record salary history
+            if (!isNew) {
+                const oldEmp = localStore.getAll('employees').find(e => e.id === id);
+                const oldSalary = parseFloat(oldEmp?.currentSalary) || 0;
+                if (oldSalary !== currentSalary) {
+                    const diff = currentSalary - oldSalary;
+                    const sh = {
+                        id: 'sh-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
+                        employeeId: id,
+                        oldSalary,
+                        newSalary: currentSalary,
+                        changeAmount: Math.abs(diff),
+                        changeType: diff > 0 ? 'Increase' : 'Decrease',
+                        effectiveDate: new Date().toISOString().split('T')[0],
+                        note: 'Updated via employee edit',
+                        createdAt: new Date().toISOString()
+                    };
+                    await cloudDB.put(sh, 'salary_history');
+                }
+            }
+
+            await cloudDB.put(emp, 'employees');
+            window.closeEmpFormModal();
+            window.refreshEmployeesModule();
+            showToast(isNew ? 'Employee added ✓' : 'Employee updated ✓');
+        };
+
+        // ── Contract Datalist ──
+        function _populateContractDatalist() {
+            const contracts = localStore.getAll('ec_history');
+            const dl = document.getElementById('emp-contract-datalist');
+            if (!dl) return;
+            dl.innerHTML = contracts.map(c => `<option value="${c.id}" data-ref="${c.ref || ''}">${c.ref || c.id} — ${c.client || ''}</option>`).join('');
+        }
+
+        window.onContractSearch = function(val) {
+            const contracts = localStore.getAll('ec_history');
+            const match = contracts.find(c => c.id === val || c.ref === val || c.ref?.toLowerCase().includes(val.toLowerCase()));
+            const numEl = document.getElementById('ef-linkedContractNumber');
+            if (match && numEl) {
+                numEl.value = match.ref || match.id;
+            }
+        };
+
+        // ── Employee Profile ──
+        window.openEmployeeProfile = function(id) {
+            const employees = localStore.getAll('employees');
+            const emp = employees.find(e => e.id === id);
+            if (!emp) return;
+            const salaryHistory = localStore.getAll('salary_history').filter(s => s.employeeId === id).sort((a, b) => new Date(b.effectiveDate) - new Date(a.effectiveDate));
+
+            const pf = (label, val) => `<div class="emp-profile-field"><label>${label}</label><p>${val || '—'}</p></div>`;
+
+            let contractSection = '';
+            if (emp.linkedContractNumber) {
+                contractSection = `
+                    <div class="emp-profile-field col-span-2">
+                        <label>Linked Contract</label>
+                        <p><span class="emp-contract-linked"
+                            onclick="window.openLinkedContract('${emp.linkedContractId || ''}')"
+                            title="Open HR Contract">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            ${emp.linkedContractNumber}
+                        </span></p>
+                    </div>`;
+            } else {
+                contractSection = `<div class="emp-profile-field col-span-2"><label>Linked Contract</label><p class="emp-no-contract">No contract linked</p></div>`;
+            }
+
+            const content = document.getElementById('emp-profile-content');
+            if (content) {
+                content.innerHTML = `
+                    <!-- Header -->
+                    <div style="display:flex;align-items:center;gap:1rem;padding:0.5rem 0 1.25rem;border-bottom:1px solid #F1F5F9;margin-bottom:1.25rem;">
+                        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#2563EB);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.25rem;font-weight:800;flex-shrink:0;">${empInitials(emp.fullName)}</div>
+                        <div>
+                            <div style="font-size:1.15rem;font-weight:800;color:#0F172A;">${emp.fullName}</div>
+                            <div style="font-size:0.83rem;color:#64748B;">${emp.jobTitle || ''}${emp.department ? ' · ' + emp.department : ''}</div>
+                            <div style="margin-top:4px;">${empStatusBadge(emp.status)} <span style="font-size:0.75rem;color:#94A3B8;margin-left:6px;">ID: ${emp.employeeId || '—'}</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Basic Info -->
+                    <div class="emp-profile-section">
+                        <div class="emp-profile-section-title">Basic Info</div>
+                        <div class="emp-profile-grid">
+                            ${pf('Phone', emp.phone)}
+                            ${pf('Email', emp.email)}
+                            ${pf('Nationality', emp.nationality)}
+                            ${pf('Marital Status', emp.maritalStatus)}
+                            ${pf('Date of Birth', empFmtDate(emp.dob))}
+                            ${pf('National ID', emp.nationalId)}
+                            <div class="emp-profile-field col-span-2">${pf('Address', emp.address)}</div>
+                        </div>
+                    </div>
+
+                    <!-- Job Info -->
+                    <div class="emp-profile-section">
+                        <div class="emp-profile-section-title">Job Info</div>
+                        <div class="emp-profile-grid">
+                            ${pf('Job Title', emp.jobTitle)}
+                            ${pf('Department', emp.department)}
+                            ${pf('Direct Manager', emp.manager)}
+                            ${pf('Employment Type', emp.employmentType)}
+                            ${pf('Hire Date', empFmtDate(emp.hireDate))}
+                            ${pf('Probation Period', emp.probation ? emp.probation + ' months' : '—')}
+                            ${pf('Work Location', emp.workLocation)}
+                            ${pf('Work Days', emp.workDays)}
+                            ${pf('Daily Hours', emp.dailyHours ? emp.dailyHours + ' hrs' : '—')}
+                        </div>
+                    </div>
+
+                    <!-- Salary Info -->
+                    <div class="emp-profile-section">
+                        <div class="emp-profile-section-title">Salary Info</div>
+                        <div class="emp-profile-grid">
+                            ${pf('Current Salary', `<strong style="font-size:1.05rem;">${empFmtCurrency(emp.currentSalary, emp.currency)}</strong>`)}
+                            ${pf('Currency', emp.currency)}
+                            ${pf('Payment Method', emp.paymentMethod)}
+                            ${pf('Payroll Cycle', emp.payrollCycle)}
+                            ${pf('Allowances', empFmtCurrency(emp.allowances, emp.currency))}
+                            ${pf('Bonuses', empFmtCurrency(emp.bonuses, emp.currency))}
+                            ${pf('Last Updated', empFmtDate(emp.updatedAt?.split('T')[0]))}
+                        </div>
+                    </div>
+
+                    <!-- Contract Info -->
+                    <div class="emp-profile-section">
+                        <div class="emp-profile-section-title">Contract Info</div>
+                        <div class="emp-profile-grid">${contractSection}</div>
+                    </div>
+
+                    <!-- Salary History Preview -->
+                    <div class="emp-profile-section">
+                        <div class="emp-profile-section-title">Recent Salary History</div>
+                        ${salaryHistory.length === 0
+                            ? '<div class="emp-empty-state">No salary changes recorded.</div>'
+                            : `<div class="emp-salary-timeline">${salaryHistory.slice(0, 3).map(s => {
+                                const typeKey = (s.changeType || 'adjustment').toLowerCase();
+                                const sign = s.changeType === 'Increase' ? '+' : s.changeType === 'Decrease' ? '-' : '~';
+                                const clr = s.changeType === 'Increase' ? '#059669' : s.changeType === 'Decrease' ? '#DC2626' : '#D97706';
+                                return `<div class="emp-salary-entry">
+                                    <div class="emp-salary-entry-dot emp-salary-entry-dot-${typeKey}" style="margin-top:6px;"></div>
+                                    <div>
+                                        <div style="font-size:0.85rem;font-weight:600;color:#0F172A;">${empFmtCurrency(s.oldSalary, emp.currency)} → ${empFmtCurrency(s.newSalary, emp.currency)}</div>
+                                        <div style="font-size:0.75rem;color:#64748B;margin-top:2px;">${s.note || '—'} · ${empFmtDate(s.effectiveDate)}</div>
+                                    </div>
+                                    <div style="font-weight:700;color:${clr};font-size:0.85rem;">${sign}${empFmtCurrency(Math.abs(s.changeAmount), emp.currency)}</div>
+                                </div>`;
+                              }).join('')}</div>`
+                        }
+                    </div>
+                `;
+            }
+
+            const actionsEl = document.getElementById('emp-profile-actions');
+            if (actionsEl) {
+                actionsEl.innerHTML = `
+                    <button class="ui-button ui-button-secondary" onclick="window.closeEmpProfileModal()">Close</button>
+                    <button class="ui-button" style="background:rgba(16,185,129,0.1);color:#059669;border:1px solid rgba(16,185,129,0.25);" onclick="window.closeEmpProfileModal();window.openSalaryHistory('${id}')">
+                        Salary History
+                    </button>
+                    <button class="ui-button ui-button-primary" onclick="window.closeEmpProfileModal();window.openEditEmployeeModal('${id}')">Edit Employee</button>
+                `;
+            }
+
+            document.getElementById('emp-profile-modal').classList.remove('hidden');
+        };
+
+        window.closeEmpProfileModal = function() {
+            document.getElementById('emp-profile-modal').classList.add('hidden');
+        };
+
+        window.openLinkedContract = function(contractId) {
+            if (!contractId) return;
+            // Switch to HR Contract module and note the contract
+            window.closeEmpProfileModal();
+            showToast('Opening HR Contract module…');
+            setTimeout(() => { window.switchMainModule('empcontract'); }, 400);
+        };
+
+        // ── Salary History Modal ──
+        window.openSalaryHistory = function(employeeId) {
+            const employees = localStore.getAll('employees');
+            const emp = employees.find(e => e.id === employeeId);
+            if (!emp) return;
+            empSalaryHistoryTargetId = employeeId;
+
+            document.getElementById('emp-salary-history-title').textContent = `Salary History — ${emp.fullName}`;
+            const btn = document.getElementById('btn-add-salary-adj');
+            if (btn) btn.onclick = function() { window.openAddSalaryAdjustment(employeeId); };
+
+            _renderSalaryHistoryContent(employeeId, emp);
+            document.getElementById('emp-salary-history-modal').classList.remove('hidden');
+        };
+
+        function _renderSalaryHistoryContent(employeeId, emp) {
+            const history = localStore.getAll('salary_history').filter(s => s.employeeId === employeeId)
+                .sort((a, b) => new Date(b.effectiveDate) - new Date(a.effectiveDate));
+
+            const container = document.getElementById('emp-salary-history-content');
+            if (!container) return;
+
+            if (history.length === 0) {
+                container.innerHTML = '<div class="emp-empty-state" style="padding:2rem;">No salary history recorded.</div>';
+                return;
+            }
+
+            // Summary stats
+            const totalIncrease = history.filter(s => s.changeType === 'Increase').reduce((sum, s) => sum + (parseFloat(s.changeAmount) || 0), 0);
+            const increaseCount = history.filter(s => s.changeType === 'Increase').length;
+            const firstSalary = history[history.length - 1];
+            const latestSalary = history[0];
+
+            container.innerHTML = `
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;margin-bottom:1.25rem;">
+                    <div style="background:#F8FAFC;border-radius:12px;padding:0.75rem 1rem;text-align:center;">
+                        <div style="font-size:1rem;font-weight:800;color:#0F172A;">${empFmtCurrency(emp.currentSalary, emp.currency)}</div>
+                        <div style="font-size:0.73rem;color:#94A3B8;margin-top:2px;">Current Salary</div>
+                    </div>
+                    <div style="background:#F0FDF4;border-radius:12px;padding:0.75rem 1rem;text-align:center;">
+                        <div style="font-size:1rem;font-weight:800;color:#059669;">+${empFmtCurrency(totalIncrease, emp.currency)}</div>
+                        <div style="font-size:0.73rem;color:#94A3B8;margin-top:2px;">Total Increases</div>
+                    </div>
+                    <div style="background:#F8FAFC;border-radius:12px;padding:0.75rem 1rem;text-align:center;">
+                        <div style="font-size:1rem;font-weight:800;color:#7C3AED;">${increaseCount}</div>
+                        <div style="font-size:0.73rem;color:#94A3B8;margin-top:2px;">Raise Count</div>
+                    </div>
+                </div>
+                <div class="emp-salary-timeline">
+                    ${history.map((s, idx) => {
+                        const typeKey = (s.changeType || 'adjustment').toLowerCase();
+                        const sign = s.changeType === 'Increase' ? '+' : s.changeType === 'Decrease' ? '-' : '~';
+                        const clr = s.changeType === 'Increase' ? '#059669' : s.changeType === 'Decrease' ? '#DC2626' : '#D97706';
+                        const isLatest = idx === 0;
+                        return `<div class="emp-salary-entry" style="${isLatest ? 'border-color:#2563EB;background:rgba(37,99,235,0.02);' : ''}">
+                            <div class="emp-salary-entry-dot emp-salary-entry-dot-${typeKey}" style="margin-top:6px;"></div>
+                            <div style="flex:1;">
+                                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                    <span style="font-weight:700;font-size:0.88rem;color:#0F172A;">${empFmtCurrency(s.oldSalary, emp.currency)} → ${empFmtCurrency(s.newSalary, emp.currency)}</span>
+                                    <span class="emp-salary-entry-badge emp-salary-entry-badge-${typeKey}">${s.changeType}</span>
+                                    ${isLatest ? '<span style="font-size:0.7rem;background:#DBEAFE;color:#1D4ED8;padding:2px 7px;border-radius:999px;font-weight:700;">Latest</span>' : ''}
+                                </div>
+                                <div style="font-size:0.78rem;color:#64748B;margin-top:3px;">${s.note || '—'}</div>
+                                <div style="font-size:0.73rem;color:#94A3B8;margin-top:2px;">Effective: ${empFmtDate(s.effectiveDate)} · Recorded: ${empFmtDate(s.createdAt?.split('T')[0])}</div>
+                            </div>
+                            <div style="font-weight:800;color:${clr};font-size:0.9rem;white-space:nowrap;">${sign}${empFmtCurrency(Math.abs(s.changeAmount), emp.currency)}</div>
+                        </div>`;
+                    }).join('')}
+                </div>`;
+        }
+
+        window.closeEmpSalaryHistoryModal = function() {
+            document.getElementById('emp-salary-history-modal').classList.add('hidden');
+            empSalaryHistoryTargetId = null;
+        };
+
+        // ── Add Salary Adjustment ──
+        window.openAddSalaryAdjustment = function(employeeId) {
+            const employees = localStore.getAll('employees');
+            const emp = employees.find(e => e.id === employeeId);
+            if (!emp) return;
+
+            document.getElementById('sa-employee-id').value = employeeId;
+            document.getElementById('sa-employee-name').value = emp.fullName;
+            document.getElementById('sa-current-salary').value = empFmtCurrency(emp.currentSalary, emp.currency);
+            document.getElementById('sa-new-salary').value = '';
+            document.getElementById('sa-change-amount').value = '';
+            document.getElementById('sa-change-type').value = 'Increase';
+            document.getElementById('sa-effective-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('sa-note').value = '';
+
+            // Close salary history modal first, then open adjustment
+            document.getElementById('emp-salary-history-modal').classList.add('hidden');
+            document.getElementById('emp-salary-adj-modal').classList.remove('hidden');
+        };
+
+        window.calcSalaryDiff = function() {
+            const empId = document.getElementById('sa-employee-id').value;
+            const employees = localStore.getAll('employees');
+            const emp = employees.find(e => e.id === empId);
+            if (!emp) return;
+            const current = parseFloat(emp.currentSalary) || 0;
+            const newSal = parseFloat(document.getElementById('sa-new-salary').value) || 0;
+            const diff = newSal - current;
+            document.getElementById('sa-change-amount').value = empFmtCurrency(Math.abs(diff), emp.currency);
+            // Auto-set change type
+            const typeSelect = document.getElementById('sa-change-type');
+            if (typeSelect) {
+                if (diff > 0) typeSelect.value = 'Increase';
+                else if (diff < 0) typeSelect.value = 'Decrease';
+                else typeSelect.value = 'Adjustment';
+            }
+        };
+
+        window.closeEmpSalaryAdjModal = function() {
+            document.getElementById('emp-salary-adj-modal').classList.add('hidden');
+            // Re-open salary history if it was open
+            if (empSalaryHistoryTargetId) {
+                document.getElementById('emp-salary-history-modal').classList.remove('hidden');
+            }
+        };
+
+        window.saveSalaryAdjustment = async function() {
+            const empId = document.getElementById('sa-employee-id').value;
+            const newSalary = parseFloat(document.getElementById('sa-new-salary').value);
+            const effectiveDate = document.getElementById('sa-effective-date').value;
+            if (!empId || isNaN(newSalary) || !effectiveDate) {
+                showToast('Please fill in all required fields.');
+                return;
+            }
+            const employees = localStore.getAll('employees');
+            const emp = employees.find(e => e.id === empId);
+            if (!emp) return;
+            const oldSalary = parseFloat(emp.currentSalary) || 0;
+            const diff = newSalary - oldSalary;
+            const changeType = document.getElementById('sa-change-type').value;
+            const note = document.getElementById('sa-note').value.trim();
+
+            // Save salary history
+            const sh = {
+                id: 'sh-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
+                employeeId: empId,
+                oldSalary,
+                newSalary,
+                changeAmount: Math.abs(diff),
+                changeType,
+                effectiveDate,
+                note,
+                createdAt: new Date().toISOString()
+            };
+            await cloudDB.put(sh, 'salary_history');
+
+            // Update employee current salary
+            const updatedEmp = { ...emp, currentSalary: newSalary, updatedAt: new Date().toISOString() };
+            await cloudDB.put(updatedEmp, 'employees');
+
+            window.closeEmpSalaryAdjModal();
+            document.getElementById('emp-salary-history-modal').classList.add('hidden');
+            empSalaryHistoryTargetId = null;
+            window.refreshEmployeesModule();
+            showToast('Salary adjustment saved ✓');
+        };
+
+        // ── Archive Employee ──
+        window.archiveEmployee = function(id) {
+            const employees = localStore.getAll('employees');
+            const emp = employees.find(e => e.id === id);
+            if (!emp) return;
+            if (emp.status === 'Archived') { showToast('Employee is already archived.'); return; }
+            window.openConfirmModal(
+                'Archive Employee',
+                `Archive ${emp.fullName}? They will be excluded from active payroll.`,
+                async () => {
+                    const updated = { ...emp, status: 'Archived', updatedAt: new Date().toISOString() };
+                    await cloudDB.put(updated, 'employees');
+                    window.refreshEmployeesModule();
+                    showToast('Employee archived ✓');
+                }
+            );
+        };
+
+        // ── Firebase realtime sync for employees stores ──
+        (function _patchCloudDBForEmployees() {
+            const origSetup = cloudDB.setupRealtime.bind(cloudDB);
+            cloudDB.setupRealtime = function(storeName) {
+                origSetup(storeName);
+                // employees and salary_history stores handled by the snapshot callback below
+            };
+            // Patch onSnapshot handler to also handle employees/salary_history
+            const origInit = cloudDB.init.bind(cloudDB);
+            cloudDB.init = async function() {
+                await origInit();
+            };
+        }());
 
     </script>
 </body>
