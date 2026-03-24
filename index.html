@@ -13,12 +13,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Flatpickr (Calendar UI) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
-
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -209,8 +203,6 @@
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(255, 255, 255, 0.6); border-radius: 2px; border: 1px solid rgba(255,255,255,0.8); }
         input[type=range]:disabled::-webkit-slider-thumb { background: #CBD5E1; cursor: not-allowed; }
         input[type=range]:disabled::-webkit-slider-runnable-track { cursor: not-allowed; }
-
-        .flatpickr-calendar { font-family: inherit !important; border-radius: 16px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.1) !important; border: 1px solid rgba(255,255,255,0.9) !important; background: rgba(255,255,255,0.95) !important; backdrop-filter: blur(20px) !important;}
 
         .ui-top-nav { height: 64px; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-bottom: 1px solid rgba(255, 255, 255, 0.6); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 1.5rem; position: sticky; top: 0; z-index: 50; }
         .ui-nav-pills { display: flex; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 14px; padding: 0.3rem; gap: 0.25rem; box-shadow: 0 4px 16px rgba(31, 38, 135, 0.08), inset 0 1px 0 rgba(255,255,255,0.9); }
@@ -626,6 +618,13 @@
         }
         .history-filter-day:focus { border-color: #2563eb; background-color: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
         .history-filter-day::placeholder { color: #94a3b8; font-weight: 400; }
+        .history-filter-date {
+            padding: 0.4rem 0.625rem; width: 145px;
+            border: 1px solid rgba(148,163,184,0.35); border-radius: 8px;
+            font-size: 0.8rem; font-weight: 600; background: rgba(255,255,255,0.8);
+            color: #334155; outline: none; transition: all 0.18s; box-sizing: border-box;
+        }
+        .history-filter-date:focus { border-color: #2563eb; background-color: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
         .history-reset-btn {
             padding: 0.4rem 0.75rem; border-radius: 8px; font-size: 0.775rem; font-weight: 700;
             background: rgba(241,245,249,0.9); color: #64748b;
@@ -1370,11 +1369,11 @@
                             </div>
                             <div class="ui-form-group mb-0 mt-1">
                                 <label class="ui-label">Campaign Month</label>
-                                <input type="text" id="campaignMonth" placeholder="Select month and year" class="ui-input" readonly>
+                                <input type="month" id="campaignMonth" class="ui-input" oninput="if(typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations()">
                             </div>
                             <div class="ui-form-group mb-0 mt-1">
                                 <label class="ui-label">Invoice Date</label>
-                                <input type="text" id="invoiceDate" placeholder="Select month and year" class="ui-input" readonly>
+                                <input type="month" id="invoiceDate" class="ui-input" oninput="if(typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations()">
                             </div>
                         </div>
                     </div>
@@ -1621,17 +1620,7 @@
                                 <select id="inv-history-filter-client" class="history-filter-select" style="flex:1;min-width:130px;" onchange="if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList()">
                                     <option value="">All Clients</option>
                                 </select>
-                                <select id="inv-history-filter-year" class="history-filter-select" style="width:100px;" onchange="if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList()">
-                                    <option value="">All Years</option>
-                                </select>
-                                <select id="inv-history-filter-month" class="history-filter-select" style="width:120px;" onchange="if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList()">
-                                    <option value="">All Months</option>
-                                    <option value="1">January</option><option value="2">February</option><option value="3">March</option>
-                                    <option value="4">April</option><option value="5">May</option><option value="6">June</option>
-                                    <option value="7">July</option><option value="8">August</option><option value="9">September</option>
-                                    <option value="10">October</option><option value="11">November</option><option value="12">December</option>
-                                </select>
-                                <input type="number" id="inv-history-filter-day" class="history-filter-day" placeholder="Day" min="1" max="31" oninput="if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList()">
+                                <input type="date" id="inv-history-filter-date" class="history-filter-date" onchange="if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList()">
                                 <select id="inv-history-sort" class="history-filter-select" style="width:135px;" onchange="if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList()">
                                     <option value="newest">Newest First</option>
                                     <option value="oldest">Oldest First</option>
@@ -1869,17 +1858,7 @@
                                 <select id="history-filter-client" class="history-filter-select" style="flex:1;min-width:130px;" onchange="if(typeof window.renderHistoryList === 'function') window.renderHistoryList()">
                                     <option value="">All Clients</option>
                                 </select>
-                                <select id="history-filter-year" class="history-filter-select" style="width:100px;" onchange="if(typeof window.renderHistoryList === 'function') window.renderHistoryList()">
-                                    <option value="">All Years</option>
-                                </select>
-                                <select id="history-filter-month" class="history-filter-select" style="width:120px;" onchange="if(typeof window.renderHistoryList === 'function') window.renderHistoryList()">
-                                    <option value="">All Months</option>
-                                    <option value="1">January</option><option value="2">February</option><option value="3">March</option>
-                                    <option value="4">April</option><option value="5">May</option><option value="6">June</option>
-                                    <option value="7">July</option><option value="8">August</option><option value="9">September</option>
-                                    <option value="10">October</option><option value="11">November</option><option value="12">December</option>
-                                </select>
-                                <input type="number" id="history-filter-day" class="history-filter-day" placeholder="Day" min="1" max="31" oninput="if(typeof window.renderHistoryList === 'function') window.renderHistoryList()">
+                                <input type="date" id="history-filter-date" class="history-filter-date" onchange="if(typeof window.renderHistoryList === 'function') window.renderHistoryList()">
                                 <select id="history-sort" class="history-filter-select" style="width:135px;" onchange="if(typeof window.renderHistoryList === 'function') window.renderHistoryList()">
                                     <option value="newest">Newest First</option>
                                     <option value="oldest">Oldest First</option>
@@ -2202,17 +2181,7 @@
                                 <select id="ct-history-filter-client" class="history-filter-select" style="flex:1;min-width:130px;" onchange="window.renderCtHistoryList()">
                                     <option value="">All Clients</option>
                                 </select>
-                                <select id="ct-history-filter-year" class="history-filter-select" style="width:100px;" onchange="window.renderCtHistoryList()">
-                                    <option value="">All Years</option>
-                                </select>
-                                <select id="ct-history-filter-month" class="history-filter-select" style="width:120px;" onchange="window.renderCtHistoryList()">
-                                    <option value="">All Months</option>
-                                    <option value="1">January</option><option value="2">February</option><option value="3">March</option>
-                                    <option value="4">April</option><option value="5">May</option><option value="6">June</option>
-                                    <option value="7">July</option><option value="8">August</option><option value="9">September</option>
-                                    <option value="10">October</option><option value="11">November</option><option value="12">December</option>
-                                </select>
-                                <input type="number" id="ct-history-filter-day" class="history-filter-day" placeholder="Day" min="1" max="31" oninput="window.renderCtHistoryList()">
+                                <input type="date" id="ct-history-filter-date" class="history-filter-date" onchange="window.renderCtHistoryList()">
                                 <select id="ct-history-filter-status" class="history-filter-select" style="width:115px;" onchange="window.renderCtHistoryList()">
                                     <option value="">All Statuses</option>
                                     <option value="Draft">Draft</option>
@@ -2612,17 +2581,7 @@
                                 <select id="ec-history-filter-client" class="history-filter-select" style="flex:1;min-width:130px;" onchange="window.renderEcHistoryList()">
                                     <option value="">All Employees</option>
                                 </select>
-                                <select id="ec-history-filter-year" class="history-filter-select" style="width:100px;" onchange="window.renderEcHistoryList()">
-                                    <option value="">All Years</option>
-                                </select>
-                                <select id="ec-history-filter-month" class="history-filter-select" style="width:120px;" onchange="window.renderEcHistoryList()">
-                                    <option value="">All Months</option>
-                                    <option value="1">January</option><option value="2">February</option><option value="3">March</option>
-                                    <option value="4">April</option><option value="5">May</option><option value="6">June</option>
-                                    <option value="7">July</option><option value="8">August</option><option value="9">September</option>
-                                    <option value="10">October</option><option value="11">November</option><option value="12">December</option>
-                                </select>
-                                <input type="number" id="ec-history-filter-day" class="history-filter-day" placeholder="Day" min="1" max="31" oninput="window.renderEcHistoryList()">
+                                <input type="date" id="ec-history-filter-date" class="history-filter-date" onchange="window.renderEcHistoryList()">
                                 <select id="ec-history-filter-status" class="history-filter-select" style="width:115px;" onchange="window.renderEcHistoryList()">
                                     <option value="">All Statuses</option>
                                     <option value="Draft">Draft</option>
@@ -3355,6 +3314,20 @@
             if(combined.length > 80) combined = combined.substring(0, 80);
             return `${combined}.pdf`;
         }
+        function formatMonthForDisplay(yyyymm) {
+            if (!yyyymm) return 'N/A';
+            const parts = yyyymm.split('-');
+            if (parts.length < 2) return yyyymm;
+            const monthNum = parseInt(parts[1], 10);
+            if (monthNum < 1 || monthNum > 12) return yyyymm;
+            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            return `${months[monthNum - 1]}-${parts[0]}`;
+        }
+        function parseDateFilter(dateVal) {
+            if (!dateVal) return { filterYear: '', filterMonth: '', filterDay: '' };
+            const [y, m, d] = dateVal.split('-');
+            return { filterYear: y, filterMonth: String(parseInt(m, 10)), filterDay: String(parseInt(d, 10)) };
+        }
         function showToast(msg) {
             const div = document.createElement('div');
             div.style.cssText = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); color:white; padding:12px 24px; border-radius:12px; border: 1px solid rgba(255,255,255,0.2); z-index:9999; font-weight:bold; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transition: opacity 0.3s;";
@@ -3882,8 +3855,12 @@
                 // Don't auto-switch to invoice — landing screen handles initial module selection
                 // but still initialize the invoice module in background so it's ready
                 
-                flatpickr("#campaignMonth", { plugins: [new monthSelectPlugin({ shorthand: true, dateFormat: "M-Y", altFormat: "M-Y" })], defaultDate: "today", disableMobile: true, onChange: () => { if(typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations(); } });
-                flatpickr("#invoiceDate", { plugins: [new monthSelectPlugin({ shorthand: true, dateFormat: "M-y", altFormat: "M-y" })], defaultDate: "today", disableMobile: true, onChange: () => { if(typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations(); } });
+                // Set native month inputs to current month
+                const todayMonth = new Date().toISOString().slice(0, 7);
+                const cmEl = document.getElementById('campaignMonth');
+                const idEl = document.getElementById('invoiceDate');
+                if (cmEl && !cmEl.value) cmEl.value = todayMonth;
+                if (idEl && !idEl.value) idEl.value = todayMonth;
                 
                 // Silent state load
                 const saved = localStorage.getItem(STORAGE_KEY);
@@ -4259,8 +4236,8 @@
             if (!tbEl) return null;
             const totalBudget = parseFloat(tbEl.value) || 0;
             const clientVal = document.getElementById('clientName')?.value || '';
-            const month = document.getElementById('campaignMonth')?.value || 'N/A';
-            const invoiceDate = document.getElementById('invoiceDate')?.value || 'N/A';
+            const month = formatMonthForDisplay(document.getElementById('campaignMonth')?.value) || 'N/A';
+            const invoiceDate = formatMonthForDisplay(document.getElementById('invoiceDate')?.value) || 'N/A';
             const currency = document.getElementById('currency')?.value || 'EGP';
             const fees = 500;
             const netBudget = totalBudget - fees;
@@ -5426,17 +5403,14 @@
 
             const searchVal = (document.getElementById('history-search')?.value || '').toLowerCase();
             const filterClient = document.getElementById('history-filter-client')?.value || '';
-            const filterYear = document.getElementById('history-filter-year')?.value || '';
-            const filterMonth = document.getElementById('history-filter-month')?.value || '';
-            const filterDay = document.getElementById('history-filter-day')?.value || '';
+            const filterDateVal = document.getElementById('history-filter-date')?.value || '';
+            const { filterYear, filterMonth, filterDay } = parseDateFilter(filterDateVal);
             const sortVal = document.getElementById('history-sort')?.value || 'newest';
 
             const allRecords = await cloudDB.getAll('history');
 
             const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
-            const uniqueYears = [...new Set(allRecords.map(r => r.year || new Date(r.timestamp || 0).getFullYear()).filter(Boolean))].sort((a, b) => b - a);
             _populateHistorySelect('history-filter-client', uniqueClients, 'All Clients');
-            _populateHistorySelect('history-filter-year', uniqueYears, 'All Years');
 
             let records = allRecords.filter(r => {
                 const matchSearch = !searchVal || (r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal));
@@ -5462,17 +5436,14 @@
 
             const searchVal = (document.getElementById('inv-history-search')?.value || '').toLowerCase();
             const filterClient = document.getElementById('inv-history-filter-client')?.value || '';
-            const filterYear = document.getElementById('inv-history-filter-year')?.value || '';
-            const filterMonth = document.getElementById('inv-history-filter-month')?.value || '';
-            const filterDay = document.getElementById('inv-history-filter-day')?.value || '';
+            const filterDateVal = document.getElementById('inv-history-filter-date')?.value || '';
+            const { filterYear, filterMonth, filterDay } = parseDateFilter(filterDateVal);
             const sortVal = document.getElementById('inv-history-sort')?.value || 'newest';
 
             const allRecords = await cloudDB.getAll('inv_history');
 
             const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
-            const uniqueYears = [...new Set(allRecords.map(r => r.year || new Date(r.timestamp || 0).getFullYear()).filter(Boolean))].sort((a, b) => b - a);
             _populateHistorySelect('inv-history-filter-client', uniqueClients, 'All Clients');
-            _populateHistorySelect('inv-history-filter-year', uniqueYears, 'All Years');
 
             let records = allRecords.filter(r => {
                 const matchSearch = !searchVal || (r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal));
@@ -5498,18 +5469,15 @@
 
             const searchVal = (document.getElementById('ct-history-search')?.value || '').toLowerCase();
             const filterClient = document.getElementById('ct-history-filter-client')?.value || '';
-            const filterYear = document.getElementById('ct-history-filter-year')?.value || '';
-            const filterMonth = document.getElementById('ct-history-filter-month')?.value || '';
-            const filterDay = document.getElementById('ct-history-filter-day')?.value || '';
+            const filterDateVal = document.getElementById('ct-history-filter-date')?.value || '';
+            const { filterYear, filterMonth, filterDay } = parseDateFilter(filterDateVal);
             const filterStatus = document.getElementById('ct-history-filter-status')?.value || '';
             const sortVal = document.getElementById('ct-history-sort')?.value || 'newest';
 
             const allRecords = await cloudDB.getAll('ct_history');
 
             const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
-            const uniqueYears = [...new Set(allRecords.map(r => r.year || new Date(r.timestamp || 0).getFullYear()).filter(Boolean))].sort((a, b) => b - a);
             _populateHistorySelect('ct-history-filter-client', uniqueClients, 'All Clients');
-            _populateHistorySelect('ct-history-filter-year', uniqueYears, 'All Years');
 
             let records = allRecords.filter(r => {
                 const matchSearch = !searchVal || (r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal));
@@ -5535,18 +5503,15 @@
 
             const searchVal = (document.getElementById('ec-history-search')?.value || '').toLowerCase();
             const filterClient = document.getElementById('ec-history-filter-client')?.value || '';
-            const filterYear = document.getElementById('ec-history-filter-year')?.value || '';
-            const filterMonth = document.getElementById('ec-history-filter-month')?.value || '';
-            const filterDay = document.getElementById('ec-history-filter-day')?.value || '';
+            const filterDateVal = document.getElementById('ec-history-filter-date')?.value || '';
+            const { filterYear, filterMonth, filterDay } = parseDateFilter(filterDateVal);
             const filterStatus = document.getElementById('ec-history-filter-status')?.value || '';
             const sortVal = document.getElementById('ec-history-sort')?.value || 'newest';
 
             const allRecords = await cloudDB.getAll('ec_history');
 
             const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
-            const uniqueYears = [...new Set(allRecords.map(r => r.year || new Date(r.timestamp || 0).getFullYear()).filter(Boolean))].sort((a, b) => b - a);
             _populateHistorySelect('ec-history-filter-client', uniqueClients, 'All Clients');
-            _populateHistorySelect('ec-history-filter-year', uniqueYears, 'All Years');
 
             let records = allRecords.filter(r => {
                 const matchSearch = !searchVal || (r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal));
@@ -5616,9 +5581,7 @@
         window.resetHistoryFilters = function() {
             const el = id => document.getElementById(id);
             if (el('history-filter-client')) el('history-filter-client').value = '';
-            if (el('history-filter-year')) el('history-filter-year').value = '';
-            if (el('history-filter-month')) el('history-filter-month').value = '';
-            if (el('history-filter-day')) el('history-filter-day').value = '';
+            if (el('history-filter-date')) el('history-filter-date').value = '';
             if (el('history-sort')) el('history-sort').value = 'newest';
             if (el('history-search')) el('history-search').value = '';
             window.setHistoryFilter('all');
@@ -5627,9 +5590,7 @@
         window.resetInvHistoryFilters = function() {
             const el = id => document.getElementById(id);
             if (el('inv-history-filter-client')) el('inv-history-filter-client').value = '';
-            if (el('inv-history-filter-year')) el('inv-history-filter-year').value = '';
-            if (el('inv-history-filter-month')) el('inv-history-filter-month').value = '';
-            if (el('inv-history-filter-day')) el('inv-history-filter-day').value = '';
+            if (el('inv-history-filter-date')) el('inv-history-filter-date').value = '';
             if (el('inv-history-sort')) el('inv-history-sort').value = 'newest';
             if (el('inv-history-search')) el('inv-history-search').value = '';
             window.setInvHistoryFilter('all');
@@ -5639,9 +5600,7 @@
             const el = id => document.getElementById(id);
             if (el('ct-history-search')) el('ct-history-search').value = '';
             if (el('ct-history-filter-client')) el('ct-history-filter-client').value = '';
-            if (el('ct-history-filter-year')) el('ct-history-filter-year').value = '';
-            if (el('ct-history-filter-month')) el('ct-history-filter-month').value = '';
-            if (el('ct-history-filter-day')) el('ct-history-filter-day').value = '';
+            if (el('ct-history-filter-date')) el('ct-history-filter-date').value = '';
             if (el('ct-history-filter-status')) el('ct-history-filter-status').value = '';
             if (el('ct-history-sort')) el('ct-history-sort').value = 'newest';
             window.renderCtHistoryList();
@@ -5651,9 +5610,7 @@
             const el = id => document.getElementById(id);
             if (el('ec-history-search')) el('ec-history-search').value = '';
             if (el('ec-history-filter-client')) el('ec-history-filter-client').value = '';
-            if (el('ec-history-filter-year')) el('ec-history-filter-year').value = '';
-            if (el('ec-history-filter-month')) el('ec-history-filter-month').value = '';
-            if (el('ec-history-filter-day')) el('ec-history-filter-day').value = '';
+            if (el('ec-history-filter-date')) el('ec-history-filter-date').value = '';
             if (el('ec-history-filter-status')) el('ec-history-filter-status').value = '';
             if (el('ec-history-sort')) el('ec-history-sort').value = 'newest';
             window.renderEcHistoryList();
@@ -7004,7 +6961,7 @@
         window.runInvAI = function() {
             runAIGeneration({
                 promptId: 'ai-inv-prompt', outputId: 'ai-inv-output', btnId: 'ai-inv-generate-btn',
-                systemPrompt: `You are an invoice assistant. Analyze the request and return ONLY a valid JSON object (no markdown):\n{"client":"","totalBudget":0,"currency":"EGP","campaignMonth":"Mar-2026","project":"","desc":""}\nSupported currencies: EGP, SAR, AED, USD. campaignMonth format: Mon-YYYY like Mar-2026.`,
+                systemPrompt: `You are an invoice assistant. Analyze the request and return ONLY a valid JSON object (no markdown):\n{"client":"","totalBudget":0,"currency":"EGP","campaignMonth":"2026-03","project":"","desc":""}\nSupported currencies: EGP, SAR, AED, USD. campaignMonth format: YYYY-MM like 2026-03.`,
                 onSuccess: (json, outputEl) => {
                     window.aiInvoiceContext = json;
                     if (outputEl) {
@@ -7172,7 +7129,7 @@
 
             // Note: quoteServices = array of {name,scope} objects, contractServices = array of strings
             const sysPrompt = `You are an intelligent document system. Analyze the user request and return ONLY a valid JSON object. Use this exact structure:
-{"documentType":"invoice|quotation|contract|empcontract","data":{"clientName":"","company":"","project":"","projectDesc":"","finalPrice":0,"currency":"EGP","quoteServices":[{"name":"","scope":""}],"totalBudget":0,"campaignMonth":"Mar-2026","p2name":"","totalValue":0,"duration":12,"paymentMethod":"Bank Transfer","contractServices":[""],"empName":"","jobTitle":"","jobDept":"","salary":0,"jobType":"Full-time","probation":"3 months"}}
+{"documentType":"invoice|quotation|contract|empcontract","data":{"clientName":"","company":"","project":"","projectDesc":"","finalPrice":0,"currency":"EGP","quoteServices":[{"name":"","scope":""}],"totalBudget":0,"campaignMonth":"2026-03","p2name":"","totalValue":0,"duration":12,"paymentMethod":"Bank Transfer","contractServices":[""],"empName":"","jobTitle":"","jobDept":"","salary":0,"jobType":"Full-time","probation":"3 months"}}
 Only fill fields relevant to the detected document type. Return ONLY valid JSON.`;
 
             const text = await fetchGeminiText(`${sysPrompt}\n\nUser request: ${prompt}`);
