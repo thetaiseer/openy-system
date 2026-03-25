@@ -29,12 +29,12 @@
             --radius-btn: 12px;
         }
 
-        .arabic-text { font-family: 'Cairo', sans-serif !important; direction: rtl; text-align: right; unicode-bidi: embed; }
+        .arabic-text { font-family: 'Noto Sans Arabic', sans-serif !important; direction: rtl; text-align: right; unicode-bidi: embed; }
         /* Ensure Arabic text overrides the Inter blanket rule inside document roots */
         .quote-root .arabic-text, .invoice-root .arabic-text, .contract-root .arabic-text {
-            font-family: 'Cairo', sans-serif !important;
+            font-family: 'Noto Sans Arabic', sans-serif !important;
         }
-        .english-text { font-family: "Google Sans", sans-serif !important; direction: ltr; text-align: left; }
+        .english-text { font-family: "Inter", sans-serif !important; direction: ltr; text-align: left; }
         td, th { white-space: normal; word-break: break-word; }
         .no-wrap-text { white-space: nowrap !important; }
 
@@ -42,7 +42,7 @@
             margin: 0; padding: 0; 
             overflow-x: hidden; /* prevent horizontal scroll from oversized preview layout box */
             color: var(--text-main);
-            font-family: "Google Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
             font-optical-sizing: auto; -webkit-font-smoothing: antialiased;
             /* Glassmorphism Dynamic Background - Soft but colorful to show off the glass */
             background-color: #f8fafc;
@@ -866,9 +866,9 @@
            CONTRACT & EMPLOYEE CONTRACT PREVIEW STYLES
            ============================================================ */
         .contract-root, .contract-root * { font-family: 'Inter', system-ui, sans-serif !important; }
-        /* Arabic contract: override Inter with Cairo for all content in RTL mode */
+        /* Arabic contract: override Inter with Noto Sans Arabic for all content in RTL mode */
         .a4-page.contract-root[dir="rtl"] *,
-        .a4-page.contract-root.rtl-mode * { font-family: 'Cairo', sans-serif !important; }
+        .a4-page.contract-root.rtl-mode * { font-family: 'Noto Sans Arabic', sans-serif !important; }
         .ct-header-divider { height: 3px; background: #111; margin: 12px 0 16px; }
         .ct-section-label { display: inline-block; font-size: 9.5px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; background: #111; color: #fff; padding: 6px 10px; margin-bottom: 10px; }
         .ct-party-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
@@ -886,8 +886,8 @@
         .ct-financial-total { background: #111; color: #fff; margin: 8px -14px -12px; padding: 10px 14px; font-size: 12px; font-weight: 900; display: flex; justify-content: space-between; }
         .ct-clause { margin-bottom: 11px; page-break-inside: avoid; break-inside: avoid; }
         .ct-clause-num { display: inline-block; font-size: 9px; font-weight: 800; color: #fff; background: #111; padding: 2px 7px; margin-bottom: 4px; }
-        .ct-clause-title-text { font-size: 11.5px; font-weight: 800; color: #111; direction: rtl; text-align: right; font-family: 'Cairo', sans-serif !important; }
-        .ct-clause-body { font-size: 10.5px; color: #333; line-height: 1.7; direction: rtl; text-align: right; font-family: 'Cairo', sans-serif !important; }
+        .ct-clause-title-text { font-size: 11.5px; font-weight: 800; color: #111; direction: rtl; text-align: right; font-family: 'Noto Sans Arabic', sans-serif !important; }
+        .ct-clause-body { font-size: 10.5px; color: #333; line-height: 1.7; direction: rtl; text-align: right; font-family: 'Noto Sans Arabic', sans-serif !important; }
         .ct-sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 28px; padding-top: 16px; border-top: 2px solid #111; }
         .ct-sig-block { text-align: center; }
         .ct-sig-party-label { font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; background: #111; color: #fff; padding: 4px 8px; display: inline-block; margin-bottom: 24px; }
@@ -959,13 +959,13 @@
             background: rgba(248,250,252,0.9); border: 1px solid rgba(203,213,225,0.6);
             border-radius: 12px; padding: 0.75rem; font-size: 0.82rem; color: #1e293b;
             white-space: pre-wrap; max-height: 200px; overflow-y: auto; line-height: 1.5;
-            font-family: 'Cairo', sans-serif !important;
+            font-family: 'Noto Sans Arabic', sans-serif !important;
         }
 
         /* RTL document fixes for export */
         .a4-page[dir="rtl"] .page-content, .a4-page.rtl-mode .page-content {
             direction: rtl; text-align: right;
-            font-family: 'Cairo', sans-serif !important;
+            font-family: 'Noto Sans Arabic', sans-serif !important;
         }
         /* ============================================================
            LANDING SELECTION SCREEN

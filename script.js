@@ -1588,7 +1588,7 @@
                 wrapper.style.width = '100%';
             }
 
-            // Force DOM reflow and ensure Cairo Arabic font is both ready before capture
+            // Force DOM reflow and ensure Noto Sans Arabic font is ready before capture
             await Promise.all([new Promise(resolve => setTimeout(resolve, 300)), document.fonts.ready]);
 
             const opt = {
@@ -1734,7 +1734,7 @@
                 wrapper.style.width = '100%';
             }
 
-            // Force DOM reflow and ensure Cairo Arabic font is both ready before capture
+            // Force DOM reflow and ensure Noto Sans Arabic font is ready before capture
             await Promise.all([new Promise(resolve => setTimeout(resolve, 300)), document.fonts.ready]);
 
             const opt = {
@@ -2921,7 +2921,7 @@
             const C = CONTRACT_CONTENT[isArabic ? 'ar' : 'en'];
             const clauseDir = isArabic ? 'rtl' : 'ltr';
             const clauseAlign = isArabic ? 'right' : 'left';
-            const clauseFont = isArabic ? "'Cairo',sans-serif" : 'inherit';
+            const clauseFont = isArabic ? "'Noto Sans Arabic',sans-serif" : 'inherit';
             const row = document.createElement('div');
             row.className = 'ct-clause-editor-row';
             row.id = 'row-' + clause.id;
@@ -2944,7 +2944,7 @@
             const C = CONTRACT_CONTENT[isArabic ? 'ar' : 'en'];
             const clauseDir = isArabic ? 'rtl' : 'ltr';
             const clauseAlign = isArabic ? 'right' : 'left';
-            const clauseFont = isArabic ? "'Cairo',sans-serif" : 'inherit';
+            const clauseFont = isArabic ? "'Noto Sans Arabic',sans-serif" : 'inherit';
             const row = document.createElement('div');
             row.className = 'ct-clause-editor-row';
             row.id = 'erow-' + clause.id;
@@ -3040,7 +3040,7 @@
             const C = CONTRACT_CONTENT[lang] || CONTRACT_CONTENT['ar'];
             const isArabic = lang === 'ar';
             const dir = isArabic ? 'rtl' : 'ltr';
-            const fontFamily = isArabic ? "'Cairo',sans-serif" : "'Inter',sans-serif";
+            const fontFamily = isArabic ? "'Noto Sans Arabic',sans-serif" : "'Inter',sans-serif";
             const alignStyle = isArabic ? 'right' : 'left';
 
             const currency = v('ct-currency') || 'EGP';
@@ -3080,8 +3080,8 @@
 
                 <!-- Title Band -->
                 <div style="text-align:center;margin:12px 0;padding:10px;background:#111;color:#fff;">
-                    <div style="font-size:18px;font-weight:900;letter-spacing:1px;font-family:'Cairo',sans-serif;direction:${dir};">${C.clientContractTitle}</div>
-                    <div style="font-size:11px;opacity:0.8;margin-top:3px;font-family:'Cairo',sans-serif;direction:${dir};">${C.clientContractSubtitle}</div>
+                    <div style="font-size:18px;font-weight:900;letter-spacing:1px;font-family:'Noto Sans Arabic',sans-serif;direction:${dir};">${C.clientContractTitle}</div>
+                    <div style="font-size:11px;opacity:0.8;margin-top:3px;font-family:'Noto Sans Arabic',sans-serif;direction:${dir};">${C.clientContractSubtitle}</div>
                 </div>
 
                 <!-- Parties -->
@@ -3186,7 +3186,7 @@
             const C = CONTRACT_CONTENT[lang] || CONTRACT_CONTENT['ar'];
             const isArabic = lang === 'ar';
             const dir = isArabic ? 'rtl' : 'ltr';
-            const fontFamily = isArabic ? "'Cairo',sans-serif" : "'Inter',sans-serif";
+            const fontFamily = isArabic ? "'Noto Sans Arabic',sans-serif" : "'Inter',sans-serif";
             const alignStyle = isArabic ? 'right' : 'left';
 
             const currency = v('ec-currency') || 'EGP';
@@ -3222,8 +3222,8 @@
 
                 <!-- Title Band -->
                 <div style="text-align:center;margin:12px 0;padding:10px;background:#111;color:#fff;">
-                    <div style="font-size:18px;font-weight:900;letter-spacing:1px;font-family:'Cairo',sans-serif;direction:${dir};">${C.empContractTitle}</div>
-                    <div style="font-size:11px;opacity:0.8;margin-top:3px;font-family:'Cairo',sans-serif;direction:${dir};">${C.empContractSubtitle}</div>
+                    <div style="font-size:18px;font-weight:900;letter-spacing:1px;font-family:'Noto Sans Arabic',sans-serif;direction:${dir};">${C.empContractTitle}</div>
+                    <div style="font-size:11px;opacity:0.8;margin-top:3px;font-family:'Noto Sans Arabic',sans-serif;direction:${dir};">${C.empContractSubtitle}</div>
                 </div>
 
                 <!-- Parties -->
@@ -3423,7 +3423,7 @@
             let origWrapperTransform = '', origWrapperWidth = '';
             if (wrapper) { origWrapperTransform = wrapper.style.transform; origWrapperWidth = wrapper.style.width; wrapper.style.transform = 'none'; wrapper.style.width = '100%'; }
 
-            // Force DOM reflow and ensure Cairo Arabic font is both ready before capture
+            // Force DOM reflow and ensure Noto Sans Arabic font is ready before capture
             await Promise.all([new Promise(resolve => setTimeout(resolve, 300)), document.fonts.ready]);
 
             const opt = {
@@ -3488,9 +3488,9 @@
             try {
                 const ctLang = isEmp ? (document.getElementById('ec-lang')?.value || empContractLang) : (document.getElementById('ct-lang')?.value || contractLang);
                 const isCtArabic = ctLang === 'ar';
-                const bodyFont = isCtArabic ? "'Cairo', sans-serif" : "'Arial', 'Calibri', sans-serif";
+                const bodyFont = isCtArabic ? "'Noto Sans Arabic', sans-serif" : "'Arial', 'Calibri', sans-serif";
                 const styleBlock = `<style>
-                    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+                    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;700;800;900&display=swap');
                     body { font-family: ${bodyFont}; font-size: 11pt; color: #111; direction: ${isCtArabic ? 'rtl' : 'ltr'}; }
                     .ct-header-divider { border-top: 3px solid #111; margin: 10pt 0 14pt; }
                     .ct-section-label { background: #111; color: #fff; font-size: 9pt; font-weight: bold; letter-spacing: 1pt; text-transform: uppercase; padding: 5pt 8pt; display: inline-block; margin-bottom: 8pt; }
@@ -3511,7 +3511,7 @@
                     .ct-sig-party-label { background: #111; color: #fff; font-size: 8pt; font-weight: bold; padding: 3pt 7pt; }
                     .ct-sig-name-line { border-bottom: 1.5pt solid #111; margin: 20pt 0 6pt; }
                     .ct-sig-name-text { font-size: 10pt; font-weight: bold; font-family: ${bodyFont}; }
-                    .arabic-text { font-family: 'Cairo', sans-serif !important; direction: rtl; text-align: right; unicode-bidi: embed; }
+                    .arabic-text { font-family: 'Noto Sans Arabic', sans-serif !important; direction: rtl; text-align: right; unicode-bidi: embed; }
                 </style>`;
                 const htmlContent = element.innerHTML;
                 const dir = isCtArabic ? 'rtl' : 'ltr';
@@ -3697,7 +3697,7 @@
         // Wait for fonts and set proper direction before export
         // ==========================================================================
         async function prepareElementForExport(element, langOverride) {
-            // Wait for all fonts (including Cairo) to load
+            // Wait for all fonts (including Noto Sans Arabic) to load
             try { await document.fonts.ready; } catch(e) {}
             // Additional stabilization delay
             await new Promise(r => setTimeout(r, 250));
@@ -3706,9 +3706,9 @@
             if (lang === 'ar') {
                 element.style.direction = 'rtl';
                 element.setAttribute('dir', 'rtl');
-                // Ensure Cairo font is applied for proper Arabic shaping
-                if (!element.style.fontFamily || !element.style.fontFamily.includes('Cairo')) {
-                    element.style.fontFamily = "'Cairo', sans-serif";
+                // Ensure Noto Sans Arabic font is applied for proper Arabic shaping
+                if (!element.style.fontFamily || !element.style.fontFamily.includes('Noto Sans Arabic')) {
+                    element.style.fontFamily = "'Noto Sans Arabic', sans-serif";
                 }
             } else {
                 element.style.direction = 'ltr';
@@ -3775,7 +3775,7 @@
             } else { await _origLazyCtPDF.call(this, type); }
         };
 
-        // Word export uses Cairo font via the embedded style block — no additional patching needed
+        // Word export uses Noto Sans Arabic font via the embedded style block — no additional patching needed
 
         // ==========================================================================
         // SHARED AI HELPERS
