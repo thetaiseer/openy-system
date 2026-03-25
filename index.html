@@ -566,17 +566,6 @@
                     </div>
                 </div>
             </main>
-            
-            <div class="export-dock no-print" id="inv-export-section">
-                <button id="invBtnExcel" onclick="if(typeof window.lazyGenerateExcel === 'function') window.lazyGenerateExcel()" class="ui-button ui-button-secondary">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Download Excel
-                </button>
-                <button id="invBtnPDF" onclick="if(typeof window.lazyGenerateInvoicePDF === 'function') window.lazyGenerateInvoicePDF()" class="ui-button ui-button-primary">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                    Download PDF
-                </button>
-            </div>
         </aside>
 
         <!-- Right Live Preview for Invoice -->
@@ -843,17 +832,6 @@
                     </div>
                 </div>
             </main>
-            
-            <div class="export-dock no-print" id="export-section">
-                <button id="btn-export-excel-quote" onclick="if(typeof window.lazyGenerateQuoteExcel === 'function') window.lazyGenerateQuoteExcel()" class="ui-button ui-button-secondary">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Download Excel
-                </button>
-                <button id="btn-export-main" onclick="if(typeof window.lazyGenerateQuotePDF === 'function') window.lazyGenerateQuotePDF()" class="ui-button ui-button-primary">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Download PDF
-                </button>
-            </div>
         </aside>
 
         <!-- Right Live Preview for Quotation -->
@@ -1222,19 +1200,6 @@
                 </div><!-- end ct-tab-history -->
             </main>
 
-            <!-- Export Dock -->
-            <div class="export-dock no-print" id="ct-export-section">
-                <div class="flex gap-3 flex-wrap">
-                    <button onclick="window.lazyGenerateContractWord('contract')" id="ctBtnWord" class="ui-button ui-button-secondary flex-1">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Export Word
-                    </button>
-                    <button onclick="window.lazyGenerateContractPDF('contract')" id="ctBtnPDF" class="ui-button ui-button-primary flex-1">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                        Export PDF
-                    </button>
-                </div>
-            </div>
         </aside>
 
         <!-- Right: A4 Preview -->
@@ -1661,19 +1626,6 @@
                 </div><!-- end ec-tab-history -->
             </main>
 
-            <!-- Export Dock -->
-            <div class="export-dock no-print" id="ec-export-section">
-                <div class="flex gap-3 flex-wrap">
-                    <button onclick="window.lazyGenerateContractWord('empcontract')" id="ecBtnWord" class="ui-button ui-button-secondary flex-1">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Export Word
-                    </button>
-                    <button onclick="window.lazyGenerateContractPDF('empcontract')" id="ecBtnPDF" class="ui-button ui-button-primary flex-1">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                        Export PDF
-                    </button>
-                </div>
-            </div>
         </aside>
 
         <!-- Right: A4 Preview -->
@@ -2227,6 +2179,65 @@
                 <button class="ui-button ui-button-secondary" onclick="window.closeEmpSalaryAdjModal()">Cancel</button>
                 <button class="ui-button ui-button-primary" onclick="window.saveSalaryAdjustment()">Save Adjustment</button>
             </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         FLOATING EXPORT ACTION BUTTONS — body-level so that
+         position:fixed is always relative to the viewport,
+         NOT clipped by backdrop-filter on .app-sidebar.
+         Visibility is managed via JS (switchMainModule, tab functions).
+         ══════════════════════════════════════════════════════════ -->
+
+    <!-- Invoice export dock -->
+    <div class="export-dock no-print" id="inv-export-section" style="display:none;">
+        <button id="invBtnExcel" onclick="if(typeof window.lazyGenerateExcel === 'function') window.lazyGenerateExcel()" class="ui-button ui-button-secondary">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Download Excel
+        </button>
+        <button id="invBtnPDF" onclick="if(typeof window.lazyGenerateInvoicePDF === 'function') window.lazyGenerateInvoicePDF()" class="ui-button ui-button-primary">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            Download PDF
+        </button>
+    </div>
+
+    <!-- Quotation export dock -->
+    <div class="export-dock no-print" id="export-section" style="display:none;">
+        <button id="btn-export-excel-quote" onclick="if(typeof window.lazyGenerateQuoteExcel === 'function') window.lazyGenerateQuoteExcel()" class="ui-button ui-button-secondary">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Download Excel
+        </button>
+        <button id="btn-export-main" onclick="if(typeof window.lazyGenerateQuotePDF === 'function') window.lazyGenerateQuotePDF()" class="ui-button ui-button-primary">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Download PDF
+        </button>
+    </div>
+
+    <!-- Client Contract export dock -->
+    <div class="export-dock no-print" id="ct-export-section" style="display:none;">
+        <div class="flex gap-3 flex-wrap">
+            <button onclick="window.lazyGenerateContractWord('contract')" id="ctBtnWord" class="ui-button ui-button-secondary flex-1">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Export Word
+            </button>
+            <button onclick="window.lazyGenerateContractPDF('contract')" id="ctBtnPDF" class="ui-button ui-button-primary flex-1">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                Export PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Employee Contract export dock -->
+    <div class="export-dock no-print" id="ec-export-section" style="display:none;">
+        <div class="flex gap-3 flex-wrap">
+            <button onclick="window.lazyGenerateContractWord('empcontract')" id="ecBtnWord" class="ui-button ui-button-secondary flex-1">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Export Word
+            </button>
+            <button onclick="window.lazyGenerateContractPDF('empcontract')" id="ecBtnPDF" class="ui-button ui-button-primary flex-1">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                Export PDF
+            </button>
         </div>
     </div>
 

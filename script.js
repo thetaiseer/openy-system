@@ -326,6 +326,8 @@
                 landing.classList.remove('fade-out');
                 requestAnimationFrame(() => { landing.style.opacity = '1'; });
             }
+            // Hide all floating export docks when returning to the landing screen
+            document.querySelectorAll('.export-dock').forEach(d => { d.style.display = 'none'; });
             window.scrollTo(0, 0);
         };
 
@@ -343,12 +345,18 @@
 
             [invMod, quoMod, ctMod, ecMod, empMod].forEach(m => { if(m) m.style.display = 'none'; });
             [navInv, navQuo, navCt, navEc, navEmp].forEach(b => { if(b) b.classList.remove('active'); });
-            // Reset dock visibility whenever a module switch occurs
-            document.querySelectorAll('.export-dock').forEach(d => d.classList.remove('dock-hidden'));
+            // Hide all floating export docks; each module block below will show the correct one
+            document.querySelectorAll('.export-dock').forEach(d => { d.style.display = 'none'; d.classList.remove('dock-hidden'); });
 
             if (moduleName === 'invoice') {
                 if(invMod) invMod.style.display = 'flex';
                 if(navInv) navInv.classList.add('active');
+                // Show invoice dock only when the editor tab is active
+                const invDock = document.getElementById('inv-export-section');
+                if (invDock && invMod) {
+                    const editorActive = invMod.querySelector('.ui-nav-pill[data-inv-tab="editor"].active');
+                    if (editorActive) invDock.style.display = 'flex';
+                }
                 setTimeout(() => {
                     if (typeof window.updateAllocations === 'function') window.updateAllocations();
                     if (typeof window.adjustLayout === 'function') window.adjustLayout();
@@ -356,10 +364,22 @@
             } else if (moduleName === 'quotation') {
                 if(quoMod) quoMod.style.display = 'flex';
                 if(navQuo) navQuo.classList.add('active');
+                // Show quotation dock only when the editor tab is active
+                const quoDock = document.getElementById('export-section');
+                if (quoDock && quoMod) {
+                    const editorActive = quoMod.querySelector('.ui-nav-pill[data-tab="editor"].active');
+                    if (editorActive) quoDock.style.display = 'flex';
+                }
                 setTimeout(() => { if (typeof window.adjustLayout === 'function') window.adjustLayout(); }, 50);
             } else if (moduleName === 'contract') {
                 if(ctMod) ctMod.style.display = 'flex';
                 if(navCt) navCt.classList.add('active');
+                // Show contract dock only when the editor tab is active
+                const ctDock = document.getElementById('ct-export-section');
+                if (ctDock && ctMod) {
+                    const editorActive = ctMod.querySelector('.ui-nav-pill[data-ctab="editor"].active');
+                    if (editorActive) ctDock.style.display = 'flex';
+                }
                 setTimeout(() => {
                     if (typeof window.renderContractPreview === 'function') window.renderContractPreview();
                     if (typeof window.adjustLayout === 'function') window.adjustLayout();
@@ -367,6 +387,12 @@
             } else if (moduleName === 'empcontract') {
                 if(ecMod) ecMod.style.display = 'flex';
                 if(navEc) navEc.classList.add('active');
+                // Show employee contract dock only when the editor tab is active
+                const ecDock = document.getElementById('ec-export-section');
+                if (ecDock && ecMod) {
+                    const editorActive = ecMod.querySelector('.ui-nav-pill[data-ectab="editor"].active');
+                    if (editorActive) ecDock.style.display = 'flex';
+                }
                 setTimeout(() => {
                     if (typeof window.renderEmpContractPreview === 'function') window.renderEmpContractPreview();
                     if (typeof window.adjustLayout === 'function') window.adjustLayout();
