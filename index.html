@@ -2191,32 +2191,32 @@
 
     <!-- Invoice export dock -->
     <div class="export-dock no-print" id="inv-export-section" style="display:none;">
-        <button id="invBtnExcel" onclick="if(typeof window.lazyGenerateExcel === 'function') window.lazyGenerateExcel()" class="ui-button ui-button-secondary" title="Download Excel">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+        <button id="invBtnExcel" onclick="if(typeof window.lazyGenerateExcel === 'function') window.lazyGenerateExcel()" class="ui-button ui-button-secondary ui-button-excel" title="Download Excel">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#22c55e"/><path d="M14 2v6h6" fill="#86efac"/><text x="12" y="18" text-anchor="middle" font-size="5.5" font-weight="800" fill="white" font-family="Arial,Helvetica,sans-serif">XLS</text></svg>
         </button>
-        <button id="invBtnPDF" onclick="if(typeof window.lazyGenerateInvoicePDF === 'function') window.lazyGenerateInvoicePDF()" class="ui-button ui-button-primary" title="Download PDF">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+        <button id="invBtnPDF" onclick="if(typeof window.lazyGenerateInvoicePDF === 'function') window.lazyGenerateInvoicePDF()" class="ui-button ui-button-primary ui-button-pdf" title="Download PDF">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#ef4444"/><path d="M14 2v6h6" fill="#fca5a5"/><text x="12" y="18" text-anchor="middle" font-size="5.5" font-weight="800" fill="white" font-family="Arial,Helvetica,sans-serif">PDF</text></svg>
         </button>
     </div>
 
     <!-- Quotation export dock -->
     <div class="export-dock no-print" id="export-section" style="display:none;">
-        <button id="btn-export-excel-quote" onclick="if(typeof window.lazyGenerateQuoteExcel === 'function') window.lazyGenerateQuoteExcel()" class="ui-button ui-button-secondary" title="Download Excel">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+        <button id="btn-export-excel-quote" onclick="if(typeof window.lazyGenerateQuoteExcel === 'function') window.lazyGenerateQuoteExcel()" class="ui-button ui-button-secondary ui-button-excel" title="Download Excel">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#22c55e"/><path d="M14 2v6h6" fill="#86efac"/><text x="12" y="18" text-anchor="middle" font-size="5.5" font-weight="800" fill="white" font-family="Arial,Helvetica,sans-serif">XLS</text></svg>
         </button>
-        <button id="btn-export-main" onclick="if(typeof window.lazyGenerateQuotePDF === 'function') window.lazyGenerateQuotePDF()" class="ui-button ui-button-primary" title="Download PDF">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+        <button id="btn-export-main" onclick="if(typeof window.lazyGenerateQuotePDF === 'function') window.lazyGenerateQuotePDF()" class="ui-button ui-button-primary ui-button-pdf" title="Download PDF">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#ef4444"/><path d="M14 2v6h6" fill="#fca5a5"/><text x="12" y="18" text-anchor="middle" font-size="5.5" font-weight="800" fill="white" font-family="Arial,Helvetica,sans-serif">PDF</text></svg>
         </button>
     </div>
 
     <!-- Client Contract export dock -->
     <div class="export-dock no-print" id="ct-export-section" style="display:none;">
         <div class="flex gap-3 flex-wrap">
-            <button onclick="window.lazyGenerateContractWord('contract')" id="ctBtnWord" class="ui-button ui-button-secondary" title="Export Word">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <button onclick="window.lazyGenerateContractWord('contract')" id="ctBtnWord" class="ui-button ui-button-secondary ui-button-word" title="Export Word">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#3b82f6"/><path d="M14 2v6h6" fill="#93c5fd"/><text x="12" y="18" text-anchor="middle" font-size="5.5" font-weight="800" fill="white" font-family="Arial,Helvetica,sans-serif">DOC</text></svg>
             </button>
-            <button onclick="window.lazyGenerateContractPDF('contract')" id="ctBtnPDF" class="ui-button ui-button-primary" title="Export PDF">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            <button onclick="window.lazyGenerateContractPDF('contract')" id="ctBtnPDF" class="ui-button ui-button-primary ui-button-pdf" title="Export PDF">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#ef4444"/><path d="M14 2v6h6" fill="#fca5a5"/><text x="12" y="18" text-anchor="middle" font-size="5.5" font-weight="800" fill="white" font-family="Arial,Helvetica,sans-serif">PDF</text></svg>
             </button>
         </div>
     </div>
@@ -2224,11 +2224,11 @@
     <!-- Employee Contract export dock -->
     <div class="export-dock no-print" id="ec-export-section" style="display:none;">
         <div class="flex gap-3 flex-wrap">
-            <button onclick="window.lazyGenerateContractWord('empcontract')" id="ecBtnWord" class="ui-button ui-button-secondary" title="Export Word">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <button onclick="window.lazyGenerateContractWord('empcontract')" id="ecBtnWord" class="ui-button ui-button-secondary ui-button-word" title="Export Word">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#3b82f6"/><path d="M14 2v6h6" fill="#93c5fd"/><text x="12" y="18" text-anchor="middle" font-size="5.5" font-weight="800" fill="white" font-family="Arial,Helvetica,sans-serif">DOC</text></svg>
             </button>
-            <button onclick="window.lazyGenerateContractPDF('empcontract')" id="ecBtnPDF" class="ui-button ui-button-primary" title="Export PDF">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            <button onclick="window.lazyGenerateContractPDF('empcontract')" id="ecBtnPDF" class="ui-button ui-button-primary ui-button-pdf" title="Export PDF">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#ef4444"/><path d="M14 2v6h6" fill="#fca5a5"/><text x="12" y="18" text-anchor="middle" font-size="5.5" font-weight="800" fill="white" font-family="Arial,Helvetica,sans-serif">PDF</text></svg>
             </button>
         </div>
     </div>
