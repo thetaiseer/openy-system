@@ -328,6 +328,8 @@
             }
             // Hide all floating export docks when returning to the landing screen
             document.querySelectorAll('.export-dock').forEach(d => { d.style.display = 'none'; });
+            // Sync bottom glass nav to home
+            if (typeof window.setBottomNavActive === 'function') window.setBottomNavActive('home');
             window.scrollTo(0, 0);
         };
 
@@ -410,6 +412,8 @@
                 const mBtn = document.getElementById('mnav-' + m);
                 if (mBtn) mBtn.classList.toggle('active', m === moduleName);
             });
+            // Sync bottom glass nav
+            if (typeof window.setBottomNavActive === 'function') window.setBottomNavActive(moduleName);
             window.scrollTo(0, 0);
         };
 
@@ -459,6 +463,128 @@
                 }
             });
         }());
+
+        // ── Theme Management ──────────────────────────────────────────────────────
+        (function() {
+            const THEME_KEY = 'openy_theme';
+            // Themes: 'light' (default) | 'dark'
+            function applyTheme(theme) {
+                const html = document.documentElement;
+                if (theme === 'dark') {
+                    html.setAttribute('data-theme', 'dark');
+                } else {
+                    html.removeAttribute('data-theme');
+                }
+                // Update all theme icon buttons
+                const isDark = theme === 'dark';
+                const sunPath = 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z';
+                const moonPath = 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z';
+                const iconPath = isDark ? sunPath : moonPath;
+                const label = isDark ? 'Light Mode' : 'Dark Mode';
+                ['theme-icon-nav', 'theme-icon-more'].forEach(function(id) {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="' + iconPath + '"/>';
+                    }
+                });
+                const labelMore = document.getElementById('theme-label-more');
+                if (labelMore) labelMore.textContent = label;
+            }
+
+            window.cycleTheme = function() {
+                const current = localStorage.getItem(THEME_KEY) || 'light';
+                const next = current === 'dark' ? 'light' : 'dark';
+                localStorage.setItem(THEME_KEY, next);
+                applyTheme(next);
+            };
+
+            // Init on load
+            function initTheme() {
+                let saved = localStorage.getItem(THEME_KEY);
+                if (!saved) {
+                    // Follow system preference by default
+                    saved = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                }
+                applyTheme(saved);
+            }
+            initTheme();
+
+            // Respond to system preference changes if user hasn't set a preference
+            if (window.matchMedia) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                    if (!localStorage.getItem(THEME_KEY)) {
+                        applyTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+            }
+        }());
+
+        // ── Bottom Glass Nav ─────────────────────────────────────────────────────
+        window.setBottomNavActive = function(moduleName) {
+            // moduleName: 'home' | 'invoice' | 'quotation' | 'contract' | 'empcontract' | 'employees'
+            const items = ['home', 'invoice', 'quotation', 'employees', 'more'];
+            items.forEach(function(id) {
+                const btn = document.getElementById('bnav-' + id);
+                if (btn) btn.classList.remove('active');
+            });
+            // Also clear more-menu active items
+            ['bmore-contract', 'bmore-empcontract'].forEach(function(id) {
+                const btn = document.getElementById(id);
+                if (btn) btn.classList.remove('active');
+            });
+
+            if (moduleName === 'home') {
+                const homeBtn = document.getElementById('bnav-home');
+                if (homeBtn) homeBtn.classList.add('active');
+            } else if (moduleName === 'invoice') {
+                const btn = document.getElementById('bnav-invoice');
+                if (btn) btn.classList.add('active');
+            } else if (moduleName === 'quotation') {
+                const btn = document.getElementById('bnav-quotation');
+                if (btn) btn.classList.add('active');
+            } else if (moduleName === 'employees') {
+                const btn = document.getElementById('bnav-employees');
+                if (btn) btn.classList.add('active');
+            } else if (moduleName === 'contract' || moduleName === 'empcontract') {
+                const moreBtn = document.getElementById('bnav-more');
+                if (moreBtn) moreBtn.classList.add('active');
+                const subBtn = document.getElementById('bmore-' + moduleName);
+                if (subBtn) subBtn.classList.add('active');
+            }
+        };
+
+        window.toggleBottomMore = function(e) {
+            if (e) e.stopPropagation();
+            const popup = document.getElementById('bottom-more-popup');
+            const btn = document.getElementById('bnav-more');
+            if (!popup) return;
+            const isOpen = popup.classList.contains('open');
+            if (isOpen) {
+                popup.classList.remove('open');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            } else {
+                popup.classList.add('open');
+                if (btn) btn.setAttribute('aria-expanded', 'true');
+            }
+        };
+
+        window.closeBottomMore = function() {
+            const popup = document.getElementById('bottom-more-popup');
+            const btn = document.getElementById('bnav-more');
+            if (popup) popup.classList.remove('open');
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+        };
+
+        // Close bottom more popup when clicking outside
+        document.addEventListener('click', function(e) {
+            const popup = document.getElementById('bottom-more-popup');
+            const btn = document.getElementById('bnav-more');
+            if (popup && popup.classList.contains('open')) {
+                if (!popup.contains(e.target) && e.target !== btn && !(btn && btn.contains(e.target))) {
+                    window.closeBottomMore();
+                }
+            }
+        });
 
         window.switchTab = function(tabId) {
             const mod = document.getElementById('quotation-module');

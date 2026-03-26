@@ -142,6 +142,12 @@
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                 Home
             </button>
+            <!-- Theme toggle button -->
+            <button class="theme-toggle-btn no-print" id="theme-toggle-btn" onclick="window.cycleTheme()" title="Toggle theme" aria-label="Toggle color theme">
+                <svg id="theme-icon-nav" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                </svg>
+            </button>
             <!-- Hamburger button: mobile only -->
             <button class="hamburger-btn no-print" id="mobile-menu-btn" onclick="window.toggleMobileMenu()" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav-dropdown">
                 <svg id="hamburger-icon" class="hamburger-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -2232,6 +2238,68 @@
             </button>
         </div>
     </div>
+
+    <!-- ========== BOTTOM GLASS NAVIGATION (mobile) ========== -->
+    <nav class="bottom-glass-nav no-print" id="bottom-glass-nav" aria-label="Main navigation">
+        <!-- More popup (outside buttons to keep HTML valid) -->
+        <div class="bottom-more-popup" id="bottom-more-popup" role="menu">
+            <button class="bottom-more-item" id="bmore-contract" onclick="window.openModule('contract'); window.closeBottomMore();" role="menuitem">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Client Contract
+            </button>
+            <button class="bottom-more-item" id="bmore-empcontract" onclick="window.openModule('empcontract'); window.closeBottomMore();" role="menuitem">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                HR Contract
+            </button>
+            <div class="bottom-more-divider"></div>
+            <button class="bottom-more-item" id="theme-toggle-more" onclick="window.cycleTheme(); window.closeBottomMore();" role="menuitem">
+                <svg id="theme-icon-more" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:18px;height:18px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                <span id="theme-label-more">Dark Mode</span>
+            </button>
+        </div>
+        <div class="bottom-nav-track">
+            <!-- Home -->
+            <button class="bottom-nav-item" id="bnav-home" onclick="window.openLanding();" aria-label="Home">
+                <span class="bottom-nav-dot"></span>
+                <svg class="bottom-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="bottom-nav-label">Home</span>
+            </button>
+            <!-- Invoice -->
+            <button class="bottom-nav-item" id="bnav-invoice" onclick="window.openModule('invoice')" aria-label="Invoice">
+                <span class="bottom-nav-dot"></span>
+                <svg class="bottom-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span class="bottom-nav-label">Invoice</span>
+            </button>
+            <!-- Quotation -->
+            <button class="bottom-nav-item" id="bnav-quotation" onclick="window.openModule('quotation')" aria-label="Quotation">
+                <span class="bottom-nav-dot"></span>
+                <svg class="bottom-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                </svg>
+                <span class="bottom-nav-label">Quotes</span>
+            </button>
+            <!-- Employees -->
+            <button class="bottom-nav-item" id="bnav-employees" onclick="window.openModule('employees')" aria-label="Employees">
+                <span class="bottom-nav-dot"></span>
+                <svg class="bottom-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <span class="bottom-nav-label">Staff</span>
+            </button>
+            <!-- More -->
+            <button class="bottom-nav-item" id="bnav-more" onclick="window.toggleBottomMore(event)" aria-label="More" aria-expanded="false" aria-controls="bottom-more-popup">
+                <span class="bottom-nav-dot"></span>
+                <svg class="bottom-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
+                </svg>
+                <span class="bottom-nav-label">More</span>
+            </button>
+        </div>
+    </nav>
 
     <script src="script.js"></script>
 </body>
