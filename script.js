@@ -404,6 +404,7 @@
                 if(navEmp) navEmp.classList.add('active');
                 setTimeout(() => {
                     if (typeof window.refreshEmployeesModule === 'function') window.refreshEmployeesModule();
+                    if (typeof window.switchEmpTab === 'function') window.switchEmpTab('list');
                 }, 80);
             }
 
@@ -4275,7 +4276,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
             return (parts[0][0] + (parts[1]?.[0] || '')).toUpperCase();
         }
         function empStatusBadge(status) {
-            const map = { 'Active': 'active', 'On Leave': 'onleave', 'Resigned': 'resigned', 'Terminated': 'terminated', 'Archived': 'archived' };
+            const map = { 'Active': 'active', 'Inactive': 'archived', 'On Leave': 'onleave', 'Resigned': 'resigned', 'Terminated': 'terminated', 'Archived': 'archived' };
             const key = map[status] || 'archived';
             return `<span class="emp-badge emp-badge-${key}">${status || '—'}</span>`;
         }
@@ -4320,7 +4321,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
             const salaryHistory = localStore.getAll('salary_history');
             const active = employees.filter(e => e.status === 'Active');
             const onLeave = employees.filter(e => e.status === 'On Leave');
-            const inactive = employees.filter(e => ['Archived', 'Resigned', 'Terminated'].includes(e.status));
+            const inactive = employees.filter(e => ['Inactive', 'Archived', 'Resigned', 'Terminated'].includes(e.status));
             const totalMonthly = active.reduce((sum, e) => sum + (parseFloat(e.currentSalary) || 0), 0);
             const totalAnnual = totalMonthly * 12;
 
@@ -4408,7 +4409,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
 
             // Sort: active first, then by hire date desc
             filtered.sort((a, b) => {
-                const statusOrder = ['Active', 'On Leave', 'Resigned', 'Terminated', 'Archived'];
+                const statusOrder = ['Active', 'On Leave', 'Inactive', 'Resigned', 'Terminated', 'Archived'];
                 const aIdx = statusOrder.indexOf(a.status);
                 const bIdx = statusOrder.indexOf(b.status);
                 if (aIdx !== bIdx) return aIdx - bIdx;
@@ -4473,16 +4474,15 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
             const thisYear = now.getFullYear();
 
             const active = employees.filter(e => e.status === 'Active');
-            const allActive = employees.filter(e => ['Active', 'On Leave'].includes(e.status));
-            const totalMonthly = allActive.reduce((s, e) => s + (parseFloat(e.currentSalary) || 0), 0);
+            const totalMonthly = active.reduce((s, e) => s + (parseFloat(e.currentSalary) || 0), 0);
             const totalAnnual = totalMonthly * 12;
-            const activeOnly = active.reduce((s, e) => s + (parseFloat(e.currentSalary) || 0), 0);
+            const activeOnly = totalMonthly;
             const incMonth = salaryHistory.filter(s => { const d = new Date(s.effectiveDate); return d.getMonth() === thisMonth && d.getFullYear() === thisYear && s.changeType === 'Increase'; })
                 .reduce((s, r) => s + Math.abs(parseFloat(r.changeAmount) || 0), 0);
             const incYear = salaryHistory.filter(s => { const d = new Date(s.effectiveDate); return d.getFullYear() === thisYear && s.changeType === 'Increase'; })
                 .reduce((s, r) => s + Math.abs(parseFloat(r.changeAmount) || 0), 0);
 
-            const currency = active[0]?.currency || allActive[0]?.currency || 'EGP';
+            const currency = active[0]?.currency || 'EGP';
             const sv = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
             sv('pr-monthly', empFmtCurrency(totalMonthly, currency));
             sv('pr-annual', empFmtCurrency(totalAnnual, currency));
@@ -4522,10 +4522,13 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
             const tbody2 = document.getElementById('pr-breakdown-body');
             const tfoot = document.getElementById('pr-breakdown-foot');
             if (tbody2) {
-                // Show all non-archived employees sorted by department then name
+                // Show all employees sorted by active first, then by department then name; archived/inactive shown for history
+                const inactiveStatuses = ['Inactive', 'Archived', 'Resigned', 'Terminated'];
                 const payrollEmps = [...employees]
-                    .filter(e => !['Archived'].includes(e.status))
                     .sort((a, b) => {
+                        const aInactive = inactiveStatuses.includes(a.status);
+                        const bInactive = inactiveStatuses.includes(b.status);
+                        if (aInactive !== bInactive) return aInactive ? 1 : -1;
                         const dCmp = (a.department || '').localeCompare(b.department || '');
                         return dCmp !== 0 ? dCmp : (a.fullName || '').localeCompare(b.fullName || '');
                     });
@@ -4533,7 +4536,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                     tbody2.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:#94A3B8;">No employees found.</td></tr>';
                     if (tfoot) tfoot.innerHTML = '';
                 } else {
-                    // Group totals by currency to handle mixed-currency payrolls
+                    // Only Active employees contribute to currency totals (payroll)
                     const currencyTotals = {};
                     tbody2.innerHTML = payrollEmps.map(e => {
                         const base = parseFloat(e.currentSalary) || 0;
@@ -4541,39 +4544,46 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                         const bonuses = parseFloat(e.bonuses) || 0;
                         const monthlyCost = base + allowances + bonuses;
                         const cur = e.currency || 'EGP';
-                        if (!currencyTotals[cur]) currencyTotals[cur] = { base: 0, allowances: 0, bonuses: 0, cost: 0, count: 0 };
-                        currencyTotals[cur].base += base;
-                        currencyTotals[cur].allowances += allowances;
-                        currencyTotals[cur].bonuses += bonuses;
-                        currencyTotals[cur].cost += monthlyCost;
-                        currencyTotals[cur].count++;
                         const isActive = e.status === 'Active';
-                        return `<tr style="${!isActive ? 'opacity:0.6;' : ''}">
+                        if (isActive) {
+                            if (!currencyTotals[cur]) currencyTotals[cur] = { base: 0, allowances: 0, bonuses: 0, cost: 0, count: 0 };
+                            currencyTotals[cur].base += base;
+                            currencyTotals[cur].allowances += allowances;
+                            currencyTotals[cur].bonuses += bonuses;
+                            currencyTotals[cur].cost += monthlyCost;
+                            currencyTotals[cur].count++;
+                        }
+                        return `<tr style="${!isActive ? 'opacity:0.5;text-decoration:line-through;' : ''}">
                             <td class="emp-name">${e.fullName}</td>
                             <td>${e.department || '—'}</td>
                             <td>${e.jobTitle || '—'}</td>
                             <td>${empStatusBadge(e.status)}</td>
-                            <td style="font-weight:600;">${empFmtCurrency(base, cur)}</td>
-                            <td style="color:#059669;">${allowances > 0 ? empFmtCurrency(allowances, cur) : '—'}</td>
-                            <td style="color:#7C3AED;">${bonuses > 0 ? empFmtCurrency(bonuses, cur) : '—'}</td>
-                            <td style="font-weight:800;color:#0F172A;">${empFmtCurrency(monthlyCost, cur)}</td>
+                            <td style="font-weight:600;">${isActive ? empFmtCurrency(base, cur) : '—'}</td>
+                            <td style="color:#059669;">${isActive && allowances > 0 ? empFmtCurrency(allowances, cur) : '—'}</td>
+                            <td style="color:#7C3AED;">${isActive && bonuses > 0 ? empFmtCurrency(bonuses, cur) : '—'}</td>
+                            <td style="font-weight:800;color:#0F172A;">${isActive ? empFmtCurrency(monthlyCost, cur) : '—'}</td>
                         </tr>`;
                     }).join('');
                     if (tfoot) {
-                        const currencies = Object.keys(currencyTotals);
-                        tfoot.innerHTML = currencies.map((cur, i) => {
-                            const t = currencyTotals[cur];
-                            const label = currencies.length > 1
-                                ? `Total — ${cur} (${t.count} employee${t.count !== 1 ? 's' : ''})`
-                                : `Total (${payrollEmps.length} employee${payrollEmps.length !== 1 ? 's' : ''})`;
-                            return `<tr style="background:#F8FAFC;border-top:${i === 0 ? '2px' : '1px'} solid #E2E8F0;">
-                                <td colspan="4" style="font-weight:700;color:#0F172A;padding:10px 12px;">${label}</td>
-                                <td style="font-weight:700;">${empFmtCurrency(t.base, cur)}</td>
-                                <td style="font-weight:700;color:#059669;">${empFmtCurrency(t.allowances, cur)}</td>
-                                <td style="font-weight:700;color:#7C3AED;">${empFmtCurrency(t.bonuses, cur)}</td>
-                                <td style="font-weight:800;color:#2563EB;">${empFmtCurrency(t.cost, cur)}</td>
-                            </tr>`;
-                        }).join('');
+                        const activeCurrencies = Object.keys(currencyTotals);
+                        const activeCount = active.length;
+                        if (activeCurrencies.length === 0) {
+                            tfoot.innerHTML = `<tr style="background:#F8FAFC;border-top:2px solid #E2E8F0;"><td colspan="8" style="font-weight:700;color:#94A3B8;padding:10px 12px;">No active employees in payroll</td></tr>`;
+                        } else {
+                            tfoot.innerHTML = activeCurrencies.map((cur, i) => {
+                                const t = currencyTotals[cur];
+                                const label = activeCurrencies.length > 1
+                                    ? `Active Payroll Total — ${cur} (${t.count} active employee${t.count !== 1 ? 's' : ''})`
+                                    : `Active Payroll Total (${activeCount} active employee${activeCount !== 1 ? 's' : ''})`;
+                                return `<tr style="background:#F0FDF4;border-top:${i === 0 ? '2px' : '1px'} solid #BBF7D0;">
+                                    <td colspan="4" style="font-weight:700;color:#065F46;padding:10px 12px;">${label}</td>
+                                    <td style="font-weight:700;color:#065F46;">${empFmtCurrency(t.base, cur)}</td>
+                                    <td style="font-weight:700;color:#059669;">${empFmtCurrency(t.allowances, cur)}</td>
+                                    <td style="font-weight:700;color:#7C3AED;">${empFmtCurrency(t.bonuses, cur)}</td>
+                                    <td style="font-weight:800;color:#059669;">${empFmtCurrency(t.cost, cur)}</td>
+                                </tr>`;
+                            }).join('');
+                        }
                     }
                 }
             }
@@ -4668,6 +4678,9 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
             const existingId = document.getElementById('emp-form-id').value;
             const id = isNew ? ('emp-' + Date.now() + '-' + Math.floor(Math.random() * 10000)) : existingId;
 
+            const existingEmployees = localStore.getAll('employees');
+            const oldEmpRecord = isNew ? null : existingEmployees.find(e => e.id === id);
+
             const emp = {
                 id,
                 employeeId: document.getElementById('ef-employeeId').value.trim(),
@@ -4699,8 +4712,21 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 linkedContractNumber: document.getElementById('ef-linkedContractNumber').value.trim(),
                 contractDuration: parseInt(document.getElementById('ef-contractDuration').value, 10) || 0,
                 updatedAt: new Date().toISOString(),
-                createdAt: isNew ? new Date().toISOString() : (localStore.getAll('employees').find(e => e.id === id)?.createdAt || new Date().toISOString())
+                createdAt: isNew ? new Date().toISOString() : (oldEmpRecord?.createdAt || new Date().toISOString()),
+                hiredAt: isNew ? new Date().toISOString() : (oldEmpRecord?.hiredAt || null)
             };
+
+            // Preserve deactivatedAt / leftAt if already set; update if status is now inactive/archived
+            const inactiveStatuses = ['Inactive', 'Archived', 'Resigned', 'Terminated'];
+            if (!isNew) {
+                if (oldEmpRecord?.deactivatedAt) emp.deactivatedAt = oldEmpRecord.deactivatedAt;
+                if (oldEmpRecord?.leftAt) emp.leftAt = oldEmpRecord.leftAt;
+                // If status just changed to inactive, record the deactivation time
+                if (inactiveStatuses.includes(emp.status) && oldEmpRecord && !inactiveStatuses.includes(oldEmpRecord.status)) {
+                    emp.deactivatedAt = new Date().toISOString();
+                    emp.leftAt = new Date().toISOString();
+                }
+            }
 
             // If new employee and salary > 0, create initial salary history entry
             if (isNew && currentSalary > 0) {
@@ -4721,8 +4747,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
 
             // If editing and salary changed, record salary history
             if (!isNew) {
-                const oldEmp = localStore.getAll('employees').find(e => e.id === id);
-                const oldSalary = parseFloat(oldEmp?.currentSalary) || 0;
+                const oldSalary = parseFloat(oldEmpRecord?.currentSalary) || 0;
                 if (oldSalary !== currentSalary) {
                     const diff = currentSalary - oldSalary;
                     const sh = {
@@ -4857,6 +4882,72 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                         <div class="emp-profile-grid">${contractSection}</div>
                     </div>
 
+                    <!-- Activity Timeline -->
+                    <div class="emp-profile-section">
+                        <div class="emp-profile-section-title">Activity Timeline</div>
+                        <div class="emp-salary-timeline">
+                            <div class="emp-salary-entry">
+                                <div class="emp-salary-entry-dot emp-salary-entry-dot-increase" style="margin-top:6px;"></div>
+                                <div style="flex:1;">
+                                    <div style="font-weight:700;font-size:0.88rem;color:#0F172A;">Hired</div>
+                                    <div style="font-size:0.78rem;color:#64748B;margin-top:2px;">Hire Date: ${empFmtDate(emp.hireDate)}</div>
+                                </div>
+                                <span class="emp-salary-entry-badge emp-salary-entry-badge-increase">Hired</span>
+                            </div>
+                            ${(function() {
+                                const firstSalaryEntry = [...salaryHistory].filter(s => s.changeType === 'Increase').sort((a,b) => new Date(a.effectiveDate) - new Date(b.effectiveDate))[0];
+                                if (!firstSalaryEntry) return '';
+                                return `<div class="emp-salary-entry">
+                                    <div class="emp-salary-entry-dot emp-salary-entry-dot-increase" style="margin-top:6px;"></div>
+                                    <div style="flex:1;">
+                                        <div style="font-weight:700;font-size:0.88rem;color:#0F172A;">Became Active</div>
+                                        <div style="font-size:0.78rem;color:#64748B;margin-top:2px;">Starting salary recorded: ${empFmtDate(firstSalaryEntry.effectiveDate)}</div>
+                                    </div>
+                                    <span class="emp-salary-entry-badge emp-salary-entry-badge-increase">Active</span>
+                                </div>`;
+                            })()}
+                            ${salaryHistory.filter(s => s.changeType === 'Increase').map(s => `
+                            <div class="emp-salary-entry">
+                                <div class="emp-salary-entry-dot emp-salary-entry-dot-increase" style="margin-top:6px;"></div>
+                                <div style="flex:1;">
+                                    <div style="font-weight:700;font-size:0.88rem;color:#0F172A;">Salary Increase</div>
+                                    <div style="font-size:0.78rem;color:#64748B;margin-top:2px;">${empFmtCurrency(s.oldSalary, emp.currency)} → ${empFmtCurrency(s.newSalary, emp.currency)} · ${s.note || ''}</div>
+                                    <div style="font-size:0.73rem;color:#94A3B8;margin-top:2px;">${empFmtDate(s.effectiveDate)}</div>
+                                </div>
+                                <span class="emp-salary-entry-badge emp-salary-entry-badge-increase">+${empFmtCurrency(s.changeAmount, emp.currency)}</span>
+                            </div>`).join('')}
+                            ${salaryHistory.filter(s => s.changeType === 'Decrease').map(s => `
+                            <div class="emp-salary-entry">
+                                <div class="emp-salary-entry-dot emp-salary-entry-dot-decrease" style="margin-top:6px;"></div>
+                                <div style="flex:1;">
+                                    <div style="font-weight:700;font-size:0.88rem;color:#0F172A;">Salary Decrease</div>
+                                    <div style="font-size:0.78rem;color:#64748B;margin-top:2px;">${empFmtCurrency(s.oldSalary, emp.currency)} → ${empFmtCurrency(s.newSalary, emp.currency)} · ${s.note || ''}</div>
+                                    <div style="font-size:0.73rem;color:#94A3B8;margin-top:2px;">${empFmtDate(s.effectiveDate)}</div>
+                                </div>
+                                <span class="emp-salary-entry-badge emp-salary-entry-badge-decrease">-${empFmtCurrency(s.changeAmount, emp.currency)}</span>
+                            </div>`).join('')}
+                            ${emp.deactivatedAt ? `
+                            <div class="emp-salary-entry" style="border-color:#EF4444;">
+                                <div class="emp-salary-entry-dot emp-salary-entry-dot-decrease" style="margin-top:6px;"></div>
+                                <div style="flex:1;">
+                                    <div style="font-weight:700;font-size:0.88rem;color:#DC2626;">Status Changed to Inactive / Archived</div>
+                                    <div style="font-size:0.78rem;color:#64748B;margin-top:2px;">Removed from active payroll</div>
+                                    <div style="font-size:0.73rem;color:#94A3B8;margin-top:2px;">Deactivated: ${empFmtDate(emp.deactivatedAt.slice(0,10))}</div>
+                                </div>
+                                <span class="emp-salary-entry-badge emp-salary-entry-badge-decrease">Archived</span>
+                            </div>` : ''}
+                            ${emp.leftAt ? `
+                            <div class="emp-salary-entry" style="border-color:#6B7280;">
+                                <div class="emp-salary-entry-dot" style="margin-top:6px;background:#6B7280;width:10px;height:10px;border-radius:50%;flex-shrink:0;"></div>
+                                <div style="flex:1;">
+                                    <div style="font-weight:700;font-size:0.88rem;color:#374151;">Left / Terminated</div>
+                                    <div style="font-size:0.73rem;color:#94A3B8;margin-top:2px;">Left at: ${empFmtDate(emp.leftAt.slice(0,10))}</div>
+                                </div>
+                                <span style="font-size:0.72rem;background:#F3F4F6;color:#374151;padding:2px 8px;border-radius:999px;font-weight:700;">Left</span>
+                            </div>` : ''}
+                        </div>
+                    </div>
+
                     <!-- Salary History Preview -->
                     <div class="emp-profile-section">
                         <div class="emp-profile-section-title">Recent Salary History</div>
@@ -4925,12 +5016,12 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
         window.exportPayrollCSV = function() {
             const employees = localStore.getAll('employees');
             const payrollEmps = [...employees]
-                .filter(e => !['Archived'].includes(e.status))
+                .filter(e => e.status === 'Active')
                 .sort((a, b) => {
                     const dCmp = (a.department || '').localeCompare(b.department || '');
                     return dCmp !== 0 ? dCmp : (a.fullName || '').localeCompare(b.fullName || '');
                 });
-            if (payrollEmps.length === 0) { showToast('No employees to export.'); return; }
+            if (payrollEmps.length === 0) { showToast('No active employees to export.'); return; }
             const header = ['Employee ID', 'Full Name', 'Department', 'Job Title', 'Status', 'Currency', 'Base Salary', 'Allowances', 'Bonuses', 'Total Monthly Cost'];
             const rows = payrollEmps.map(e => {
                 const base = parseFloat(e.currentSalary) || 0;
@@ -5128,13 +5219,35 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
             const employees = localStore.getAll('employees');
             const emp = employees.find(e => e.id === id);
             if (!emp) return;
-            if (emp.status === 'Archived') { showToast('Employee is already archived.'); return; }
+            const alreadyInactive = ['Inactive', 'Archived', 'Resigned', 'Terminated'].includes(emp.status);
+            if (alreadyInactive) { showToast('Employee is already inactive / archived.'); return; }
             window.openConfirmModal(
                 'Archive Employee',
-                `Archive ${emp.fullName}? They will be excluded from active payroll.`,
+                `Archive ${emp.fullName}? They will be marked as Inactive/Archived and excluded from active payroll. Their record and history will be preserved.`,
                 async () => {
-                    const updated = { ...emp, status: 'Archived', updatedAt: new Date().toISOString() };
+                    const now = new Date().toISOString();
+                    const updated = {
+                        ...emp,
+                        status: 'Archived',
+                        deactivatedAt: now,
+                        leftAt: now,
+                        updatedAt: now
+                    };
                     await cloudDB.put(updated, 'employees');
+                    // Record a status-change event in salary_history for activity tracking
+                    const lastSalary = parseFloat(emp.currentSalary) || 0;
+                    const activityEntry = {
+                        id: 'sh-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
+                        employeeId: id,
+                        oldSalary: lastSalary,
+                        newSalary: lastSalary,
+                        changeAmount: 0,
+                        changeType: 'Archived',
+                        effectiveDate: now.slice(0, 10),
+                        note: 'Employee archived — removed from active payroll',
+                        createdAt: now
+                    };
+                    await cloudDB.put(activityEntry, 'salary_history');
                     window.refreshEmployeesModule();
                     showToast('Employee archived ✓');
                 }

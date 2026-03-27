@@ -1651,13 +1651,13 @@
 
         <!-- Sub-tabs bar -->
         <div class="emp-tabs-bar no-print">
-            <button class="ui-nav-pill active" data-emptab="overview" onclick="window.switchEmpTab('overview')">Overview</button>
-            <button class="ui-nav-pill" data-emptab="list" onclick="window.switchEmpTab('list')">Employees List</button>
+            <button class="ui-nav-pill" data-emptab="overview" onclick="window.switchEmpTab('overview')">Overview</button>
+            <button class="ui-nav-pill active" data-emptab="list" onclick="window.switchEmpTab('list')">Employees List</button>
             <button class="ui-nav-pill" data-emptab="payroll" onclick="window.switchEmpTab('payroll')">Payroll Summary</button>
         </div>
 
         <!-- ── TAB: Overview ── -->
-        <div id="emp-tab-overview" class="emp-tab-content active">
+        <div id="emp-tab-overview" class="emp-tab-content">
             <!-- Stats Row -->
             <div class="emp-stats-grid">
                 <div class="emp-stat-card">
@@ -1746,7 +1746,7 @@
         </div>
 
         <!-- ── TAB: Employees List ── -->
-        <div id="emp-tab-list" class="emp-tab-content">
+        <div id="emp-tab-list" class="emp-tab-content active">
             <!-- Toolbar -->
             <div class="emp-toolbar">
                 <div class="emp-search-wrap">
@@ -1760,6 +1760,7 @@
                     <select id="emp-filter-status" class="ui-input emp-filter-select" onchange="window.renderEmployeesList()">
                         <option value="">All Statuses</option>
                         <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
                         <option value="On Leave">On Leave</option>
                         <option value="Resigned">Resigned</option>
                         <option value="Terminated">Terminated</option>
@@ -2001,6 +2002,7 @@
                         <label class="ui-label">Status</label>
                         <select id="ef-status" class="ui-input">
                             <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
                             <option value="On Leave">On Leave</option>
                             <option value="Resigned">Resigned</option>
                             <option value="Terminated">Terminated</option>
