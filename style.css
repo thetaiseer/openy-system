@@ -2412,3 +2412,40 @@
             background: #111111 !important;
             color: #ffffff !important;
         }
+
+        /* ===================================================================
+           .document-preview — dedicated always-light class
+           Applied to every .a4-page so the document preview always renders
+           as a print-ready white document, identical in light AND dark mode.
+           Dark mode applies ONLY to the app UI; never to this container.
+           =================================================================== */
+        .document-preview {
+            background: #ffffff !important;
+            color: #000000 !important;
+            /* Remove any glass / blur / opacity effects */
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            opacity: 1 !important;
+        }
+
+        /* Force all child elements to use black text and transparent
+           backgrounds so the parent white surface always shows through. */
+        .document-preview * {
+            color: #000 !important;
+            background-color: transparent !important;
+        }
+
+        /* Restore intentional white-on-dark document elements:
+           block labels, table headers, total boxes, contract labels, etc.
+           These are print-safe by design and must keep their dark style. */
+        .document-preview .block-label:not(.light),
+        .document-preview .services-table th,
+        .document-preview .total-box,
+        .document-preview .ct-section-label,
+        .document-preview .ct-party-header,
+        .document-preview .ct-clause-num,
+        .document-preview .ct-sig-party-label,
+        .document-preview .ct-financial-total {
+            background-color: #111111 !important;
+            color: #ffffff !important;
+        }
