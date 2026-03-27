@@ -1984,6 +1984,95 @@
             margin: 0.3rem 0.25rem;
         }
 
+        /* ===== DARK MODE BASE FIX ===== */
+        [data-theme="dark"],
+        .dark {
+            color: #ffffff !important;
+        }
+
+        /* all text */
+        .dark *,
+        [data-theme="dark"] * {
+            color: #ffffff;
+        }
+
+        /* secondary text (softer, like iOS) */
+        .dark .text-secondary,
+        [data-theme="dark"] .text-secondary {
+            color: #a1a1aa !important;
+        }
+
+        /* ===== INPUTS & SELECTS ===== */
+        .dark input,
+        .dark select,
+        .dark textarea,
+        [data-theme="dark"] input,
+        [data-theme="dark"] select,
+        [data-theme="dark"] textarea {
+            color: #ffffff !important;
+            background: #1c1c1e !important;
+            border: 1px solid #2c2c2e !important;
+        }
+
+        /* placeholder */
+        .dark input::placeholder,
+        .dark textarea::placeholder,
+        [data-theme="dark"] input::placeholder,
+        [data-theme="dark"] textarea::placeholder {
+            color: #6b7280 !important;
+        }
+
+        /* ===== CARDS / BOXES ===== */
+        .dark .card,
+        .dark .box,
+        [data-theme="dark"] .card,
+        [data-theme="dark"] .box {
+            background: #1c1c1e !important;
+            border: 1px solid #2c2c2e !important;
+            color: #ffffff !important;
+        }
+
+        /* ===== LABELS ===== */
+        .dark label,
+        [data-theme="dark"] label {
+            color: #d1d5db !important;
+        }
+
+        /* ===== HEADINGS ===== */
+        .dark h1,
+        .dark h2,
+        .dark h3,
+        .dark h4,
+        [data-theme="dark"] h1,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h4 {
+            color: #ffffff !important;
+        }
+
+        /* ===== TABLES ===== */
+        .dark table,
+        .dark th,
+        .dark td,
+        [data-theme="dark"] table,
+        [data-theme="dark"] th,
+        [data-theme="dark"] td {
+            color: #ffffff !important;
+            border-color: #2c2c2e !important;
+        }
+
+        /* ===== BUTTONS ===== */
+        .dark button,
+        [data-theme="dark"] button {
+            color: #ffffff !important;
+        }
+
+        /* ===== FIX ANY FADED TEXT ===== */
+        .dark .muted,
+        [data-theme="dark"] .muted {
+            color: #9ca3af !important;
+        }
+
         /* Adjust export dock bottom on mobile to float above the bottom nav */
         @media (max-width: 768px) {
             .bottom-glass-nav { display: block; }
