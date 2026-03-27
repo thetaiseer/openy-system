@@ -2318,3 +2318,87 @@
         /* Light — scrollbar */
         [data-theme="light"] ::-webkit-scrollbar-thumb { background: #d1d5db; }
         [data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+        /* ===================================================================
+           DOCUMENT COLOR ISOLATION
+           Prevents dark / light app theme from leaking into the final
+           document preview area, PDF export, and Word export.
+           MUST be placed AFTER all other theme rules in this file so it
+           overrides them via higher specificity and/or !important.
+           =================================================================== */
+
+        /* 1. Force the A4 page to always use print-safe white/black */
+        .a4-page {
+            background: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        /* 2. Override the non-!important dark mode wildcard
+              "[data-theme="dark"] * { color: #ffffff }"
+              Our rule has higher specificity (0,2,0) vs (0,1,0) so it wins
+              without needing !important.  Inline styles (1,0,0,0) still
+              beat this rule, which is intentional. */
+        [data-theme="dark"] .a4-page *,
+        .dark .a4-page * {
+            color: inherit;
+        }
+
+        /* 3. Override dark mode !important rules for table elements.
+              Uses !important + higher specificity (0,2,1) vs (0,1,1).
+              "inherit" walks up the DOM: for header rows the parent <tr>
+              already carries color:#fff via inline style, so white text is
+              preserved; for body rows the chain reaches .a4-page (black). */
+        [data-theme="dark"] .a4-page table,
+        [data-theme="dark"] .a4-page th,
+        [data-theme="dark"] .a4-page td,
+        .dark .a4-page table,
+        .dark .a4-page th,
+        .dark .a4-page td {
+            color: inherit !important;
+            border-color: inherit !important;
+        }
+
+        /* 4. Override dark mode !important color rules for headings */
+        [data-theme="dark"] .a4-page h1,
+        [data-theme="dark"] .a4-page h2,
+        [data-theme="dark"] .a4-page h3,
+        [data-theme="dark"] .a4-page h4,
+        [data-theme="dark"] .a4-page h5,
+        [data-theme="dark"] .a4-page h6,
+        .dark .a4-page h1,
+        .dark .a4-page h2,
+        .dark .a4-page h3,
+        .dark .a4-page h4,
+        .dark .a4-page h5,
+        .dark .a4-page h6 {
+            color: inherit !important;
+        }
+
+        /* 5. Override dark mode !important color rules for labels */
+        [data-theme="dark"] .a4-page label,
+        .dark .a4-page label {
+            color: inherit !important;
+        }
+
+        /* 6. Restore intentional white-on-dark elements (CSS class based).
+              These are specific document elements that deliberately use a
+              black background with white text and must keep those colors. */
+        [data-theme="dark"] .a4-page .block-label:not(.light),
+        [data-theme="dark"] .a4-page .services-table th,
+        [data-theme="dark"] .a4-page .total-box,
+        [data-theme="dark"] .a4-page .ct-section-label,
+        [data-theme="dark"] .a4-page .ct-party-header,
+        [data-theme="dark"] .a4-page .ct-clause-num,
+        [data-theme="dark"] .a4-page .ct-sig-party-label,
+        [data-theme="dark"] .a4-page .ct-financial-total,
+        .dark .a4-page .block-label:not(.light),
+        .dark .a4-page .services-table th,
+        .dark .a4-page .total-box,
+        .dark .a4-page .ct-section-label,
+        .dark .a4-page .ct-party-header,
+        .dark .a4-page .ct-clause-num,
+        .dark .a4-page .ct-sig-party-label,
+        .dark .a4-page .ct-financial-total {
+            background: #111111 !important;
+            color: #ffffff !important;
+        }
