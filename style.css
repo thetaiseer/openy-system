@@ -488,110 +488,59 @@
             box-sizing: border-box;
         }
 
-        /* Date / month / time inputs — match normal text/select field sizing */
+        /* Date / month / time inputs — native browser date picker, same look as text inputs */
         input[type="date"].ui-input,
         input[type="month"].ui-input,
         input[type="time"].ui-input {
             min-width: 0;
-            max-width: 100%;
             width: 100%;
             box-sizing: border-box;
-            overflow: hidden;
-            height: 2.875rem;      /* pin height to match select/text inputs */
-            padding: 0 0.625rem;   /* reduced padding so native date UI fits cleanly */
-        }
-        /* Constrain WebKit's internal date-edit shadow-DOM so it cannot push
-           past the input's own boundary on narrow (mobile) viewports. */
-        input[type="date"].ui-input::-webkit-datetime-edit,
-        input[type="month"].ui-input::-webkit-datetime-edit,
-        input[type="time"].ui-input::-webkit-datetime-edit {
-            overflow: hidden;
-            min-width: 0;
-            max-width: 100%;
-            width: 100%;
-            flex: 1 1 0%;
-            padding: 0;
-        }
-        input[type="date"].ui-input::-webkit-datetime-edit-fields-wrapper,
-        input[type="month"].ui-input::-webkit-datetime-edit-fields-wrapper,
-        input[type="time"].ui-input::-webkit-datetime-edit-fields-wrapper {
-            overflow: hidden;
-            min-width: 0;
-            max-width: 100%;
-            padding: 0;
-        }
-        input[type="date"].ui-input::-webkit-date-and-time-value,
-        input[type="month"].ui-input::-webkit-date-and-time-value {
-            min-width: 0;
-            width: 100%;
+            height: 2.875rem;
+            padding: 0.75rem 1rem;
         }
         input[type="date"].ui-input::-webkit-calendar-picker-indicator,
         input[type="month"].ui-input::-webkit-calendar-picker-indicator,
         input[type="time"].ui-input::-webkit-calendar-picker-indicator {
             opacity: 0.6;
             cursor: pointer;
-            flex-shrink: 0;
-            max-width: 1.25rem;
-            max-height: 1.25rem;
         }
 
-        /* ── Compact date chip ─────────────────────────────────────────────────
-           Metadata-style date fields that shouldn't dominate the form.
-           Keeps native date picker behaviour while reducing visual weight.
+        /* ── Date chip — same visual style as normal inputs ────────────────────
+           Uses native browser date/month picker. Full-width to match other fields.
            ───────────────────────────────────────────────────────────────── */
         input[type="month"].date-chip,
         input[type="date"].date-chip {
-            width: 190px;
+            width: 100%;
             max-width: 100%;
             min-width: 0;
-            height: 2.25rem;
-            min-height: 0;
-            padding: 0 0.75rem;
+            height: 2.875rem;
+            padding: 0.75rem 1rem;
             font-size: 0.875rem;
             font-weight: 600;
-            text-align: center;
-            background-color: rgba(241, 245, 249, 0.85);
-            border: 1px solid rgba(148, 163, 184, 0.35);
+            background-color: var(--bg-input);
+            border: 1px solid rgba(148, 163, 184, 0.4);
             border-radius: var(--radius-input);
+            box-sizing: border-box;
             box-shadow: none;
-            letter-spacing: 0.2px;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            color: var(--text-main);
         }
         input[type="month"].date-chip:focus,
         input[type="date"].date-chip:focus {
-            background-color: #fff;
             border-color: var(--border-focus);
             box-shadow: var(--shadow-focus);
-            transform: none;
-        }
-        input[type="month"].date-chip::-webkit-datetime-edit,
-        input[type="date"].date-chip::-webkit-datetime-edit {
-            padding: 0;
-            overflow: hidden;
+            outline: none;
         }
         input[type="month"].date-chip::-webkit-calendar-picker-indicator,
         input[type="date"].date-chip::-webkit-calendar-picker-indicator {
-            opacity: 0.45;
+            opacity: 0.6;
             cursor: pointer;
-            max-width: 1rem;
-            max-height: 1rem;
         }
-        /* Keep chip compact on mobile — override the general !important rules */
-        @media (max-width: 639px) {
-            input[type="month"].date-chip,
-            input[type="date"].date-chip {
-                width: 190px !important;
-                max-width: 100% !important;
-                min-width: 0 !important;
-                height: 2.25rem !important;
-            }
-        }
-        /* Dark mode — lighter chip background */
+        /* Dark mode — chip in dark theme */
         [data-theme="dark"] input[type="month"].date-chip,
         [data-theme="dark"] input[type="date"].date-chip {
-            background: rgba(44, 44, 46, 0.7) !important;
-            border-color: rgba(255, 255, 255, 0.12) !important;
+            background: #2c2c2e !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: #ffffff !important;
         }
         [data-theme="dark"] input[type="month"].date-chip:focus,
         [data-theme="dark"] input[type="date"].date-chip:focus {
@@ -809,22 +758,10 @@
             border: 1px solid rgba(148,163,184,0.35); border-radius: 8px;
             font-size: 0.8rem; font-weight: 600; background: rgba(255,255,255,0.8);
             color: #334155; outline: none; transition: all 0.18s; box-sizing: border-box;
-            max-width: 100%; min-width: 0; overflow: hidden;
+            max-width: 100%; min-width: 0;
         }
         .history-filter-date:focus { border-color: #2563eb; background-color: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-        /* Constrain WebKit internal date-edit elements for history filter dates */
-        .history-filter-date::-webkit-datetime-edit {
-            overflow: hidden; min-width: 0; max-width: 100%;
-        }
-        .history-filter-date::-webkit-datetime-edit-fields-wrapper {
-            overflow: hidden; min-width: 0; max-width: 100%;
-        }
-        .history-filter-date::-webkit-date-and-time-value {
-            min-width: 0; width: 100%;
-        }
-        .history-filter-date::-webkit-calendar-picker-indicator {
-            flex-shrink: 0; cursor: pointer;
-        }
+        .history-filter-date::-webkit-calendar-picker-indicator { cursor: pointer; }
         .history-reset-btn {
             padding: 0.4rem 0.75rem; border-radius: 8px; font-size: 0.775rem; font-weight: 700;
             background: rgba(241,245,249,0.9); color: #64748b;
@@ -1763,6 +1700,80 @@
         [data-theme="dark"] ::-webkit-scrollbar-thumb { background: #3a3a3c; }
         [data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: #48484a; }
 
+        /* Dark — Tailwind slate/blue text utilities: override with !important to win over Tailwind CDN */
+        [data-theme="dark"] .text-slate-900,
+        [data-theme="dark"] .text-slate-800 { color: #ffffff !important; }
+        [data-theme="dark"] .text-slate-700 { color: #ababaf !important; }
+        [data-theme="dark"] .text-slate-600 { color: #a1a1aa !important; }
+        [data-theme="dark"] .text-slate-500 { color: #8e8e93 !important; }
+        [data-theme="dark"] .text-blue-600 { color: #60a5fa !important; }
+
+        /* Dark — edit mode banners (hardcoded Tailwind !important amber must be overridden by higher specificity) */
+        [data-theme="dark"] #inv-edit-mode-banner > div,
+        [data-theme="dark"] #edit-mode-banner > div { color: #fcd34d !important; }
+        [data-theme="dark"] #inv-edit-mode-banner .ui-button-ghost,
+        [data-theme="dark"] #edit-mode-banner .ui-button-ghost {
+            background: transparent !important;
+            border-color: #fcd34d !important;
+            color: #fcd34d !important;
+        }
+
+        /* Dark — history record text (hardcoded CSS colors invisible on dark backgrounds) */
+        [data-theme="dark"] .history-record-client { color: #ffffff !important; }
+        [data-theme="dark"] .history-record-meta { color: #8e8e93 !important; }
+        [data-theme="dark"] .history-record-amount { color: #ffffff !important; }
+        [data-theme="dark"] .history-record-row { border-bottom-color: rgba(255, 255, 255, 0.06) !important; }
+        [data-theme="dark"] .history-record-row:hover { background: rgba(255, 255, 255, 0.06) !important; }
+        [data-theme="dark"] .history-month-divider-label { color: #6e6e73 !important; }
+        [data-theme="dark"] .history-month-divider-line { background: rgba(255, 255, 255, 0.08) !important; }
+
+        /* Dark — history filter controls */
+        [data-theme="dark"] .history-filter-date,
+        [data-theme="dark"] .history-filter-select,
+        [data-theme="dark"] .history-filter-day {
+            color: #ffffff !important;
+            background: #2c2c2e !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        [data-theme="dark"] .history-filter-date:focus,
+        [data-theme="dark"] .history-filter-select:focus,
+        [data-theme="dark"] .history-filter-day:focus {
+            border-color: #0a84ff !important;
+            box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.12) !important;
+        }
+        [data-theme="dark"] .history-reset-btn {
+            background: #2c2c2e !important;
+            color: #a1a1aa !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        [data-theme="dark"] .history-reset-btn:hover { background: #3a3a3c !important; color: #ffffff !important; }
+
+        /* Dark — history status badges */
+        [data-theme="dark"] .history-status-badge.is-paid { background: rgba(22,163,74,0.15) !important; color: #4ade80 !important; border-color: rgba(22,163,74,0.3) !important; }
+        [data-theme="dark"] .history-status-badge.is-unpaid { background: rgba(217,119,6,0.15) !important; color: #fbbf24 !important; border-color: rgba(217,119,6,0.3) !important; }
+        [data-theme="dark"] .history-status-badge.is-draft { background: rgba(100,116,139,0.15) !important; color: #94a3b8 !important; border-color: rgba(100,116,139,0.3) !important; }
+        [data-theme="dark"] .history-status-badge.is-active { background: rgba(37,99,235,0.15) !important; color: #60a5fa !important; border-color: rgba(37,99,235,0.3) !important; }
+        [data-theme="dark"] .history-status-badge.is-completed { background: rgba(22,163,74,0.15) !important; color: #4ade80 !important; border-color: rgba(22,163,74,0.3) !important; }
+        [data-theme="dark"] .history-status-badge.is-terminated { background: rgba(225,29,72,0.15) !important; color: #f87171 !important; border-color: rgba(225,29,72,0.3) !important; }
+
+        /* Dark — history action buttons */
+        [data-theme="dark"] .history-action-btn-blue { background: rgba(37,99,235,0.15) !important; border-color: rgba(96,165,250,0.3) !important; color: #60a5fa !important; }
+        [data-theme="dark"] .history-action-btn-red { background: rgba(220,38,38,0.15) !important; border-color: rgba(248,113,113,0.3) !important; color: #f87171 !important; }
+
+        /* Dark — range slider track */
+        [data-theme="dark"] input[type=range]::-webkit-slider-runnable-track {
+            background: #3a3a3c;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Dark — calendar picker indicator: invert to appear white on dark background */
+        [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+        [data-theme="dark"] input[type="month"]::-webkit-calendar-picker-indicator,
+        [data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.7;
+        }
+
         /* ==========================================================================
            THEME TOGGLE BUTTON
            ========================================================================== */
@@ -2333,14 +2344,13 @@
             color: #000000 !important;
         }
 
-        /* 2. Override the non-!important dark mode wildcard
-              "[data-theme="dark"] * { color: #ffffff }"
-              Our rule has higher specificity (0,2,0) vs (0,1,0) so it wins
-              without needing !important.  Inline styles (1,0,0,0) still
-              beat this rule, which is intentional. */
+        /* 2. Override all dark mode text color rules (including the Tailwind-class overrides
+              added above) so the document preview always shows print-safe colors.
+              Uses !important + higher specificity (0,2,0) vs (0,2,0) same specificity
+              but this rule is declared AFTER the Tailwind overrides so it wins the cascade. */
         [data-theme="dark"] .a4-page *,
         .dark .a4-page * {
-            color: inherit;
+            color: inherit !important;
         }
 
         /* 3. Override dark mode !important rules for table elements.
