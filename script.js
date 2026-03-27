@@ -23,12 +23,13 @@
         // NEVER put Admin SDK private keys or service account JSON in this file.
         // ===========================================================================
         const FIREBASE_WEB_CONFIG = {
-            apiKey:            "YOUR_API_KEY",
-            authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId:         "YOUR_PROJECT_ID",
-            storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId:             "YOUR_APP_ID"
+            apiKey:            "AIzaSyAhXa5gLCMIIxuFIAj0RFeFEvAcE5TiilY",
+            authDomain:        "openy-suite.firebaseapp.com",
+            projectId:         "openy-suite",
+            storageBucket:     "openy-suite.firebasestorage.app",
+            messagingSenderId: "735713304757",
+            appId:             "1:735713304757:web:d7c006022e4c0e8fa2defc",
+            measurementId:     "G-TWZQ62R09M"
         };
         // Set to true after filling in FIREBASE_WEB_CONFIG above
         const FIREBASE_ENABLED = FIREBASE_WEB_CONFIG.apiKey !== "YOUR_API_KEY";
@@ -778,6 +779,8 @@
                             if (document.getElementById('ct-tab-history')?.classList.contains('active')) window.renderCtHistoryList();
                         } else if (storeName === 'ec_history') {
                             if (document.getElementById('ec-tab-history')?.classList.contains('active')) window.renderEcHistoryList();
+                        } else if (storeName === 'employees' || storeName === 'salary_history') {
+                            if (typeof window.refreshEmployeesModule === 'function') window.refreshEmployeesModule();
                         }
                     }, (error) => console.error(`Firestore sync error for ${storeName}:`, error));
                 } catch(e) { console.error(`Failed to setup realtime for ${storeName}:`, e); }
