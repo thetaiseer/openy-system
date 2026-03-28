@@ -661,7 +661,28 @@
         };
 
         // All known store names – extend here when adding new document types
-        const ALL_STORES = ['history', 'inv_history', 'ct_history', 'ec_history', 'employees', 'salary_history'];
+        // Maps to Firestore collection names: quotations, invoices, clientContracts, hrContracts, employees, salaryHistory, activityLogs
+        const ALL_STORES = ['quotations', 'invoices', 'clientContracts', 'hrContracts', 'employees', 'salaryHistory', 'activityLogs'];
+
+        // One-time localStorage key migration (old names → new Firestore-aligned names)
+        (function _migrateLocalStorageKeys() {
+            const migrations = {
+                'openy_history':       'openy_quotations',
+                'openy_inv_history':   'openy_invoices',
+                'openy_ct_history':    'openy_clientContracts',
+                'openy_ec_history':    'openy_hrContracts',
+                'openy_salary_history':'openy_salaryHistory'
+            };
+            try {
+                Object.entries(migrations).forEach(([oldKey, newKey]) => {
+                    const old = localStorage.getItem(oldKey);
+                    if (old && !localStorage.getItem(newKey)) {
+                        localStorage.setItem(newKey, old);
+                        localStorage.removeItem(oldKey);
+                    }
+                });
+            } catch(e) {}
+        }());
 
         const cloudDB = {
             unsubscribers: {},
@@ -717,17 +738,17 @@
                         const cloudRecords = snapshot.docs.map(d => d.data());
                         cloudRecords.forEach(rec => localStore.put(rec, storeName));
                         const merged = localStore.getAll(storeName);
-                        if (storeName === 'history') {
+                        if (storeName === 'quotations') {
                             allHistoryRecords = merged;
                             if (document.getElementById('tab-history')?.classList.contains('active')) window.renderHistoryList();
-                        } else if (storeName === 'inv_history') {
+                        } else if (storeName === 'invoices') {
                             allInvHistoryRecords = merged;
                             if (document.getElementById('inv-tab-history')?.classList.contains('active')) window.renderInvHistoryList();
-                        } else if (storeName === 'ct_history') {
+                        } else if (storeName === 'clientContracts') {
                             if (document.getElementById('ct-tab-history')?.classList.contains('active')) window.renderCtHistoryList();
-                        } else if (storeName === 'ec_history') {
+                        } else if (storeName === 'hrContracts') {
                             if (document.getElementById('ec-tab-history')?.classList.contains('active')) window.renderEcHistoryList();
-                        } else if (storeName === 'employees' || storeName === 'salary_history') {
+                        } else if (storeName === 'employees' || storeName === 'salaryHistory') {
                             if (typeof window.refreshEmployeesModule === 'function') window.refreshEmployeesModule();
                         }
                     }, (error) => console.error(`Firestore sync error for ${storeName}:`, error));
@@ -1724,7 +1745,8 @@
                     day: _now.getDate(),
                     source: 'web'
                 };
-                await cloudDB.put(record, 'history');
+                await cloudDB.put(record, 'quotations');
+                logActivity('created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
             } catch (e) {
                 console.error(e);
                 showToast("Error generating PDF");
@@ -1797,7 +1819,8 @@
                     day: _now2.getDate(),
                     source: 'web'
                 };
-                await cloudDB.put(record, 'history');
+                await cloudDB.put(record, 'quotations');
+                logActivity('created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
             } catch (e) {
                 console.error(e);
                 showToast("Error generating Excel");
@@ -2324,7 +2347,7 @@
 
 
         function _renderHistoryCard(r, storeName, container) {
-            const canToggle = ['history', 'inv_history'].includes(storeName);
+            const canToggle = ['quotations', 'invoices'].includes(storeName);
             const statusLower = (r.status || 'unpaid').toLowerCase();
             let badgeClass = 'is-unpaid';
             if (statusLower === 'paid') badgeClass = 'is-paid';
@@ -2368,7 +2391,7 @@
             const { filterYear, filterMonth, filterDay } = parseDateFilter(filterDateVal);
             const sortVal = document.getElementById('history-sort')?.value || 'newest';
 
-            const allRecords = await cloudDB.getAll('history');
+            const allRecords = await cloudDB.getAll('quotations');
 
             const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
             _populateHistorySelect('history-filter-client', uniqueClients, 'All Clients');
@@ -2388,7 +2411,7 @@
             container.innerHTML = '';
             if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
             if (emptyEl) emptyEl.classList.add('hidden');
-            _renderHistoryRecords(records, 'history', container, sortVal);
+            _renderHistoryRecords(records, 'quotations', container, sortVal);
         };
 
         window.renderInvHistoryList = async function() {
@@ -2402,7 +2425,7 @@
             const { filterYear, filterMonth, filterDay } = parseDateFilter(filterDateVal);
             const sortVal = document.getElementById('inv-history-sort')?.value || 'newest';
 
-            const allRecords = await cloudDB.getAll('inv_history');
+            const allRecords = await cloudDB.getAll('invoices');
 
             const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
             _populateHistorySelect('inv-history-filter-client', uniqueClients, 'All Clients');
@@ -2422,7 +2445,7 @@
             container.innerHTML = '';
             if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
             if (emptyEl) emptyEl.classList.add('hidden');
-            _renderHistoryRecords(records, 'inv_history', container, sortVal);
+            _renderHistoryRecords(records, 'invoices', container, sortVal);
         };
 
         window.renderCtHistoryList = async function() {
@@ -2437,7 +2460,7 @@
             const filterStatus = document.getElementById('ct-history-filter-status')?.value || '';
             const sortVal = document.getElementById('ct-history-sort')?.value || 'newest';
 
-            const allRecords = await cloudDB.getAll('ct_history');
+            const allRecords = await cloudDB.getAll('clientContracts');
 
             const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
             _populateHistorySelect('ct-history-filter-client', uniqueClients, 'All Clients');
@@ -2457,7 +2480,7 @@
             container.innerHTML = '';
             if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
             if (emptyEl) emptyEl.classList.add('hidden');
-            _renderHistoryRecords(records, 'ct_history', container, sortVal);
+            _renderHistoryRecords(records, 'clientContracts', container, sortVal);
         };
 
         window.renderEcHistoryList = async function() {
@@ -2472,7 +2495,7 @@
             const filterStatus = document.getElementById('ec-history-filter-status')?.value || '';
             const sortVal = document.getElementById('ec-history-sort')?.value || 'newest';
 
-            const allRecords = await cloudDB.getAll('ec_history');
+            const allRecords = await cloudDB.getAll('hrContracts');
 
             const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
             _populateHistorySelect('ec-history-filter-client', uniqueClients, 'All Clients');
@@ -2492,7 +2515,7 @@
             container.innerHTML = '';
             if (records.length === 0) { if (emptyEl) emptyEl.classList.remove('hidden'); return; }
             if (emptyEl) emptyEl.classList.add('hidden');
-            _renderHistoryRecords(records, 'ec_history', container, sortVal);
+            _renderHistoryRecords(records, 'hrContracts', container, sortVal);
         };
 
         window.toggleStatus = async function(id, storeName, currentStatus) {
@@ -2501,18 +2524,18 @@
             if (record) {
                 record.status = currentStatus === 'paid' ? 'unpaid' : 'paid';
                 await cloudDB.put(record, storeName);
-                if (storeName === 'history') window.renderHistoryList();
-                else if (storeName === 'inv_history') window.renderInvHistoryList();
+                if (storeName === 'quotations') window.renderHistoryList();
+                else if (storeName === 'invoices') window.renderInvHistoryList();
             }
         };
 
         window.deleteRecord = async function(id, storeName) {
             window.openConfirmModal("Delete Record", "Are you sure you want to delete this record? This action cannot be undone.", async () => {
                 await cloudDB.delete(id, storeName);
-                if (storeName === 'history') window.renderHistoryList();
-                else if (storeName === 'inv_history') window.renderInvHistoryList();
-                else if (storeName === 'ct_history') window.renderCtHistoryList();
-                else if (storeName === 'ec_history') window.renderEcHistoryList();
+                if (storeName === 'quotations') window.renderHistoryList();
+                else if (storeName === 'invoices') window.renderInvHistoryList();
+                else if (storeName === 'clientContracts') window.renderCtHistoryList();
+                else if (storeName === 'hrContracts') window.renderEcHistoryList();
                 showToast("Record deleted.");
             });
         };
@@ -2584,7 +2607,7 @@
 
         window.clearHistory = async function() {
             window.openConfirmModal("Clear History", "Are you sure you want to clear all Quotation records?", async () => {
-                await cloudDB.clear('history');
+                await cloudDB.clear('quotations');
                 window.renderHistoryList();
                 showToast("History cleared.");
             });
@@ -2592,7 +2615,7 @@
 
         window.clearInvHistory = async function() {
             window.openConfirmModal("Clear History", "Are you sure you want to clear all Invoice records?", async () => {
-                await cloudDB.clear('inv_history');
+                await cloudDB.clear('invoices');
                 window.renderInvHistoryList();
                 showToast("History cleared.");
             });
@@ -2600,7 +2623,7 @@
 
         window.clearCtHistory = async function() {
             window.openConfirmModal("Clear History", "Are you sure you want to clear all Contract records?", async () => {
-                await cloudDB.clear('ct_history');
+                await cloudDB.clear('clientContracts');
                 window.renderCtHistoryList();
                 showToast("History cleared.");
             });
@@ -2608,14 +2631,14 @@
 
         window.clearEcHistory = async function() {
             window.openConfirmModal("Clear History", "Are you sure you want to clear all Employee Contract records?", async () => {
-                await cloudDB.clear('ec_history');
+                await cloudDB.clear('hrContracts');
                 window.renderEcHistoryList();
                 showToast("History cleared.");
             });
         };
 
         window.exportBackup = async function() {
-            const records = await cloudDB.getAll('history');
+            const records = await cloudDB.getAll('quotations');
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
@@ -2624,7 +2647,7 @@
         };
 
         window.exportInvBackup = async function() {
-            const records = await cloudDB.getAll('inv_history');
+            const records = await cloudDB.getAll('invoices');
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
@@ -2633,7 +2656,7 @@
         };
 
         window.exportCtBackup = async function() {
-            const records = await cloudDB.getAll('ct_history');
+            const records = await cloudDB.getAll('clientContracts');
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
@@ -2642,7 +2665,7 @@
         };
 
         window.exportEcBackup = async function() {
-            const records = await cloudDB.getAll('ec_history');
+            const records = await cloudDB.getAll('hrContracts');
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records));
             const dlAnchorElem = document.createElement('a');
             dlAnchorElem.setAttribute("href", dataStr);
@@ -2659,7 +2682,7 @@
                     const data = JSON.parse(e.target.result);
                     if (Array.isArray(data)) {
                         for(const item of data) {
-                            await cloudDB.put(item, 'history');
+                            await cloudDB.put(item, 'quotations');
                         }
                         window.renderHistoryList();
                         showToast("Backup restored successfully.");
@@ -2680,7 +2703,7 @@
                     const data = JSON.parse(e.target.result);
                     if (Array.isArray(data)) {
                         for(const item of data) {
-                            await cloudDB.put(item, 'inv_history');
+                            await cloudDB.put(item, 'invoices');
                         }
                         window.renderInvHistoryList();
                         showToast("Backup restored successfully.");
@@ -2700,7 +2723,7 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     if (Array.isArray(data)) {
-                        for (const item of data) await cloudDB.put(item, 'ct_history');
+                        for (const item of data) await cloudDB.put(item, 'clientContracts');
                         window.renderCtHistoryList();
                         showToast("Backup restored successfully.");
                     }
@@ -2717,7 +2740,7 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     if (Array.isArray(data)) {
-                        for (const item of data) await cloudDB.put(item, 'ec_history');
+                        for (const item of data) await cloudDB.put(item, 'hrContracts');
                         window.renderEcHistoryList();
                         showToast("Backup restored successfully.");
                     }
