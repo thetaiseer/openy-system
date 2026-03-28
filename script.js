@@ -99,7 +99,7 @@
         async function initInvoiceNumber() {
             const year = new Date().getFullYear();
             const prefix = `INV-${year}-`;
-            const records = await cloudDB.getAll('inv_history');
+            const records = await cloudDB.getAll('invoices');
             let maxNum = 0;
             records.forEach(r => {
                 if (r.ref && r.ref.startsWith(prefix)) {
@@ -1893,7 +1893,7 @@
                     day: _now3.getDate(),
                     source: 'web'
                 };
-                await cloudDB.put(record, 'inv_history');
+                await cloudDB.put(record, 'invoices');
                 await initInvoiceNumber();
                 if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
             } catch (e) {
@@ -2233,7 +2233,7 @@
                     day: _now4.getDate(),
                     source: 'web'
                 };
-                await cloudDB.put(record, 'inv_history');
+                await cloudDB.put(record, 'invoices');
                 await initInvoiceNumber();
                 if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
             } catch (e) {
@@ -3586,7 +3586,7 @@
                     day: _nowCt.getDate(),
                     source: 'web'
                 };
-                await cloudDB.put(ctRecord, isEmp ? 'ec_history' : 'ct_history');
+                await cloudDB.put(ctRecord, isEmp ? 'hrContracts' : 'clientContracts');
             } catch (e) {
                 console.error(e);
                 showToast('Error generating PDF');
@@ -3670,7 +3670,7 @@
                     day: _nowCtW.getDate(),
                     source: 'web'
                 };
-                await cloudDB.put(ctWRecord, isEmp ? 'ec_history' : 'ct_history');
+                await cloudDB.put(ctWRecord, isEmp ? 'hrContracts' : 'clientContracts');
             } catch(e) {
                 console.error(e);
                 showToast('Error generating Word document');
@@ -4292,7 +4292,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
         // ── Overview ──
         window.renderEmployeesOverview = function() {
             const employees = localStore.getAll('employees');
-            const salaryHistory = localStore.getAll('salary_history');
+            const salaryHistory = localStore.getAll('salaryHistory');
             const active = employees.filter(e => e.status === 'Active');
             const onLeave = employees.filter(e => e.status === 'On Leave');
             const inactive = employees.filter(e => ['Inactive', 'Archived', 'Resigned', 'Terminated'].includes(e.status));
@@ -4442,7 +4442,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
         // ── Payroll Summary ──
         window.renderPayrollSummary = function() {
             const employees = localStore.getAll('employees');
-            const salaryHistory = localStore.getAll('salary_history');
+            const salaryHistory = localStore.getAll('salaryHistory');
             const now = new Date();
             const thisMonth = now.getMonth();
             const thisYear = now.getFullYear();
@@ -4716,7 +4716,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                     note,
                     createdAt: new Date().toISOString()
                 };
-                await cloudDB.put(sh, 'salary_history');
+                await cloudDB.put(sh, 'salaryHistory');
             }
 
             // If editing and salary changed, record salary history
@@ -4735,7 +4735,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                         note: 'Updated via employee edit',
                         createdAt: new Date().toISOString()
                     };
-                    await cloudDB.put(sh, 'salary_history');
+                    await cloudDB.put(sh, 'salaryHistory');
                 }
             }
 
@@ -4747,14 +4747,14 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
 
         // ── Contract Datalist ──
         function _populateContractDatalist() {
-            const contracts = localStore.getAll('ec_history');
+            const contracts = localStore.getAll('hrContracts');
             const dl = document.getElementById('emp-contract-datalist');
             if (!dl) return;
             dl.innerHTML = contracts.map(c => `<option value="${c.id}" data-ref="${c.ref || ''}">${c.ref || c.id} — ${c.client || ''}</option>`).join('');
         }
 
         window.onContractSearch = function(val) {
-            const contracts = localStore.getAll('ec_history');
+            const contracts = localStore.getAll('hrContracts');
             const match = contracts.find(c => c.id === val || c.ref === val || c.ref?.toLowerCase().includes(val.toLowerCase()));
             const numEl = document.getElementById('ef-linkedContractNumber');
             if (match && numEl) {
@@ -4767,7 +4767,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
             const employees = localStore.getAll('employees');
             const emp = employees.find(e => e.id === id);
             if (!emp) return;
-            const salaryHistory = localStore.getAll('salary_history').filter(s => s.employeeId === id).sort((a, b) => new Date(b.effectiveDate) - new Date(a.effectiveDate));
+            const salaryHistory = localStore.getAll('salaryHistory').filter(s => s.employeeId === id).sort((a, b) => new Date(b.effectiveDate) - new Date(a.effectiveDate));
 
             const pf = (label, val) => `<div class="emp-profile-field"><label>${label}</label><p>${val || '—'}</p></div>`;
 
@@ -5041,7 +5041,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
         };
 
         function _renderSalaryHistoryContent(employeeId, emp) {
-            const history = localStore.getAll('salary_history').filter(s => s.employeeId === employeeId)
+            const history = localStore.getAll('salaryHistory').filter(s => s.employeeId === employeeId)
                 .sort((a, b) => new Date(b.effectiveDate) - new Date(a.effectiveDate));
 
             const container = document.getElementById('emp-salary-history-content');
@@ -5175,7 +5175,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 note,
                 createdAt: new Date().toISOString()
             };
-            await cloudDB.put(sh, 'salary_history');
+            await cloudDB.put(sh, 'salaryHistory');
 
             // Update employee current salary
             const updatedEmp = { ...emp, currentSalary: newSalary, updatedAt: new Date().toISOString() };
@@ -5221,7 +5221,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                         note: 'Employee archived — removed from active payroll',
                         createdAt: now
                     };
-                    await cloudDB.put(activityEntry, 'salary_history');
+                    await cloudDB.put(activityEntry, 'salaryHistory');
                     window.refreshEmployeesModule();
                     showToast('Employee archived ✓');
                 }
@@ -5238,9 +5238,9 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 `Permanently delete ${emp.fullName}? This will also remove all their salary history and cannot be undone.`,
                 async () => {
                     // Remove all related salary history records first
-                    const salaryHistory = localStore.getAll('salary_history');
+                    const salaryHistory = localStore.getAll('salaryHistory');
                     const relatedIds = salaryHistory.filter(s => s.employeeId === id).map(s => s.id);
-                    await Promise.all(relatedIds.map(shId => cloudDB.delete(shId, 'salary_history')));
+                    await Promise.all(relatedIds.map(shId => cloudDB.delete(shId, 'salaryHistory')));
                     // Remove the employee record
                     await cloudDB.delete(id, 'employees');
                     window.refreshEmployeesModule();
