@@ -1421,3 +1421,21 @@
                 padding-right: 1rem;
             }
         }
+
+        /* ==========================================================================
+           ACCOUNTING MODULE
+           ========================================================================== */
+        /* The accounting module reuses .employees-full-layout, .emp-tabs-bar,
+           .emp-tab-content, .emp-table, .emp-toolbar, .emp-stat-card etc.
+           Only accounting-specific overrides are added here. */
+
+        #accounting-module .emp-tabs-bar {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        #accounting-module .emp-tabs-bar::-webkit-scrollbar { display: none; }
+
+        .acct-amount-positive { color: #059669; font-weight: 700; }
+        .acct-amount-negative { color: #DC2626; font-weight: 700; }
+        .acct-amount-neutral   { color: #2563EB; font-weight: 700; }
