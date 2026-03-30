@@ -2651,6 +2651,32 @@
             });
         };
 
+        window.clearAllHistory = async function() {
+            window.openConfirmModal(
+                "Clear All System History",
+                "This will permanently delete ALL history records across every module (Quotations, Invoices, Client Contracts, HR Contracts, Salary History, Activity Logs, and Accounting). This action cannot be undone.",
+                async () => {
+                    const stores = ['quotations', 'invoices', 'clientContracts', 'hrContracts', 'salaryHistory', 'activityLogs', 'acctLedger', 'acctExpenses'];
+                    const failed = [];
+                    await Promise.all(stores.map(s => cloudDB.clear(s).catch(() => failed.push(s))));
+                    if (typeof window.renderHistoryList === 'function') window.renderHistoryList();
+                    if (typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList();
+                    if (typeof window.renderCtHistoryList === 'function') window.renderCtHistoryList();
+                    if (typeof window.renderEcHistoryList === 'function') window.renderEcHistoryList();
+                    if (typeof window.renderEmployeesOverview === 'function') window.renderEmployeesOverview();
+                    if (typeof window.renderEmployeesList === 'function') window.renderEmployeesList();
+                    if (typeof window.renderAcctLedger === 'function') window.renderAcctLedger();
+                    if (typeof window.renderAcctExpenses === 'function') window.renderAcctExpenses();
+                    if (typeof window.renderAcctSummary === 'function') window.renderAcctSummary();
+                    if (failed.length > 0) {
+                        showToast("Some stores could not be cleared: " + failed.join(', '));
+                    } else {
+                        showToast("All system history has been cleared.");
+                    }
+                }
+            );
+        };
+
         window.exportBackup = async function() {
             const records = await cloudDB.getAll('quotations');
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records));
