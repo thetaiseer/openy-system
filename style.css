@@ -202,7 +202,7 @@
         .app-sidebar { width: 100%; border-right: 1px solid rgba(255, 255, 255, 0.5); background-color: rgba(248, 250, 252, 0.2); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); display: flex; flex-direction: column; }
         @media (min-width: 1024px) { .app-sidebar { width: 45%; max-width: 520px; } }
         
-        .app-editor { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 1.5rem; padding-bottom: 88px; }
+        .app-editor { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 1.5rem; }
 
         /* Desktop: scrollable preview panel — document-viewer style */
         .app-preview {
