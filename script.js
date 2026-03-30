@@ -5384,7 +5384,8 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
 
                 // ── 4. Expenses ──
                 window.renderAcctExpenses();
-                const expenseRecs = localStore.getAll('acctExpenses');
+                let expenseRecs = localStore.getAll('acctExpenses');
+                if (selectedMonth) expenseRecs = expenseRecs.filter(r => r.date && r.date.startsWith(selectedMonth));
                 const totalExpenses = expenseRecs.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
 
                 // ── 5. Summary Stats ──
@@ -5398,6 +5399,79 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 if (netEl) {
                     netEl.textContent = acctFmt(netProfit);
                     netEl.style.color = netProfit >= 0 ? '#059669' : '#DC2626';
+                }
+
+                // ── 6. Partner Settlement ──
+                const settlementEl = document.getElementById('acct-settlement-body');
+                if (settlementEl) {
+                    if (totalIncome === 0 && totalExpenses === 0) {
+                        settlementEl.innerHTML = `<div class="emp-empty-state">Select a month and add ledger entries &amp; expenses to calculate the settlement.</div>`;
+                    } else {
+                        const eachShare = netProfit / 2;
+                        const diff = totalEgypt - eachShare; // positive = Tayseer transfers to Ahmed; negative = Ahmed transfers to Tayseer
+                        const absAmt = Math.abs(diff);
+
+                        // 0.005 EGP tolerance for floating-point precision
+                        const directionHTML = diff > 0.005
+                            ? `<div style="margin-top:1.25rem;padding:1rem 1.25rem;border-radius:10px;background:linear-gradient(135deg,rgba(37,99,235,0.07),rgba(124,58,237,0.07));border:1.5px solid #2563EB;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                                <svg fill="none" stroke="#2563EB" viewBox="0 0 24 24" style="width:32px;height:32px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                <div>
+                                    <div style="font-size:0.82rem;color:#6B7280;margin-bottom:3px;">Settlement Result — نتيجة التسوية</div>
+                                    <div style="font-size:1.1rem;font-weight:700;color:#2563EB;">
+                                        Tayseer transfers <span style="font-size:1.3rem;color:#DC2626;">${acctFmt(absAmt)} EGP</span> → to Ahmed Mansour
+                                    </div>
+                                    <div style="font-size:0.82rem;color:#6B7280;margin-top:3px;">تيسير يحول لأحمد منصور ${acctFmt(absAmt)} ج.م</div>
+                                </div>
+                               </div>`
+                            : diff < -0.005
+                            ? `<div style="margin-top:1.25rem;padding:1rem 1.25rem;border-radius:10px;background:linear-gradient(135deg,rgba(5,150,105,0.07),rgba(15,118,110,0.07));border:1.5px solid #059669;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                                <svg fill="none" stroke="#059669" viewBox="0 0 24 24" style="width:32px;height:32px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 17h-12m0 0l4-4m-4 4l4 4m4-10h12m0 0l-4-4m4 4l-4 4"></path></svg>
+                                <div>
+                                    <div style="font-size:0.82rem;color:#6B7280;margin-bottom:3px;">Settlement Result — نتيجة التسوية</div>
+                                    <div style="font-size:1.1rem;font-weight:700;color:#059669;">
+                                        Ahmed Mansour transfers <span style="font-size:1.3rem;color:#DC2626;">${acctFmt(absAmt)} EGP</span> → to Tayseer
+                                    </div>
+                                    <div style="font-size:0.82rem;color:#6B7280;margin-top:3px;">أحمد منصور يحول لتيسير ${acctFmt(absAmt)} ج.م</div>
+                                </div>
+                               </div>`
+                            : `<div style="margin-top:1.25rem;padding:1rem 1.25rem;border-radius:10px;background:rgba(5,150,105,0.06);border:1.5px solid #10B981;display:flex;align-items:center;gap:14px;">
+                                <svg fill="none" stroke="#059669" viewBox="0 0 24 24" style="width:32px;height:32px;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <div>
+                                    <div style="font-size:0.82rem;color:#6B7280;margin-bottom:3px;">Settlement Result — نتيجة التسوية</div>
+                                    <div style="font-size:1.1rem;font-weight:700;color:#059669;">Perfectly balanced — No transfer needed ✓</div>
+                                    <div style="font-size:0.82rem;color:#6B7280;margin-top:3px;">الحسابات متساوية — لا يوجد تحويل مطلوب</div>
+                                </div>
+                               </div>`;
+
+                        settlementEl.innerHTML = `
+                            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem;">
+                                <div style="padding:0.85rem 1rem;border-radius:8px;background:rgba(5,150,105,0.06);border:1px solid rgba(5,150,105,0.18);">
+                                    <div style="font-size:0.75rem;color:#6B7280;margin-bottom:4px;">Total Revenue — إجمالي الإيرادات</div>
+                                    <div style="font-size:1.1rem;font-weight:700;color:#059669;">${acctFmt(totalIncome)} EGP</div>
+                                </div>
+                                <div style="padding:0.85rem 1rem;border-radius:8px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.18);">
+                                    <div style="font-size:0.75rem;color:#6B7280;margin-bottom:4px;">Total Expenses — المصاريف</div>
+                                    <div style="font-size:1.1rem;font-weight:700;color:#DC2626;">${acctFmt(totalExpenses)} EGP</div>
+                                </div>
+                                <div style="padding:0.85rem 1rem;border-radius:8px;background:rgba(217,119,6,0.06);border:1px solid rgba(217,119,6,0.18);">
+                                    <div style="font-size:0.75rem;color:#6B7280;margin-bottom:4px;">Net Profit — صافي الربح</div>
+                                    <div style="font-size:1.1rem;font-weight:700;color:${netProfit >= 0 ? '#D97706' : '#DC2626'};">${acctFmt(netProfit)} EGP</div>
+                                </div>
+                                <div style="padding:0.85rem 1rem;border-radius:8px;background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.18);">
+                                    <div style="font-size:0.75rem;color:#6B7280;margin-bottom:4px;">Each Partner's Share (50%) — نصيب كل شريك</div>
+                                    <div style="font-size:1.1rem;font-weight:700;color:#2563EB;">${acctFmt(eachShare)} EGP</div>
+                                </div>
+                                <div style="padding:0.85rem 1rem;border-radius:8px;background:rgba(15,118,110,0.06);border:1px solid rgba(15,118,110,0.18);">
+                                    <div style="font-size:0.75rem;color:#6B7280;margin-bottom:4px;">Tayseer Collected (Egypt) — تيسير حصّل من مصر</div>
+                                    <div style="font-size:1.1rem;font-weight:700;color:#0F766E;">${acctFmt(totalEgypt)} EGP</div>
+                                </div>
+                                <div style="padding:0.85rem 1rem;border-radius:8px;background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.18);">
+                                    <div style="font-size:0.75rem;color:#6B7280;margin-bottom:4px;">Ahmed Collected (Overseas) — أحمد حصّل من خارج مصر</div>
+                                    <div style="font-size:1.1rem;font-weight:700;color:#7C3AED;">${acctFmt(totalAhmed)} EGP</div>
+                                </div>
+                            </div>
+                            ${directionHTML}`;
+                    }
                 }
             };
 
