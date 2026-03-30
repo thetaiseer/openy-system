@@ -1912,22 +1912,22 @@
 
         <!-- Sub-tabs bar -->
         <div class="emp-tabs-bar no-print">
-            <button class="ui-nav-pill active" data-acctab="client-collections" onclick="window.switchAcctTab('client-collections')">Client Collections</button>
-            <button class="ui-nav-pill" data-acctab="egypt-collections" onclick="window.switchAcctTab('egypt-collections')">Egypt Collections</button>
-            <button class="ui-nav-pill" data-acctab="captain-collections" onclick="window.switchAcctTab('captain-collections')">Captain Ahmed</button>
-            <button class="ui-nav-pill" data-acctab="expenses" onclick="window.switchAcctTab('expenses')">Expenses</button>
-            <button class="ui-nav-pill" data-acctab="summary" onclick="window.switchAcctTab('summary')">Summary</button>
+            <button class="ui-nav-pill active" data-acctab="ledger" onclick="window.switchAcctTab('ledger')">Clients Ledger</button>
+            <button class="ui-nav-pill" data-acctab="summary" onclick="window.switchAcctTab('summary')">Accounting Summary</button>
         </div>
 
-        <!-- ── TAB: Client Collections ── -->
-        <div id="acct-tab-client-collections" class="emp-tab-content active">
+        <!-- ── TAB: Clients Ledger ── -->
+        <div id="acct-tab-ledger" class="emp-tab-content active">
             <div class="emp-toolbar">
                 <div class="emp-search-wrap">
                     <svg class="emp-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <input type="text" id="acct-cc-search" class="ui-input emp-search-input" placeholder="Search by client, invoice, or service…" oninput="window.renderAcctClientCollections()">
+                    <input type="text" id="acct-ledger-search" class="ui-input emp-search-input" placeholder="Search by client, service, or notes…" oninput="window.renderAcctLedger()">
                 </div>
                 <div class="emp-filters-row">
-                    <button class="ui-button ui-button-primary" onclick="window.openAcctModal('clientCollections')">
+                    <select id="acct-ledger-month" class="ui-input" style="min-width:150px;" onchange="window.renderAcctLedger()">
+                        <option value="">All Months</option>
+                    </select>
+                    <button class="ui-button ui-button-primary" onclick="window.openAcctModal('ledger')">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px;display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         Add Entry
                     </button>
@@ -1940,137 +1940,160 @@
                             <th>#</th>
                             <th>Client Name</th>
                             <th>Service / Project</th>
-                            <th>Invoice / Ref No.</th>
-                            <th>Amount Due</th>
-                            <th>Amount Paid</th>
+                            <th>Month</th>
+                            <th>Currency</th>
+                            <th>Amount</th>
+                            <th>Payment Type</th>
                             <th>Payment Date</th>
-                            <th>Payment Method</th>
                             <th>Notes</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="acct-cc-body">
+                    <tbody id="acct-ledger-body">
                         <tr><td colspan="10" class="emp-empty-state" style="text-align:center;padding:32px;">No entries yet. Click "Add Entry" to get started.</td></tr>
                     </tbody>
-                    <tfoot id="acct-cc-foot"></tfoot>
+                    <tfoot id="acct-ledger-foot"></tfoot>
                 </table>
             </div>
         </div>
 
-        <!-- ── TAB: Egypt Collections ── -->
-        <div id="acct-tab-egypt-collections" class="emp-tab-content">
-            <div class="emp-toolbar">
-                <div class="emp-search-wrap">
-                    <svg class="emp-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <input type="text" id="acct-eg-search" class="ui-input emp-search-input" placeholder="Search by client or date…" oninput="window.renderAcctEgyptCollections()">
-                </div>
-                <div class="emp-filters-row">
-                    <button class="ui-button ui-button-primary" onclick="window.openAcctModal('egyptCollections')">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px;display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        Add Entry
-                    </button>
-                </div>
-            </div>
-            <div class="emp-table-wrap">
-                <table class="emp-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Date</th>
-                            <th>Client Name</th>
-                            <th>Amount Collected (Egypt)</th>
-                            <th>Notes</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="acct-eg-body">
-                        <tr><td colspan="6" class="emp-empty-state" style="text-align:center;padding:32px;">No entries yet. Click "Add Entry" to get started.</td></tr>
-                    </tbody>
-                    <tfoot id="acct-eg-foot"></tfoot>
-                </table>
-            </div>
-        </div>
-
-        <!-- ── TAB: Captain Ahmed Collections ── -->
-        <div id="acct-tab-captain-collections" class="emp-tab-content">
-            <div class="emp-toolbar">
-                <div class="emp-search-wrap">
-                    <svg class="emp-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <input type="text" id="acct-ca-search" class="ui-input emp-search-input" placeholder="Search by client or date…" oninput="window.renderAcctCaptainCollections()">
-                </div>
-                <div class="emp-filters-row">
-                    <button class="ui-button ui-button-primary" onclick="window.openAcctModal('captainCollections')">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px;display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        Add Entry
-                    </button>
-                </div>
-            </div>
-            <div class="emp-table-wrap">
-                <table class="emp-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Date</th>
-                            <th>Client Name</th>
-                            <th>Amount Collected (Outside Egypt)</th>
-                            <th>Notes</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="acct-ca-body">
-                        <tr><td colspan="6" class="emp-empty-state" style="text-align:center;padding:32px;">No entries yet. Click "Add Entry" to get started.</td></tr>
-                    </tbody>
-                    <tfoot id="acct-ca-foot"></tfoot>
-                </table>
-            </div>
-        </div>
-
-        <!-- ── TAB: Expenses ── -->
-        <div id="acct-tab-expenses" class="emp-tab-content">
-            <div class="emp-toolbar">
-                <div class="emp-search-wrap">
-                    <svg class="emp-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <input type="text" id="acct-ex-search" class="ui-input emp-search-input" placeholder="Search by category, description, or paid by…" oninput="window.renderAcctExpenses()">
-                </div>
-                <div class="emp-filters-row">
-                    <button class="ui-button ui-button-primary" onclick="window.openAcctModal('expenses')">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px;display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        Add Entry
-                    </button>
-                </div>
-            </div>
-            <div class="emp-table-wrap">
-                <table class="emp-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Date</th>
-                            <th>Expense Category</th>
-                            <th>Description</th>
-                            <th>Amount</th>
-                            <th>Paid By</th>
-                            <th>Notes</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="acct-ex-body">
-                        <tr><td colspan="8" class="emp-empty-state" style="text-align:center;padding:32px;">No entries yet. Click "Add Entry" to get started.</td></tr>
-                    </tbody>
-                    <tfoot id="acct-ex-foot"></tfoot>
-                </table>
-            </div>
-        </div>
-
-        <!-- ── TAB: Summary ── -->
+        <!-- ── TAB: Accounting Summary ── -->
         <div id="acct-tab-summary" class="emp-tab-content">
-            <div class="emp-stats-grid">
+            <!-- Month filter -->
+            <div class="emp-toolbar" style="padding-bottom:0.5rem;">
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <label style="font-size:0.85rem;font-weight:600;color:var(--text-main);">Month:</label>
+                    <select id="acct-summary-month" class="ui-input" style="min-width:160px;" onchange="window.renderAcctSummary()">
+                        <option value="">All Months</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 1. Income -->
+            <div class="ui-card" style="margin-top:0.75rem;">
+                <div class="ui-card-header">
+                    <span class="ui-card-title" style="color:#059669;">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Income (All Entries)
+                    </span>
+                </div>
+                <div class="emp-table-wrap">
+                    <table class="emp-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Client</th>
+                                <th>Service</th>
+                                <th>Currency</th>
+                                <th style="text-align:right;">Amount</th>
+                                <th style="text-align:right;">Converted (EGP)</th>
+                                <th>Payment Type</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="acct-income-body"></tbody>
+                        <tfoot id="acct-income-foot"></tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. Egypt Collections -->
+            <div class="ui-card" style="margin-top:1rem;">
+                <div class="ui-card-header">
+                    <span class="ui-card-title" style="color:#0F766E;">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        Egypt Collections (تيسير)
+                    </span>
+                </div>
+                <div class="emp-table-wrap">
+                    <table class="emp-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Client</th>
+                                <th>Service</th>
+                                <th>Currency</th>
+                                <th style="text-align:right;">Amount</th>
+                                <th style="text-align:right;">Converted (EGP)</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="acct-egypt-body"></tbody>
+                        <tfoot id="acct-egypt-foot"></tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. Ahmed Collections -->
+            <div class="ui-card" style="margin-top:1rem;">
+                <div class="ui-card-header">
+                    <span class="ui-card-title" style="color:#7C3AED;">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Ahmed Collections (خارج مصر)
+                    </span>
+                </div>
+                <div class="emp-table-wrap">
+                    <table class="emp-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Client</th>
+                                <th>Service</th>
+                                <th>Currency</th>
+                                <th style="text-align:right;">Amount</th>
+                                <th style="text-align:right;">Converted (EGP)</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="acct-ahmed-body"></tbody>
+                        <tfoot id="acct-ahmed-foot"></tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. Expenses -->
+            <div class="ui-card" style="margin-top:1rem;">
+                <div class="ui-card-header">
+                    <span class="ui-card-title" style="color:#DC2626;">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+                        Expenses (المصاريف)
+                    </span>
+                    <button class="ui-button ui-button-danger" style="font-size:0.8rem;padding:0.3rem 0.8rem;" onclick="window.openAcctModal('expenses')">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Add Expense
+                    </button>
+                </div>
+                <div class="emp-table-wrap">
+                    <table class="emp-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th style="text-align:right;">Amount</th>
+                                <th>Paid By</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="acct-ex-body">
+                            <tr><td colspan="8" class="emp-empty-state" style="text-align:center;padding:24px;">No expenses yet.</td></tr>
+                        </tbody>
+                        <tfoot id="acct-ex-foot"></tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5. Summary Stats -->
+            <div class="emp-stats-grid" style="margin-top:1.5rem;">
                 <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#2563EB,#0EA5E9);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#059669,#0D9488);">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="summary-total-client-payments">0.00</div>
-                        <div class="emp-stat-label">Total Client Payments</div>
+                        <div class="emp-stat-value" id="summary-total-income">0.00</div>
+                        <div class="emp-stat-label">Total Income (EGP)</div>
                     </div>
                 </div>
                 <div class="emp-stat-card">
@@ -2079,7 +2102,7 @@
                     </div>
                     <div class="emp-stat-body">
                         <div class="emp-stat-value" id="summary-total-egypt">0.00</div>
-                        <div class="emp-stat-label">Total Egypt Collections</div>
+                        <div class="emp-stat-label">Egypt Collections (EGP)</div>
                     </div>
                 </div>
                 <div class="emp-stat-card">
@@ -2087,8 +2110,8 @@
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="summary-total-captain">0.00</div>
-                        <div class="emp-stat-label">Total Captain Ahmed Collections</div>
+                        <div class="emp-stat-value" id="summary-total-ahmed">0.00</div>
+                        <div class="emp-stat-label">Ahmed Collections (EGP)</div>
                     </div>
                 </div>
                 <div class="emp-stat-card">
@@ -2097,7 +2120,7 @@
                     </div>
                     <div class="emp-stat-body">
                         <div class="emp-stat-value" id="summary-total-expenses">0.00</div>
-                        <div class="emp-stat-label">Total Expenses</div>
+                        <div class="emp-stat-label">Total Expenses (EGP)</div>
                     </div>
                 </div>
                 <div class="emp-stat-card">
@@ -2105,32 +2128,9 @@
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                     </div>
                     <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="summary-net-balance">0.00</div>
-                        <div class="emp-stat-label">Net Balance</div>
+                        <div class="emp-stat-value" id="summary-net-profit">0.00</div>
+                        <div class="emp-stat-label">Net Profit (EGP)</div>
                     </div>
-                </div>
-            </div>
-            <!-- Breakdown table -->
-            <div class="ui-card" style="margin-top:1.5rem;">
-                <div class="ui-card-header">
-                    <span class="ui-card-title">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        Financial Breakdown
-                    </span>
-                </div>
-                <div class="emp-table-wrap">
-                    <table class="emp-table" id="acct-summary-breakdown">
-                        <thead>
-                            <tr>
-                                <th>Category</th>
-                                <th style="text-align:right;">Total Amount</th>
-                                <th style="text-align:right;">Entries</th>
-                            </tr>
-                        </thead>
-                        <tbody id="acct-summary-body">
-                        </tbody>
-                        <tfoot id="acct-summary-foot"></tfoot>
-                    </table>
                 </div>
             </div>
         </div>
