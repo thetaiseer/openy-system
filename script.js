@@ -5183,7 +5183,12 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
             }
             function acctFmtDate(d) {
                 if (!d) return '';
-                try { return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' }); } catch(e) { return d; }
+                try {
+                    // Handle both YYYY-MM-DD and full ISO string formats
+                    const parsed = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(d + 'T00:00:00') : new Date(d);
+                    if (isNaN(parsed.getTime())) return d;
+                    return parsed.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' });
+                } catch(e) { return d; }
             }
             function acctEscape(s) {
                 return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -5550,15 +5555,22 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 fields.forEach(f => {
                     const el = document.getElementById('acct-field-' + f.key);
                     const val = el ? el.value.trim() : '';
-                    if (f.required && !val) { valid = false; if(el) el.style.borderColor='#EF4444'; }
-                    else { if(el) el.style.borderColor=''; }
+                    if (f.required && !val) {
+                        valid = false;
+                        if(el) el.style.borderColor = '#EF4444';
+                    } else if (f.type === 'number' && val && isNaN(parseFloat(val))) {
+                        valid = false;
+                        if(el) el.style.borderColor = '#EF4444';
+                    } else {
+                        if(el) el.style.borderColor = '';
+                    }
                     record[f.key] = val;
                 });
 
                 if (!valid) { showToast('Please fill in all required fields.'); return; }
 
                 localStore.put(record, storeName);
-                cloudDB.put(record, storeName).catch(() => {});
+                cloudDB.put(record, storeName).catch(e => console.error('Accounting sync failed:', e));
 
                 window.closeAcctModal();
 
@@ -5745,7 +5757,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                         { cat:'Captain Ahmed Collections',     amount:totalCa,           entries:ca.length },
                         { cat:'Total Collections',             amount:totalCollections,   entries:cc.length+eg.length+ca.length },
                         { cat:'Total Expenses',                amount:totalEx,           entries:ex.length },
-                        { cat:'Net Balance',                   amount:netBalance,        entries:'' }
+                        { cat:'Net Balance',                   amount:netBalance,        entries:'-' }
                     ];
                     summaryRows.forEach((r, i) => {
                         const row = ws5.addRow(r);
