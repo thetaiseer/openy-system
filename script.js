@@ -700,6 +700,7 @@
             unsubscribers: {},
             db: null,
             _ready: false,
+            _syncingFromCloud: false,
             async init() {
                 try {
                     if (!FIREBASE_ENABLED) return; // No config provided yet
@@ -722,11 +723,14 @@
                             await Promise.all(ALL_STORES.map(s => this.syncUp(s)));
                             // Then subscribe to live updates for each store
                             for (const s of ALL_STORES) this.setupRealtime(s);
+                            // Subscribe to the shared quotation draft so it syncs across devices
+                            this.setupRealtimeDraft();
                         } else {
                             this._ready = false;
                             ALL_STORES.forEach(s => {
                                 if (this.unsubscribers[s]) { this.unsubscribers[s](); delete this.unsubscribers[s]; }
                             });
+                            if (this.unsubscribers['_draft']) { this.unsubscribers['_draft'](); delete this.unsubscribers['_draft']; }
                         }
                     });
                 } catch(e) { console.error("Firebase init failed:", e); }
@@ -795,6 +799,42 @@
                     const snap = await window.FB.getDocs(colRef);
                     await Promise.all(snap.docs.map(d => window.FB.deleteDoc(d.ref)));
                 } catch(e) { console.error("Failed to clear Firestore:", e); }
+            },
+            // Subscribe to the shared quotation-draft document in Firestore.
+            // When another device saves a newer draft, this listener picks it up and
+            // applies it to the local form without causing a write-back loop.
+            setupRealtimeDraft() {
+                if (!this.db) return;
+                try {
+                    if (this.unsubscribers['_draft']) this.unsubscribers['_draft']();
+                    const docRef = window.FB.doc(this.db, 'settings', 'draft_state');
+                    this.unsubscribers['_draft'] = window.FB.onSnapshot(docRef, (snap) => {
+                        if (!snap.exists()) return;
+                        const cloudState = snap.data();
+                        const localTs = appState._updatedAt || 0;
+                        const cloudTs = cloudState._updatedAt || 0;
+                        if (cloudTs > localTs && !this._syncingFromCloud) {
+                            this._syncingFromCloud = true;
+                            const { id: _id, ...state } = cloudState;
+                            appState = state;
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                            if (typeof window.populateForm === 'function') window.populateForm();
+                            setTimeout(() => { this._syncingFromCloud = false; }, 500);
+                        }
+                    }, (err) => console.error('Draft state sync error:', err));
+                } catch(e) { console.error('Failed to setup draft realtime:', e); }
+            },
+            // Write the current appState to Firestore so other devices can pick it up.
+            async saveDraftState() {
+                if (!this.db || !this._ready || this._syncingFromCloud) return;
+                try {
+                    const ts = Date.now();
+                    const stateWithMeta = { ...appState, id: 'draft_state', _updatedAt: ts };
+                    appState._updatedAt = ts;
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                    const docRef = window.FB.doc(this.db, 'settings', 'draft_state');
+                    await window.FB.setDoc(docRef, stateWithMeta);
+                } catch(e) { console.error('Failed to save draft state to cloud:', e); }
             }
         };
 
@@ -1528,7 +1568,9 @@
             if(countEl) countEl.innerText = appState.services.length;
             
             localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-            
+            // Sync draft to Firestore so it appears on other devices
+            cloudDB.saveDraftState().catch(() => {});
+
             const editorTab = document.getElementById('tab-editor');
             if (editorTab && editorTab.classList.contains('active')) {
                 if(typeof window.renderPreview === 'function') window.renderPreview();
