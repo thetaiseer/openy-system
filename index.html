@@ -1933,27 +1933,27 @@
                     </button>
                 </div>
             </div>
-            <div class="emp-table-wrap">
-                <table class="emp-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Client Name</th>
-                            <th>Service / Project</th>
-                            <th>Month</th>
-                            <th>Currency</th>
-                            <th>Amount</th>
-                            <th>Payment Type</th>
-                            <th>Payment Date</th>
-                            <th>Notes</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="acct-ledger-body">
-                        <tr><td colspan="10" class="emp-empty-state" style="text-align:center;padding:32px;">No entries yet. Click "Add Entry" to get started.</td></tr>
-                    </tbody>
-                    <tfoot id="acct-ledger-foot"></tfoot>
-                </table>
+            <!-- Ledger entries grouped by month -->
+            <div id="acct-ledger-container" style="display:flex;flex-direction:column;gap:0.75rem;">
+                <div class="emp-empty-state" style="text-align:center;padding:32px;">No entries yet. Click "Add Entry" to get started.</div>
+            </div>
+
+            <!-- ── Expenses Section on Ledger Tab ── -->
+            <div class="ui-card" style="margin-top:1.5rem;">
+                <div class="ui-card-header">
+                    <span class="ui-card-title" style="color:#DC2626;">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+                        Expenses (المصاريف)
+                    </span>
+                    <button class="ui-button ui-button-danger" style="font-size:0.8rem;padding:0.3rem 0.8rem;" onclick="window.openAcctModal('expenses')">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Add Expense
+                    </button>
+                </div>
+                <!-- Expenses grouped by month -->
+                <div id="acct-ledger-expenses-container" style="display:flex;flex-direction:column;gap:0.75rem;padding:0.5rem 0;">
+                    <div class="emp-empty-state" style="text-align:center;padding:24px;">No expenses yet.</div>
+                </div>
             </div>
         </div>
 
@@ -1987,7 +1987,7 @@
                                 <th>Currency</th>
                                 <th style="text-align:right;">Amount</th>
                                 <th style="text-align:right;">Converted (EGP)</th>
-                                <th>Payment Type</th>
+                                <th>Collected By</th>
                                 <th>Date</th>
                             </tr>
                         </thead>
@@ -1997,12 +1997,12 @@
                 </div>
             </div>
 
-            <!-- 2. Egypt Collections -->
+            <!-- 2. Taiseer Mahmoud Collections -->
             <div class="ui-card" style="margin-top:1rem;">
                 <div class="ui-card-header">
                     <span class="ui-card-title" style="color:#0F766E;">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                        Egypt Collections (تحصيل مصر)
+                        Taiseer Mahmoud Collections (تحصيل تيسير)
                     </span>
                 </div>
                 <div class="emp-table-wrap">
@@ -2024,12 +2024,12 @@
                 </div>
             </div>
 
-            <!-- 3. Ahmed Collections -->
+            <!-- 3. Ahmed Mansour Collections -->
             <div class="ui-card" style="margin-top:1rem;">
                 <div class="ui-card-header">
                     <span class="ui-card-title" style="color:#7C3AED;">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Ahmed Collections (خارج مصر)
+                        Ahmed Mansour Collections (تحصيل أحمد)
                     </span>
                 </div>
                 <div class="emp-table-wrap">
@@ -2063,25 +2063,9 @@
                         Add Expense
                     </button>
                 </div>
-                <div class="emp-table-wrap">
-                    <table class="emp-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Date</th>
-                                <th>Category</th>
-                                <th>Description</th>
-                                <th style="text-align:right;">Amount</th>
-                                <th>Paid By</th>
-                                <th>Notes</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="acct-ex-body">
-                            <tr><td colspan="8" class="emp-empty-state" style="text-align:center;padding:24px;">No expenses yet.</td></tr>
-                        </tbody>
-                        <tfoot id="acct-ex-foot"></tfoot>
-                    </table>
+                <!-- Expenses grouped by month/year -->
+                <div id="acct-ex-container" style="display:flex;flex-direction:column;gap:0.75rem;padding:0.5rem 0;">
+                    <div class="emp-empty-state" style="text-align:center;padding:24px;">No expenses yet.</div>
                 </div>
             </div>
 
@@ -2102,7 +2086,7 @@
                     </div>
                     <div class="emp-stat-body">
                         <div class="emp-stat-value" id="summary-total-egypt">0.00</div>
-                        <div class="emp-stat-label">Egypt Collections (EGP)</div>
+                        <div class="emp-stat-label">Taiseer Mahmoud (EGP)</div>
                     </div>
                 </div>
                 <div class="emp-stat-card">
@@ -2111,7 +2095,7 @@
                     </div>
                     <div class="emp-stat-body">
                         <div class="emp-stat-value" id="summary-total-ahmed">0.00</div>
-                        <div class="emp-stat-label">Ahmed Collections (EGP)</div>
+                        <div class="emp-stat-label">Ahmed Mansour (EGP)</div>
                     </div>
                 </div>
                 <div class="emp-stat-card">

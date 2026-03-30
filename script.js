@@ -5191,6 +5191,8 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
             function acctFmtDate(d) {
                 if (!d) return '';
                 try {
+                    // Handle YYYY-MM format (month-only stored value)
+                    if (/^\d{4}-\d{2}$/.test(d)) return acctFmtMonth(d);
                     const parsed = /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(d + 'T00:00:00') : new Date(d);
                     if (isNaN(parsed.getTime())) return d;
                     return parsed.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' });
@@ -5206,6 +5208,13 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
             }
             function acctEscape(s) {
                 return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            }
+            // Extract YYYY-MM key from a date string (handles YYYY-MM and YYYY-MM-DD)
+            function acctMonthKey(d) {
+                if (!d || typeof d !== 'string') return '';
+                if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d.substring(0, 7);
+                if (/^\d{4}-\d{2}$/.test(d)) return d;
+                return '';
             }
             function acctActionsHTML(id, store) {
                 return `<div style="display:flex;gap:6px;justify-content:flex-end;">
@@ -5237,50 +5246,72 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 });
             }
 
-            // ── Render: Clients Ledger ──
+            // ── Render: Clients Ledger (grouped by month/year) ──
             window.renderAcctLedger = function() {
                 acctPopulateMonthDropdowns();
                 const q = (document.getElementById('acct-ledger-search') || {}).value || '';
                 const selectedMonth = acctGetActiveMonth('acct-ledger-month');
                 let records = localStore.getAll('acctLedger')
-                    .sort((a, b) => (b.paymentDate || b.month || '').localeCompare(a.paymentDate || a.month || ''));
+                    .sort((a, b) => (b.month || '').localeCompare(a.month || ''));
                 if (selectedMonth) records = records.filter(r => r.month === selectedMonth);
                 if (q) records = records.filter(r =>
                     (r.clientName || '').toLowerCase().includes(q.toLowerCase()) ||
                     (r.service || '').toLowerCase().includes(q.toLowerCase()) ||
                     (r.notes || '').toLowerCase().includes(q.toLowerCase())
                 );
-                const tbody = document.getElementById('acct-ledger-body');
-                const tfoot = document.getElementById('acct-ledger-foot');
-                if (!tbody) return;
+                const container = document.getElementById('acct-ledger-container');
+                if (!container) return;
                 if (records.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="10" class="emp-empty-state" style="text-align:center;padding:32px;">No entries found. Click "Add Entry" to get started.</td></tr>`;
-                    if (tfoot) tfoot.innerHTML = '';
-                    return;
+                    container.innerHTML = `<div class="emp-empty-state" style="text-align:center;padding:32px;">No entries found. Click "Add Entry" to get started.</div>`;
+                } else {
+                    // Group by month
+                    const groups = {};
+                    records.forEach(r => {
+                        const key = r.month || '';
+                        if (!groups[key]) groups[key] = [];
+                        groups[key].push(r);
+                    });
+                    const sortedMonths = Object.keys(groups).sort().reverse();
+                    container.innerHTML = sortedMonths.map(month => {
+                        const groupRecs = groups[month];
+                        const groupTotal = groupRecs.reduce((s, r) => s + acctToEGP(r.amount, r.currency), 0);
+                        const rowsHTML = groupRecs.map((r, i) => {
+                            const isTaiseer = r.paymentType === 'Taiseer Mahmoud';
+                            const badgeColor = isTaiseer ? '#059669' : '#7C3AED';
+                            const badgeBg = isTaiseer ? 'rgba(5,150,105,0.1)' : 'rgba(124,58,237,0.1)';
+                            return `<tr>
+                                <td class="emp-cell-num">${i + 1}</td>
+                                <td class="emp-name">${acctEscape(r.clientName)}</td>
+                                <td>${acctEscape(r.service)}</td>
+                                <td><span style="font-weight:600;">${acctEscape(r.currency)}</span></td>
+                                <td class="emp-cell-salary">${acctFmt(r.amount)}</td>
+                                <td><span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.78rem;font-weight:600;background:${badgeBg};color:${badgeColor};">${acctEscape(r.paymentType)}</span></td>
+                                <td>${acctFmtDate(r.paymentDate)}</td>
+                                <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${acctEscape(r.notes)}">${acctEscape(r.notes)}</td>
+                                <td>${acctActionsHTML(r.id, 'ledger')}</td>
+                            </tr>`;
+                        }).join('');
+                        return `<details class="acct-month-group" open>
+                            <summary class="acct-month-summary">
+                                <span class="acct-month-label">${acctEscape(acctFmtMonth(month))}</span>
+                                <span class="acct-month-badge">${groupRecs.length} entr${groupRecs.length === 1 ? 'y' : 'ies'}</span>
+                                <span class="acct-month-total">Total: ${acctFmt(groupTotal)} EGP</span>
+                            </summary>
+                            <div class="acct-month-body emp-table-wrap">
+                                <table class="emp-table">
+                                    <thead><tr>
+                                        <th>#</th><th>Client Name</th><th>Service / Project</th>
+                                        <th>Currency</th><th>Amount</th><th>Collected By</th>
+                                        <th>Payment Date</th><th>Notes</th><th>Actions</th>
+                                    </tr></thead>
+                                    <tbody>${rowsHTML}</tbody>
+                                </table>
+                            </div>
+                        </details>`;
+                    }).join('');
                 }
-                let total = 0;
-                tbody.innerHTML = records.map((r, i) => {
-                    const egpAmt = acctToEGP(r.amount, r.currency);
-                    total += egpAmt;
-                    const badgeColor = r.paymentType === 'Egypt' ? '#059669' : '#7C3AED';
-                    const badgeBg = r.paymentType === 'Egypt' ? 'rgba(5,150,105,0.1)' : 'rgba(124,58,237,0.1)';
-                    return `<tr>
-                        <td class="emp-cell-num">${i + 1}</td>
-                        <td class="emp-name">${acctEscape(r.clientName)}</td>
-                        <td>${acctEscape(r.service)}</td>
-                        <td style="white-space:nowrap;">${acctEscape(acctFmtMonth(r.month))}</td>
-                        <td><span style="font-weight:600;">${acctEscape(r.currency)}</span></td>
-                        <td class="emp-cell-salary">${acctFmt(r.amount)}</td>
-                        <td><span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.78rem;font-weight:600;background:${badgeBg};color:${badgeColor};">${acctEscape(r.paymentType)}</span></td>
-                        <td>${acctFmtDate(r.paymentDate)}</td>
-                        <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${acctEscape(r.notes)}">${acctEscape(r.notes)}</td>
-                        <td>${acctActionsHTML(r.id, 'ledger')}</td>
-                    </tr>`;
-                }).join('');
-                if (tfoot) tfoot.innerHTML = `<tr style="background:rgba(37,99,235,0.05);font-weight:700;">
-                    <td colspan="5" style="padding:0.7rem 1rem;text-align:right;font-size:0.83rem;color:#0F172A;">Total (EGP equiv.)</td>
-                    <td colspan="5" style="padding:0.7rem 1rem;color:#059669;">${acctFmt(total)} EGP</td>
-                </tr>`;
+                // Also render ledger-tab expenses
+                acctRenderExpensesGrouped('acct-ledger-expenses-container', null);
             };
 
             // ── Render: Accounting Summary (auto-calculated from ledger) ──
@@ -5302,8 +5333,9 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                         incomeBody.innerHTML = ledgerRecs.map((r, i) => {
                             const egpAmt = acctToEGP(r.amount, r.currency);
                             totalIncome += egpAmt;
-                            const badgeColor = r.paymentType === 'Egypt' ? '#059669' : '#7C3AED';
-                            const badgeBg = r.paymentType === 'Egypt' ? 'rgba(5,150,105,0.1)' : 'rgba(124,58,237,0.1)';
+                            const isTaiseer = r.paymentType === 'Taiseer Mahmoud';
+                            const badgeColor = isTaiseer ? '#059669' : '#7C3AED';
+                            const badgeBg = isTaiseer ? 'rgba(5,150,105,0.1)' : 'rgba(124,58,237,0.1)';
                             return `<tr>
                                 <td class="emp-cell-num">${i + 1}</td>
                                 <td class="emp-name">${acctEscape(r.clientName)}</td>
@@ -5322,14 +5354,14 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                     }
                 }
 
-                // ── 2. Egypt Collections (auto-filtered from ledger) ──
-                const egyptRecs = ledgerRecs.filter(r => r.paymentType === 'Egypt');
+                // ── 2. Taiseer Mahmoud Collections (auto-filtered from ledger) ──
+                const egyptRecs = ledgerRecs.filter(r => r.paymentType === 'Taiseer Mahmoud');
                 const egyptBody = document.getElementById('acct-egypt-body');
                 const egyptFoot = document.getElementById('acct-egypt-foot');
                 let totalEgypt = 0;
                 if (egyptBody) {
                     if (egyptRecs.length === 0) {
-                        egyptBody.innerHTML = `<tr><td colspan="7" class="emp-empty-state" style="text-align:center;padding:20px;">No Egypt collections for selected period.</td></tr>`;
+                        egyptBody.innerHTML = `<tr><td colspan="7" class="emp-empty-state" style="text-align:center;padding:20px;">No Taiseer Mahmoud collections for selected period.</td></tr>`;
                         if (egyptFoot) egyptFoot.innerHTML = '';
                     } else {
                         egyptBody.innerHTML = egyptRecs.map((r, i) => {
@@ -5346,20 +5378,20 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                             </tr>`;
                         }).join('');
                         if (egyptFoot) egyptFoot.innerHTML = `<tr style="background:rgba(15,118,110,0.05);font-weight:700;">
-                            <td colspan="5" style="padding:0.7rem 1rem;text-align:right;font-size:0.83rem;">Total Egypt (EGP)</td>
+                            <td colspan="5" style="padding:0.7rem 1rem;text-align:right;font-size:0.83rem;">Total Taiseer Mahmoud (EGP)</td>
                             <td colspan="2" style="padding:0.7rem 1rem;color:#0F766E;">${acctFmt(totalEgypt)} EGP</td>
                         </tr>`;
                     }
                 }
 
-                // ── 3. Ahmed Collections (auto-filtered from ledger) ──
-                const ahmedRecs = ledgerRecs.filter(r => r.paymentType === 'Ahmed');
+                // ── 3. Ahmed Mansour Collections (auto-filtered from ledger) ──
+                const ahmedRecs = ledgerRecs.filter(r => r.paymentType === 'Ahmed Mansour');
                 const ahmedBody = document.getElementById('acct-ahmed-body');
                 const ahmedFoot = document.getElementById('acct-ahmed-foot');
                 let totalAhmed = 0;
                 if (ahmedBody) {
                     if (ahmedRecs.length === 0) {
-                        ahmedBody.innerHTML = `<tr><td colspan="7" class="emp-empty-state" style="text-align:center;padding:20px;">No Ahmed collections for selected period.</td></tr>`;
+                        ahmedBody.innerHTML = `<tr><td colspan="7" class="emp-empty-state" style="text-align:center;padding:20px;">No Ahmed Mansour collections for selected period.</td></tr>`;
                         if (ahmedFoot) ahmedFoot.innerHTML = '';
                     } else {
                         ahmedBody.innerHTML = ahmedRecs.map((r, i) => {
@@ -5376,16 +5408,16 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                             </tr>`;
                         }).join('');
                         if (ahmedFoot) ahmedFoot.innerHTML = `<tr style="background:rgba(124,58,237,0.05);font-weight:700;">
-                            <td colspan="5" style="padding:0.7rem 1rem;text-align:right;font-size:0.83rem;">Total Ahmed (EGP)</td>
+                            <td colspan="5" style="padding:0.7rem 1rem;text-align:right;font-size:0.83rem;">Total Ahmed Mansour (EGP)</td>
                             <td colspan="2" style="padding:0.7rem 1rem;color:#7C3AED;">${acctFmt(totalAhmed)} EGP</td>
                         </tr>`;
                     }
                 }
 
                 // ── 4. Expenses ──
-                window.renderAcctExpenses();
                 let expenseRecs = localStore.getAll('acctExpenses');
-                if (selectedMonth) expenseRecs = expenseRecs.filter(r => r.date && r.date.startsWith(selectedMonth));
+                if (selectedMonth) expenseRecs = expenseRecs.filter(r => r.date && acctMonthKey(r.date) === selectedMonth);
+                acctRenderExpensesGrouped('acct-ex-container', selectedMonth);
                 const totalExpenses = expenseRecs.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
 
                 // ── 5. Summary Stats ──
@@ -5462,11 +5494,11 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                                     <div style="font-size:1.1rem;font-weight:700;color:#2563EB;">${acctFmt(eachShare)} EGP</div>
                                 </div>
                                 <div style="padding:0.85rem 1rem;border-radius:8px;background:rgba(15,118,110,0.06);border:1px solid rgba(15,118,110,0.18);">
-                                    <div style="font-size:0.75rem;color:#6B7280;margin-bottom:4px;">Tayseer Collected (Egypt) — تيسير حصّل من مصر</div>
+                                    <div style="font-size:0.75rem;color:#6B7280;margin-bottom:4px;">Taiseer Mahmoud Collected — تيسير محمود حصّل</div>
                                     <div style="font-size:1.1rem;font-weight:700;color:#0F766E;">${acctFmt(totalEgypt)} EGP</div>
                                 </div>
                                 <div style="padding:0.85rem 1rem;border-radius:8px;background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.18);">
-                                    <div style="font-size:0.75rem;color:#6B7280;margin-bottom:4px;">Ahmed Collected (Overseas) — أحمد حصّل من خارج مصر</div>
+                                    <div style="font-size:0.75rem;color:#6B7280;margin-bottom:4px;">Ahmed Mansour Collected — أحمد منصور حصّل</div>
                                     <div style="font-size:1.1rem;font-weight:700;color:#7C3AED;">${acctFmt(totalAhmed)} EGP</div>
                                 </div>
                             </div>
@@ -5475,22 +5507,30 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 }
             };
 
-            // ── Render: Expenses ──
-            window.renderAcctExpenses = function() {
-                const records = localStore.getAll('acctExpenses')
+            // ── Render: Expenses (grouped by month/year) ──
+            // containerId: target container element id; monthFilter: optional YYYY-MM string to filter
+            function acctRenderExpensesGrouped(containerId, monthFilter) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                let records = localStore.getAll('acctExpenses')
                     .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-                const tbody = document.getElementById('acct-ex-body');
-                const tfoot = document.getElementById('acct-ex-foot');
-                if (!tbody) return;
+                if (monthFilter) records = records.filter(r => r.date && acctMonthKey(r.date) === monthFilter);
                 if (records.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" class="emp-empty-state" style="text-align:center;padding:20px;">No expenses yet.</td></tr>`;
-                    if (tfoot) tfoot.innerHTML = '';
+                    container.innerHTML = `<div class="emp-empty-state" style="text-align:center;padding:24px;">No expenses yet.</div>`;
                     return;
                 }
-                let total = 0;
-                tbody.innerHTML = records.map((r, i) => {
-                    total += parseFloat(r.amount) || 0;
-                    return `<tr>
+                // Group by month
+                const groups = {};
+                records.forEach(r => {
+                    const key = acctMonthKey(r.date);
+                    if (!groups[key]) groups[key] = [];
+                    groups[key].push(r);
+                });
+                const sortedMonths = Object.keys(groups).sort().reverse();
+                container.innerHTML = sortedMonths.map(month => {
+                    const groupRecs = groups[month];
+                    const groupTotal = groupRecs.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+                    const rowsHTML = groupRecs.map((r, i) => `<tr>
                         <td class="emp-cell-num">${i + 1}</td>
                         <td>${acctFmtDate(r.date)}</td>
                         <td>${acctEscape(r.category)}</td>
@@ -5499,13 +5539,30 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                         <td>${acctEscape(r.paidBy)}</td>
                         <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${acctEscape(r.notes)}">${acctEscape(r.notes)}</td>
                         <td>${acctActionsHTML(r.id, 'expenses')}</td>
-                    </tr>`;
+                    </tr>`).join('');
+                    return `<details class="acct-month-group" open>
+                        <summary class="acct-month-summary acct-month-summary-expense">
+                            <span class="acct-month-label">${acctEscape(acctFmtMonth(month))}</span>
+                            <span class="acct-month-badge">${groupRecs.length} expense${groupRecs.length === 1 ? '' : 's'}</span>
+                            <span class="acct-month-total" style="color:#DC2626;">Total: ${acctFmt(groupTotal)} EGP</span>
+                        </summary>
+                        <div class="acct-month-body emp-table-wrap">
+                            <table class="emp-table">
+                                <thead><tr>
+                                    <th>#</th><th>Date</th><th>Category</th><th>Description</th>
+                                    <th style="text-align:right;">Amount</th><th>Paid By</th><th>Notes</th><th>Actions</th>
+                                </tr></thead>
+                                <tbody>${rowsHTML}</tbody>
+                            </table>
+                        </div>
+                    </details>`;
                 }).join('');
-                if (tfoot) tfoot.innerHTML = `<tr style="background:rgba(239,68,68,0.05);font-weight:700;">
-                    <td colspan="4" style="padding:0.7rem 1rem;text-align:right;font-size:0.83rem;color:#0F172A;">Total</td>
-                    <td style="padding:0.7rem 1rem;color:#DC2626;">${acctFmt(total)}</td>
-                    <td colspan="3"></td>
-                </tr>`;
+            }
+
+            // ── Render: Expenses (legacy wrapper — kept for compatibility) ──
+            window.renderAcctExpenses = function() {
+                acctRenderExpensesGrouped('acct-ex-container', null);
+                acctRenderExpensesGrouped('acct-ledger-expenses-container', null);
             };
 
             // ── Tab Switching ──
@@ -5545,18 +5602,18 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                     { key: 'currency',    label: 'Currency',          type: 'select',   required: true,
                       options: ['EGP', 'SAR', 'AED'] },
                     { key: 'amount',      label: 'Amount',            type: 'number',   required: true,  placeholder: '0.00' },
-                    { key: 'paymentType', label: 'Payment Type',      type: 'select',   required: true,
-                      options: ['Egypt', 'Ahmed'] },
+                    { key: 'paymentType', label: 'Collected By',      type: 'select',   required: true,
+                      options: ['Taiseer Mahmoud', 'Ahmed Mansour'] },
                     { key: 'paymentDate', label: 'Payment Date',      type: 'date',     required: false, placeholder: '' },
                     { key: 'notes',       label: 'Notes',             type: 'textarea', required: false, placeholder: 'Optional notes…', span2: true }
                 ],
                 expenses: [
-                    { key: 'date',        label: 'Date',             type: 'date',     required: true,  placeholder: '' },
+                    { key: 'date',        label: 'Month / Year',     type: 'month',    required: true,  placeholder: 'e.g. March 2026' },
                     { key: 'category',    label: 'Expense Category', type: 'select',   required: true,
                       options: ['Office Supplies', 'Software & Tools', 'Marketing', 'Travel', 'Utilities', 'Salaries', 'Rent', 'Maintenance', 'Legal & Compliance', 'Other'] },
                     { key: 'description', label: 'Description',      type: 'text',     required: false, placeholder: 'Brief description…', span2: true },
                     { key: 'amount',      label: 'Amount',           type: 'number',   required: true,  placeholder: '0.00' },
-                    { key: 'paidBy',      label: 'Paid By',          type: 'text',     required: false, placeholder: 'e.g. Captain Ahmed' },
+                    { key: 'paidBy',      label: 'Paid By',          type: 'text',     required: false, placeholder: 'e.g. Taiseer Mahmoud' },
                     { key: 'notes',       label: 'Notes',            type: 'textarea', required: false, placeholder: 'Optional notes…', span2: true }
                 ]
             };
@@ -5700,7 +5757,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                         { header: 'Currency',     key: 'currency',    width: 10 },
                         { header: 'Amount',       key: 'amount',      width: 16 },
                         { header: 'Amount (EGP)', key: 'amountEGP',   width: 16 },
-                        { header: 'Payment Type', key: 'paymentType', width: 14 },
+                        { header: 'Collected By', key: 'paymentType', width: 18 },
                         { header: 'Payment Date', key: 'paymentDate', width: 15 },
                         { header: 'Notes',        key: 'notes',       width: 30 }
                     ];
@@ -5725,9 +5782,9 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                     tRow1.fill = TOTAL_FILL; tRow1.font = TOTAL_FONT;
                     numFmt(tRow1.getCell('amountEGP')); applyBorder(tRow1);
 
-                    // ── Sheet 2: Egypt Collections (auto-filtered) ──
-                    const egyptRecs = ledger.filter(r => r.paymentType === 'Egypt');
-                    const ws2 = wb.addWorksheet('Egypt Collections');
+                    // ── Sheet 2: Taiseer Mahmoud Collections (auto-filtered) ──
+                    const egyptRecs = ledger.filter(r => r.paymentType === 'Taiseer Mahmoud');
+                    const ws2 = wb.addWorksheet('Taiseer Collections');
                     ws2.columns = [
                         { header: '#',               key: 'num',        width: 5 },
                         { header: 'Client Name',     key: 'clientName', width: 25 },
@@ -5754,9 +5811,9 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                     const tRow2 = ws2.addRow({ num: '', clientName: '', service: '', currency: 'TOTAL EGP', amount: '', amountEGP: totalEg });
                     tRow2.fill = TOTAL_FILL; tRow2.font = TOTAL_FONT; numFmt(tRow2.getCell('amountEGP')); applyBorder(tRow2);
 
-                    // ── Sheet 3: Ahmed Collections (auto-filtered) ──
-                    const ahmedRecs = ledger.filter(r => r.paymentType === 'Ahmed');
-                    const ws3 = wb.addWorksheet('Ahmed Collections');
+                    // ── Sheet 3: Ahmed Mansour Collections (auto-filtered) ──
+                    const ahmedRecs = ledger.filter(r => r.paymentType === 'Ahmed Mansour');
+                    const ws3 = wb.addWorksheet('Ahmed Mansour Collections');
                     ws3.columns = [
                         { header: '#',               key: 'num',        width: 5 },
                         { header: 'Client Name',     key: 'clientName', width: 25 },
@@ -5822,8 +5879,8 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                     const netBalance = totalLedgerEGP - totalEx;
                     const summaryRows = [
                         { cat: 'Total Income (All Ledger)',    amount: totalLedgerEGP, entries: ledger.length },
-                        { cat: 'Egypt Collections',            amount: totalEg,        entries: egyptRecs.length },
-                        { cat: 'Ahmed Collections',            amount: totalCa,        entries: ahmedRecs.length },
+                        { cat: 'Taiseer Mahmoud Collections',   amount: totalEg,        entries: egyptRecs.length },
+                        { cat: 'Ahmed Mansour Collections',     amount: totalCa,        entries: ahmedRecs.length },
                         { cat: 'Total Expenses',               amount: totalEx,        entries: ex.length },
                         { cat: 'Net Profit',                   amount: netBalance,     entries: '-' }
                     ];
@@ -5914,10 +5971,10 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                     });
                     y = doc.lastAutoTable.finalY + 10;
 
-                    // 2. Egypt Collections
+                    // 2. Taiseer Mahmoud Collections
                     if (y > 250) { doc.addPage(); y = 16; }
-                    sectionTitle('2. Egypt Collections (تيسير)', [15, 118, 110]);
-                    const egyptRecs = ledger.filter(r => r.paymentType === 'Egypt');
+                    sectionTitle('2. Taiseer Mahmoud Collections (تحصيل تيسير)', [15, 118, 110]);
+                    const egyptRecs = ledger.filter(r => r.paymentType === 'Taiseer Mahmoud');
                     const egRows = egyptRecs.map((r, i) => [i + 1, r.clientName || '', r.service || '',
                         r.currency || '', fmtAmt(r.amount), fmtAmt(acctToEGP(r.amount, r.currency)), r.paymentDate || '']);
                     const totalEg = egyptRecs.reduce((s, r) => s + acctToEGP(r.amount, r.currency), 0);
@@ -5934,10 +5991,10 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                     });
                     y = doc.lastAutoTable.finalY + 10;
 
-                    // 3. Ahmed Collections
+                    // 3. Ahmed Mansour Collections
                     if (y > 250) { doc.addPage(); y = 16; }
-                    sectionTitle('3. Ahmed Collections (خارج مصر)', [76, 29, 149]);
-                    const ahmedRecs = ledger.filter(r => r.paymentType === 'Ahmed');
+                    sectionTitle('3. Ahmed Mansour Collections (تحصيل أحمد)', [76, 29, 149]);
+                    const ahmedRecs = ledger.filter(r => r.paymentType === 'Ahmed Mansour');
                     const caRows = ahmedRecs.map((r, i) => [i + 1, r.clientName || '', r.service || '',
                         r.currency || '', fmtAmt(r.amount), fmtAmt(acctToEGP(r.amount, r.currency)), r.paymentDate || '']);
                     const totalCa = ahmedRecs.reduce((s, r) => s + acctToEGP(r.amount, r.currency), 0);
@@ -5982,8 +6039,8 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                         head: [['Category', 'Amount (EGP)', 'Entries']],
                         body: [
                             ['Total Income (All Ledger)', fmtAmt(totalIncome), ledger.length],
-                            ['Egypt Collections', fmtAmt(totalEg), egyptRecs.length],
-                            ['Ahmed Collections (Outside Egypt)', fmtAmt(totalCa), ahmedRecs.length],
+                            ['Taiseer Mahmoud Collections', fmtAmt(totalEg), egyptRecs.length],
+                            ['Ahmed Mansour Collections', fmtAmt(totalCa), ahmedRecs.length],
                             ['Total Expenses', fmtAmt(totalEx), ex.length],
                             ['Net Profit', fmtAmt(netBalance), '']
                         ],
