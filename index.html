@@ -22,6 +22,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="style.css">
+    <!-- Chart.js for dashboard analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     
     <!-- Scroll Restore Prevention: must run before page renders -->
     <script>
@@ -108,15 +110,29 @@
                 <div class="landing-card-arrow" style="color:#0F766E;">Open Accounting <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg></div>
             </div>
         </div>
-        <div style="margin-top:2rem;padding:1rem 1.5rem;background:#fff1f2;border:1px solid #fecdd3;border-radius:1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;max-width:720px;width:100%;margin-left:auto;margin-right:auto;">
-            <div>
-                <div style="font-size:0.875rem;font-weight:600;color:#be123c;margin-bottom:0.25rem;">Clear All System History</div>
-                <div style="font-size:0.75rem;color:#9f1239;">Permanently delete all records from every module (Quotations, Invoices, Contracts, HR, Accounting).</div>
+        <!-- Analytics Dashboard Section -->
+        <div id="landing-analytics" style="width:100%;max-width:760px;margin-top:2rem;">
+            <!-- Section Header -->
+            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;">
+                <div style="width:4px;height:22px;background:linear-gradient(180deg,#2563EB,#7C3AED);border-radius:2px;flex-shrink:0;"></div>
+                <h2 style="font-size:1.05rem;font-weight:800;color:#0F172A;margin:0;">System Analytics</h2>
+                <span style="font-size:0.72rem;color:#94A3B8;font-weight:500;background:#F1F5F9;padding:2px 10px;border-radius:99px;white-space:nowrap;">Live from saved data</span>
             </div>
-            <button onclick="if(typeof window.clearAllHistory === 'function') window.clearAllHistory()" style="flex-shrink:0;display:flex;align-items:center;gap:0.4rem;padding:0.5rem 1rem;background:#be123c;color:#fff;border:none;border-radius:0.6rem;font-size:0.8rem;font-weight:600;cursor:pointer;">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:0.9rem;height:0.9rem;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                Clear All History
-            </button>
+            <!-- Stat Cards -->
+            <div id="analytics-stat-cards" class="analytics-stat-grid"></div>
+            <!-- Charts Row -->
+            <div class="analytics-charts-row" style="margin-top:1rem;">
+                <div class="analytics-chart-card">
+                    <div class="analytics-chart-title">Monthly Revenue vs Expenses <span class="analytics-chart-sub">(EGP)</span></div>
+                    <div style="position:relative;height:180px;"><canvas id="analytics-bar-chart"></canvas></div>
+                </div>
+                <div class="analytics-chart-card">
+                    <div class="analytics-chart-title">Module Distribution</div>
+                    <div style="position:relative;height:180px;display:flex;align-items:center;justify-content:center;">
+                        <canvas id="analytics-donut-chart" style="max-height:170px;max-width:170px;"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
