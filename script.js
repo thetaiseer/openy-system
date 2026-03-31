@@ -60,7 +60,8 @@
                     "https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js",
                     "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
                     "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js",
-                    "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+                    "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js",
+                    "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
                 ];
                 let loadedCount = 0;
                 scripts.forEach(src => {
@@ -6153,167 +6154,54 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 }
             };
 
-            // ── Export to PDF (jsPDF + autoTable) ──
+            // ── Export to PDF (html2canvas + jsPDF) ──
             window.exportAccountingPDF = async function() {
                 const btn = document.getElementById('acctBtnPDF');
                 if (btn) { btn.disabled = true; btn.innerHTML = 'Generating…'; }
                 try {
+                    const element = document.getElementById('accounting-export');
+                    if (!element) {
+                        alert('Export area not found. Please open the Accounting Summary tab first.');
+                        return;
+                    }
+
                     await loadExportLibraries();
+
                     const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-                    const pageW = doc.internal.pageSize.getWidth();
-                    const margin = 14;
-                    let y = 14;
 
-                    // Title
-                    doc.setFillColor(15, 23, 42);
-                    doc.rect(0, 0, pageW, 22, 'F');
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(15);
-                    doc.text('OPENY — Accounting Report', margin, 14);
-                    doc.setFontSize(9);
-                    doc.setFont('helvetica', 'normal');
-                    doc.text('Generated: ' + new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), pageW - margin, 14, { align: 'right' });
-                    y = 30;
-
-                    const sectionTitle = (title, color) => {
-                        if (y > 250) { doc.addPage(); y = 16; }
-                        doc.setFillColor(...color);
-                        doc.rect(margin, y, pageW - margin * 2, 8, 'F');
-                        doc.setTextColor(255, 255, 255);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setFontSize(10);
-                        doc.text(title, margin + 3, y + 5.5);
-                        doc.setTextColor(0, 0, 0);
-                        y += 10;
-                    };
-
-                    const fmtAmt = n => new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(n) || 0);
-
-                    const ledger = localStore.getAll('acctLedger')
-                        .sort((a, b) => (b.paymentDate || b.month || '').localeCompare(a.paymentDate || a.month || ''));
-
-                    // 1. Clients Ledger
-                    sectionTitle('1. Clients Ledger (All Collections)', [15, 23, 42]);
-                    const ledgerRows = ledger.map((r, i) => [i + 1, r.clientName || '', r.service || '',
-                        acctFmtMonth(r.month), r.currency || '', fmtAmt(r.amount),
-                        fmtAmt(acctToEGP(r.amount, r.currency)), r.paymentType || '', r.paymentDate || '']);
-                    const totalIncome = ledger.reduce((s, r) => s + acctToEGP(r.amount, r.currency), 0);
-                    doc.autoTable({
-                        startY: y,
-                        head: [['#', 'Client', 'Service', 'Month', 'Curr.', 'Amount', 'EGP', 'Type', 'Date']],
-                        body: ledgerRows.length ? ledgerRows : [['', 'No entries', '', '', '', '', '', '', '']],
-                        foot: [['', '', '', '', 'TOTAL EGP', '', fmtAmt(totalIncome), '', '']],
-                        margin: { left: margin, right: margin },
-                        styles: { fontSize: 8, cellPadding: 2 },
-                        headStyles: { fillColor: [37, 99, 235], textColor: 255, fontStyle: 'bold' },
-                        footStyles: { fillColor: [232, 244, 253], textColor: [15, 23, 42], fontStyle: 'bold' },
-                        columnStyles: { 0: { cellWidth: 7 }, 1: { cellWidth: 28 }, 2: { cellWidth: 28 }, 3: { cellWidth: 22 }, 4: { cellWidth: 10 }, 5: { cellWidth: 16, halign: 'right' }, 6: { cellWidth: 16, halign: 'right' }, 7: { cellWidth: 14 }, 8: { cellWidth: 'auto' } }
-                    });
-                    y = doc.lastAutoTable.finalY + 10;
-
-                    // 2. Taiseer Mahmoud Collections
-                    if (y > 250) { doc.addPage(); y = 16; }
-                    sectionTitle('2. Taiseer Mahmoud Collections (تحصيل تيسير)', [15, 118, 110]);
-                    const egyptRecs = ledger.filter(r => r.paymentType === 'Taiseer Mahmoud');
-                    const egRows = egyptRecs.map((r, i) => [i + 1, r.clientName || '', r.service || '',
-                        r.currency || '', fmtAmt(r.amount), fmtAmt(acctToEGP(r.amount, r.currency)), r.paymentDate || '']);
-                    const totalEg = egyptRecs.reduce((s, r) => s + acctToEGP(r.amount, r.currency), 0);
-                    doc.autoTable({
-                        startY: y,
-                        head: [['#', 'Client', 'Service', 'Curr.', 'Amount', 'EGP', 'Date']],
-                        body: egRows.length ? egRows : [['', 'No entries', '', '', '', '', '']],
-                        foot: [['', '', '', 'TOTAL EGP', '', fmtAmt(totalEg), '']],
-                        margin: { left: margin, right: margin },
-                        styles: { fontSize: 8, cellPadding: 2 },
-                        headStyles: { fillColor: [15, 118, 110], textColor: 255, fontStyle: 'bold' },
-                        footStyles: { fillColor: [240, 253, 250], textColor: [15, 23, 42], fontStyle: 'bold' },
-                        columnStyles: { 0: { cellWidth: 7 }, 1: { cellWidth: 40 }, 2: { cellWidth: 40 }, 3: { cellWidth: 12 }, 4: { cellWidth: 20, halign: 'right' }, 5: { cellWidth: 20, halign: 'right' }, 6: { cellWidth: 'auto' } }
-                    });
-                    y = doc.lastAutoTable.finalY + 10;
-
-                    // 3. Ahmed Mansour Collections
-                    if (y > 250) { doc.addPage(); y = 16; }
-                    sectionTitle('3. Ahmed Mansour Collections (تحصيل أحمد)', [76, 29, 149]);
-                    const ahmedRecs = ledger.filter(r => r.paymentType === 'Ahmed Mansour');
-                    const caRows = ahmedRecs.map((r, i) => [i + 1, r.clientName || '', r.service || '',
-                        r.currency || '', fmtAmt(r.amount), fmtAmt(acctToEGP(r.amount, r.currency)), r.paymentDate || '']);
-                    const totalCa = ahmedRecs.reduce((s, r) => s + acctToEGP(r.amount, r.currency), 0);
-                    doc.autoTable({
-                        startY: y,
-                        head: [['#', 'Client', 'Service', 'Curr.', 'Amount', 'EGP', 'Date']],
-                        body: caRows.length ? caRows : [['', 'No entries', '', '', '', '', '']],
-                        foot: [['', '', '', 'TOTAL EGP', '', fmtAmt(totalCa), '']],
-                        margin: { left: margin, right: margin },
-                        styles: { fontSize: 8, cellPadding: 2 },
-                        headStyles: { fillColor: [76, 29, 149], textColor: 255, fontStyle: 'bold' },
-                        footStyles: { fillColor: [245, 243, 255], textColor: [15, 23, 42], fontStyle: 'bold' },
-                        columnStyles: { 0: { cellWidth: 7 }, 1: { cellWidth: 40 }, 2: { cellWidth: 40 }, 3: { cellWidth: 12 }, 4: { cellWidth: 20, halign: 'right' }, 5: { cellWidth: 20, halign: 'right' }, 6: { cellWidth: 'auto' } }
-                    });
-                    y = doc.lastAutoTable.finalY + 10;
-
-                    // 4. Expenses
-                    if (y > 250) { doc.addPage(); y = 16; }
-                    sectionTitle('4. Expenses (المصاريف)', [153, 27, 27]);
-                    const ex = localStore.getAll('acctExpenses').sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-                    const exRows = ex.map((r, i) => [i + 1, r.date || '', r.category || '', r.description || '', fmtAmt(r.amount), r.paidBy || '', r.notes || '']);
-                    const totalEx = ex.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
-                    doc.autoTable({
-                        startY: y,
-                        head: [['#', 'Date', 'Category', 'Description', 'Amount', 'Paid By', 'Notes']],
-                        body: exRows.length ? exRows : [['', 'No entries', '', '', '', '', '']],
-                        foot: [['', '', '', 'Total', fmtAmt(totalEx), '', '']],
-                        margin: { left: margin, right: margin },
-                        styles: { fontSize: 8, cellPadding: 2 },
-                        headStyles: { fillColor: [153, 27, 27], textColor: 255, fontStyle: 'bold' },
-                        footStyles: { fillColor: [254, 242, 242], textColor: [15, 23, 42], fontStyle: 'bold' },
-                        columnStyles: { 0: { cellWidth: 8 }, 1: { cellWidth: 20 }, 2: { cellWidth: 28 }, 3: { cellWidth: 35 }, 4: { cellWidth: 20, halign: 'right' }, 5: { cellWidth: 22 }, 6: { cellWidth: 'auto' } }
-                    });
-                    y = doc.lastAutoTable.finalY + 10;
-
-                    // 5. Summary
-                    if (y > 220) { doc.addPage(); y = 16; }
-                    sectionTitle('5. Financial Summary', [15, 23, 42]);
-                    const netBalance = totalIncome - totalEx;
-                    doc.autoTable({
-                        startY: y,
-                        head: [['Category', 'Amount (EGP)', 'Entries']],
-                        body: [
-                            ['Total Income (All Ledger)', fmtAmt(totalIncome), ledger.length],
-                            ['Taiseer Mahmoud Collections', fmtAmt(totalEg), egyptRecs.length],
-                            ['Ahmed Mansour Collections', fmtAmt(totalCa), ahmedRecs.length],
-                            ['Total Expenses', fmtAmt(totalEx), ex.length],
-                            ['Net Profit', fmtAmt(netBalance), '']
-                        ],
-                        margin: { left: margin, right: margin },
-                        styles: { fontSize: 9, cellPadding: 3 },
-                        headStyles: { fillColor: [15, 23, 42], textColor: 255, fontStyle: 'bold' },
-                        bodyStyles: { textColor: [15, 23, 42] },
-                        columnStyles: { 0: { cellWidth: 100 }, 1: { cellWidth: 40, halign: 'right' }, 2: { cellWidth: 20, halign: 'center' } },
-                        didParseCell: function(data) {
-                            if (data.section === 'body') {
-                                const rowLabel = data.row.raw[0];
-                                if (rowLabel === 'Net Profit') {
-                                    data.cell.styles.fontStyle = 'bold';
-                                    data.cell.styles.fontSize = 11;
-                                    data.cell.styles.textColor = netBalance >= 0 ? [5, 150, 105] : [220, 38, 38];
-                                    data.cell.styles.fillColor = netBalance >= 0 ? [240, 253, 250] : [254, 242, 242];
-                                } else if (rowLabel === 'Total Income (All Ledger)') {
-                                    data.cell.styles.fontStyle = 'bold';
-                                    data.cell.styles.fillColor = [232, 244, 253];
-                                } else if (rowLabel === 'Total Expenses') {
-                                    data.cell.styles.textColor = [220, 38, 38];
-                                    data.cell.styles.fontStyle = 'bold';
-                                }
-                            }
-                        }
+                    const canvas = await window.html2canvas(element, {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                        logging: false
                     });
 
-                    doc.save(`OPENY_Accounting_${new Date().toISOString().split('T')[0]}.pdf`);
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+
+                    const pageWidth = 210;
+                    const pageHeight = 297;
+                    const imgWidth = pageWidth;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                    let heightLeft = imgHeight;
+                    let position = 0;
+
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+
+                    while (heightLeft > 0) {
+                        position -= pageHeight;
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                    }
+
+                    pdf.save('OPENY-Accounting.pdf');
                     showToast('Accounting PDF exported ✓');
                 } catch(e) {
-                    console.error(e);
+                    console.error('PDF export failed:', e);
+                    alert('PDF export failed: ' + (e && e.message ? e.message : 'Unknown error'));
                     showToast('Error exporting PDF');
                 } finally {
                     if (btn) { btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" fill="#ef4444"/><path d="M14 2v6h6" fill="#fca5a5"/><text x="12" y="18" text-anchor="middle" font-size="5.5" font-weight="800" fill="white" font-family="Arial,Helvetica,sans-serif">PDF</text></svg>'; }
