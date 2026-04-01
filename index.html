@@ -22,8 +22,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="style.css">
-    <!-- Chart.js for dashboard analytics -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     
     <!-- Scroll Restore Prevention: must run before page renders -->
     <script>
@@ -108,30 +106,6 @@
                 <div class="landing-card-title">Accounting</div>
                 <div class="landing-card-desc">Track client collections, Egypt &amp; overseas collections, expenses, and view financial summaries.</div>
                 <div class="landing-card-arrow" style="color:#0F766E;">Open Accounting <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg></div>
-            </div>
-        </div>
-        <!-- Analytics Dashboard Section -->
-        <div id="landing-analytics" style="width:100%;max-width:760px;margin-top:2rem;">
-            <!-- Section Header -->
-            <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;">
-                <div style="width:4px;height:22px;background:linear-gradient(180deg,#2563EB,#7C3AED);border-radius:2px;flex-shrink:0;"></div>
-                <h2 style="font-size:1.05rem;font-weight:800;color:#0F172A;margin:0;">System Analytics</h2>
-                <span style="font-size:0.72rem;color:#94A3B8;font-weight:500;background:#F1F5F9;padding:2px 10px;border-radius:99px;white-space:nowrap;">Live from saved data</span>
-            </div>
-            <!-- Stat Cards -->
-            <div id="analytics-stat-cards" class="analytics-stat-grid"></div>
-            <!-- Charts Row -->
-            <div class="analytics-charts-row" style="margin-top:1rem;">
-                <div class="analytics-chart-card">
-                    <div class="analytics-chart-title">Monthly Revenue vs Expenses <span class="analytics-chart-sub">(EGP)</span></div>
-                    <div style="position:relative;height:180px;"><canvas id="analytics-bar-chart"></canvas></div>
-                </div>
-                <div class="analytics-chart-card">
-                    <div class="analytics-chart-title">Module Distribution</div>
-                    <div style="position:relative;height:180px;display:flex;align-items:center;justify-content:center;">
-                        <canvas id="analytics-donut-chart" style="max-height:170px;max-width:170px;"></canvas>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -516,54 +490,6 @@
                                 </button>
                             </div>
                         </div>
-                        <!-- Summary -->
-                        <div class="emp-stats-grid" id="inv-history-summary" style="margin-bottom:1rem;">
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#7C3AED,#2563EB);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="inv-hist-stat-total">0</div>
-                                    <div class="emp-stat-label">Total Records</div>
-                                </div>
-                            </div>
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#059669,#10B981);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="inv-hist-stat-paid">0</div>
-                                    <div class="emp-stat-label">Total Paid</div>
-                                </div>
-                            </div>
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#F59E0B,#EF4444);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="inv-hist-stat-unpaid">0</div>
-                                    <div class="emp-stat-label">Total Unpaid</div>
-                                </div>
-                            </div>
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#2563EB,#0EA5E9);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="inv-hist-stat-value">0</div>
-                                    <div class="emp-stat-label">Total Value</div>
-                                </div>
-                            </div>
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#7C3AED,#DB2777);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="inv-hist-stat-month">0</div>
-                                    <div class="emp-stat-label">This Month Total</div>
-                                </div>
-                            </div>
-                        </div>
                         <!-- Filters -->
                         <div class="history-filters">
                             <div class="history-search-row">
@@ -789,45 +715,6 @@
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     Clear All
                                 </button>
-                            </div>
-                        </div>
-                        <!-- Summary -->
-                        <div class="emp-stats-grid" id="quot-history-summary" style="margin-bottom:1rem;">
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#7C3AED,#2563EB);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="quot-hist-stat-total">0</div>
-                                    <div class="emp-stat-label">Total Quotations</div>
-                                </div>
-                            </div>
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#2563EB,#0EA5E9);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="quot-hist-stat-value">0</div>
-                                    <div class="emp-stat-label">Total Value</div>
-                                </div>
-                            </div>
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#059669,#10B981);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="quot-hist-stat-accepted">0</div>
-                                    <div class="emp-stat-label">Accepted</div>
-                                </div>
-                            </div>
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#F59E0B,#EF4444);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="quot-hist-stat-pending">0</div>
-                                    <div class="emp-stat-label">Pending</div>
-                                </div>
                             </div>
                         </div>
                         <!-- Filters -->
@@ -1153,54 +1040,6 @@
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     Clear All
                                 </button>
-                            </div>
-                        </div>
-                        <!-- Summary -->
-                        <div class="emp-stats-grid" id="ct-history-summary" style="margin-bottom:1rem;">
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#7C3AED,#2563EB);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="ct-hist-stat-total">0</div>
-                                    <div class="emp-stat-label">Total Contracts</div>
-                                </div>
-                            </div>
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#059669,#10B981);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="ct-hist-stat-active">0</div>
-                                    <div class="emp-stat-label">Active</div>
-                                </div>
-                            </div>
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#6B7280,#374151);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="ct-hist-stat-draft">0</div>
-                                    <div class="emp-stat-label">Draft</div>
-                                </div>
-                            </div>
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#F59E0B,#EF4444);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="ct-hist-stat-expired">0</div>
-                                    <div class="emp-stat-label">Expired</div>
-                                </div>
-                            </div>
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#2563EB,#0EA5E9);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="ct-hist-stat-value">0</div>
-                                    <div class="emp-stat-label">Total Contract Value</div>
-                                </div>
                             </div>
                         </div>
                         <!-- Filters -->
@@ -1598,45 +1437,6 @@
                                 </button>
                             </div>
                         </div>
-                        <!-- Summary -->
-                        <div class="emp-stats-grid" id="ec-history-summary" style="margin-bottom:1rem;">
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#7C3AED,#2563EB);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="ec-hist-stat-total">0</div>
-                                    <div class="emp-stat-label">Total HR Contracts</div>
-                                </div>
-                            </div>
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#059669,#10B981);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="ec-hist-stat-active">0</div>
-                                    <div class="emp-stat-label">Active</div>
-                                </div>
-                            </div>
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#6B7280,#374151);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="ec-hist-stat-draft">0</div>
-                                    <div class="emp-stat-label">Draft</div>
-                                </div>
-                            </div>
-                            <div class="emp-stat-card">
-                                <div class="emp-stat-icon" style="background:linear-gradient(135deg,#F59E0B,#EF4444);">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                                </div>
-                                <div class="emp-stat-body">
-                                    <div class="emp-stat-value" id="ec-hist-stat-expired">0</div>
-                                    <div class="emp-stat-label">Expired</div>
-                                </div>
-                            </div>
-                        </div>
                         <!-- Filters -->
                         <div class="history-filters">
                             <div class="history-search-row">
@@ -1708,63 +1508,6 @@
 
         <!-- ── TAB: Overview ── -->
         <div id="emp-tab-overview" class="emp-tab-content">
-            <!-- Stats Row -->
-            <div class="emp-stats-grid">
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#7C3AED,#2563EB);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="stat-total-emp">0</div>
-                        <div class="emp-stat-label">Total Employees</div>
-                    </div>
-                </div>
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#059669,#10B981);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="stat-active-emp">0</div>
-                        <div class="emp-stat-label">Active Employees</div>
-                    </div>
-                </div>
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#F59E0B,#EF4444);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="stat-onleave-emp">0</div>
-                        <div class="emp-stat-label">On Leave</div>
-                    </div>
-                </div>
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#6B7280,#374151);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="stat-inactive-emp">0</div>
-                        <div class="emp-stat-label">Inactive / Archived</div>
-                    </div>
-                </div>
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#2563EB,#0EA5E9);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="stat-monthly-payroll">0</div>
-                        <div class="emp-stat-label">Total Monthly Payroll</div>
-                    </div>
-                </div>
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#7C3AED,#DB2777);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="stat-annual-payroll">0</div>
-                        <div class="emp-stat-label">Annual Payroll Cost</div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Recent activity row -->
             <div class="emp-two-col">
@@ -1854,53 +1597,6 @@
 
         <!-- ── TAB: Payroll Summary ── -->
         <div id="emp-tab-payroll" class="emp-tab-content">
-            <div class="emp-stats-grid">
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#2563EB,#0EA5E9);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="pr-monthly">0</div>
-                        <div class="emp-stat-label">Total Monthly Payroll</div>
-                    </div>
-                </div>
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#7C3AED,#DB2777);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="pr-annual">0</div>
-                        <div class="emp-stat-label">Total Annual Payroll</div>
-                    </div>
-                </div>
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#059669,#10B981);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="pr-active">0</div>
-                        <div class="emp-stat-label">Active Payroll</div>
-                    </div>
-                </div>
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#F59E0B,#EF4444);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="pr-increases-month">0</div>
-                        <div class="emp-stat-label">Salary Increases This Month</div>
-                    </div>
-                </div>
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#0F172A,#334155);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="pr-increases-year">0</div>
-                        <div class="emp-stat-label">Salary Increases This Year</div>
-                    </div>
-                </div>
-            </div>
             <!-- Employees with recent salary changes -->
             <div class="ui-card" style="margin-top:1.5rem;">
                 <div class="ui-card-header">
@@ -2114,67 +1810,6 @@
                 </div>
             </div>
 
-            <!-- 5. Summary Stats -->
-            <div class="emp-stats-grid" style="margin-top:1.5rem;">
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#059669,#0D9488);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="summary-total-income">0.00</div>
-                        <div class="emp-stat-label">Total Income (EGP)</div>
-                    </div>
-                </div>
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#0F766E,#059669);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="summary-total-egypt">0.00</div>
-                        <div class="emp-stat-label">Taiseer Mahmoud (EGP)</div>
-                    </div>
-                </div>
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#7C3AED,#2563EB);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="summary-total-ahmed">0.00</div>
-                        <div class="emp-stat-label">Ahmed Mansour (EGP)</div>
-                    </div>
-                </div>
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#DC2626,#EF4444);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="summary-total-expenses">0.00</div>
-                        <div class="emp-stat-label">Total Expenses (EGP)</div>
-                    </div>
-                </div>
-                <div class="emp-stat-card">
-                    <div class="emp-stat-icon" style="background:linear-gradient(135deg,#D97706,#F59E0B);">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:22px;height:22px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                    </div>
-                    <div class="emp-stat-body">
-                        <div class="emp-stat-value" id="summary-net-profit">0.00</div>
-                        <div class="emp-stat-label">Net Profit (EGP)</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 6. Partner Settlement -->
-            <div class="ui-card" style="margin-top:1.5rem;" id="acct-settlement-card">
-                <div class="ui-card-header">
-                    <span class="ui-card-title" style="color:#2563EB;">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                        Partner Settlement — التسوية بين الشركاء
-                    </span>
-                </div>
-                <div id="acct-settlement-body" style="padding:1rem 1.25rem;">
-                    <div class="emp-empty-state">Select a month and add ledger entries &amp; expenses to calculate the settlement.</div>
-                </div>
-            </div>
             </div><!-- end #accounting-export -->
         </div>
     </div>
