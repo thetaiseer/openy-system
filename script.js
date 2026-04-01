@@ -1826,9 +1826,9 @@
                 showToast("PDF Downloaded successfully!");
                 
                 const _now = new Date();
-                const _editQuoteId = currentEditingHistoryId;
+                const _editingQuotationId = currentEditingHistoryId;
                 const record = {
-                    id: _editQuoteId || Date.now().toString(),
+                    id: _editingQuotationId || Date.now().toString(),
                     client: appState['client-name'],
                     ref: appState['quote-num'],
                     date: appState.date,
@@ -1844,8 +1844,8 @@
                     formSnapshot: _captureQuoteSnapshot()
                 };
                 await cloudDB.put(record, 'quotations');
-                logActivity(_editQuoteId ? 'updated' : 'created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
-                if (_editQuoteId) window.stopEditing();
+                logActivity(_editingQuotationId ? 'updated' : 'created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                if (_editingQuotationId) window.stopEditing();
             } catch (e) {
                 console.error(e);
                 showToast("Error generating PDF");
@@ -1903,9 +1903,9 @@
                 showToast("Excel Downloaded successfully!");
                 
                 const _now2 = new Date();
-                const _editQuoteId2 = currentEditingHistoryId;
+                const _editingQuotationIdExcel = currentEditingHistoryId;
                 const record = {
-                    id: _editQuoteId2 || Date.now().toString(),
+                    id: _editingQuotationIdExcel || Date.now().toString(),
                     client: appState['client-name'],
                     ref: appState['quote-num'],
                     date: appState.date,
@@ -1921,8 +1921,8 @@
                     formSnapshot: _captureQuoteSnapshot()
                 };
                 await cloudDB.put(record, 'quotations');
-                logActivity(_editQuoteId2 ? 'updated' : 'created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
-                if (_editQuoteId2) window.stopEditing();
+                logActivity(_editingQuotationIdExcel ? 'updated' : 'created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                if (_editingQuotationIdExcel) window.stopEditing();
             } catch (e) {
                 console.error(e);
                 showToast("Error generating Excel");
@@ -1980,9 +1980,9 @@
                 showToast("Invoice PDF Downloaded!");
                 
                 const _now3 = new Date();
-                const _editInvId = currentEditingInvHistoryId;
+                const _editingInvoiceId = currentEditingInvHistoryId;
                 const record = {
-                    id: _editInvId || Date.now().toString(),
+                    id: _editingInvoiceId || Date.now().toString(),
                     client: invoiceData.client,
                     ref: invoiceRef,
                     date: invoiceData.invoiceDate,
@@ -1998,7 +1998,7 @@
                     formSnapshot: _captureInvoiceSnapshot()
                 };
                 await cloudDB.put(record, 'invoices');
-                if (_editInvId) window.stopInvEditing();
+                if (_editingInvoiceId) window.stopInvEditing();
                 await initInvoiceNumber();
                 if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
             } catch (e) {
@@ -2323,9 +2323,9 @@
                 showToast("Invoice Excel Downloaded!");
 
                 const _now4 = new Date();
-                const _editInvId2 = currentEditingInvHistoryId;
+                const _editingInvoiceIdExcel = currentEditingInvHistoryId;
                 const record = {
-                    id: _editInvId2 || Date.now().toString(),
+                    id: _editingInvoiceIdExcel || Date.now().toString(),
                     client: invoiceData.client,
                     ref: invoiceRef,
                     date: invoiceData.invoiceDate,
@@ -2341,7 +2341,7 @@
                     formSnapshot: _captureInvoiceSnapshot()
                 };
                 await cloudDB.put(record, 'invoices');
-                if (_editInvId2) window.stopInvEditing();
+                if (_editingInvoiceIdExcel) window.stopInvEditing();
                 await initInvoiceNumber();
                 if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
             } catch (e) {
@@ -4018,9 +4018,9 @@
                 showToast('PDF Downloaded successfully!');
                 // Save record to Firebase history
                 const _nowCt = new Date();
-                const _editCtId = isEmp ? currentEditingEcId : currentEditingCtId;
+                const _editingContractId = isEmp ? currentEditingEcId : currentEditingCtId;
                 const ctRecord = {
-                    id: _editCtId || Date.now().toString(),
+                    id: _editingContractId || Date.now().toString(),
                     client: clientName,
                     ref: refNum,
                     date: (isEmp ? document.getElementById('ec-date') : document.getElementById('ct-date'))?.value || _nowCt.toISOString().split('T')[0],
@@ -4036,7 +4036,7 @@
                     formSnapshot: isEmp ? _captureEcSnapshot() : _captureCtSnapshot()
                 };
                 await cloudDB.put(ctRecord, isEmp ? 'hrContracts' : 'clientContracts');
-                if (_editCtId) { if (isEmp) window.stopEcEditing(); else window.stopCtEditing(); }
+                if (_editingContractId) { if (isEmp) window.stopEcEditing(); else window.stopCtEditing(); }
             } catch (e) {
                 console.error(e);
                 showToast('Error generating PDF');
@@ -4105,9 +4105,9 @@
                 showToast('Word document downloaded!');
                 // Save record to Firebase history
                 const _nowCtW = new Date();
-                const _editCtWId = isEmp ? currentEditingEcId : currentEditingCtId;
+                const _editingContractIdWord = isEmp ? currentEditingEcId : currentEditingCtId;
                 const ctWRecord = {
-                    id: _editCtWId || Date.now().toString(),
+                    id: _editingContractIdWord || Date.now().toString(),
                     client: clientName,
                     ref: refNum,
                     date: (isEmp ? document.getElementById('ec-date') : document.getElementById('ct-date'))?.value || _nowCtW.toISOString().split('T')[0],
@@ -4123,7 +4123,7 @@
                     formSnapshot: isEmp ? _captureEcSnapshot() : _captureCtSnapshot()
                 };
                 await cloudDB.put(ctWRecord, isEmp ? 'hrContracts' : 'clientContracts');
-                if (_editCtWId) { if (isEmp) window.stopEcEditing(); else window.stopCtEditing(); }
+                if (_editingContractIdWord) { if (isEmp) window.stopEcEditing(); else window.stopCtEditing(); }
             } catch(e) {
                 console.error(e);
                 showToast('Error generating Word document');
