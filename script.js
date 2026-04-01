@@ -3117,7 +3117,7 @@
             }
         };
 
-
+        window.clearHistory = async function() {
             window.openConfirmModal("Clear History", "Are you sure you want to clear all Quotation records?", async () => {
                 await cloudDB.clear('quotations');
                 window.renderHistoryList();
