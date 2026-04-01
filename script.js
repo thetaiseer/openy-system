@@ -39,6 +39,8 @@
         
         let currentEditingHistoryId = null;
         let currentEditingInvHistoryId = null;
+        let currentEditingCtId = null;
+        let currentEditingEcId = null;
         
         let currentHistoryFilter = 'all';
         let currentInvHistoryFilter = 'all';
@@ -1975,7 +1977,8 @@
                     year: _now.getFullYear(),
                     month: _now.getMonth() + 1,
                     day: _now.getDate(),
-                    source: 'web'
+                    source: 'web',
+                    formSnapshot: _captureQuoteSnapshot()
                 };
                 await cloudDB.put(record, 'quotations');
                 logActivity('created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
@@ -2049,7 +2052,8 @@
                     year: _now2.getFullYear(),
                     month: _now2.getMonth() + 1,
                     day: _now2.getDate(),
-                    source: 'web'
+                    source: 'web',
+                    formSnapshot: _captureQuoteSnapshot()
                 };
                 await cloudDB.put(record, 'quotations');
                 logActivity('created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
@@ -2123,7 +2127,8 @@
                     year: _now3.getFullYear(),
                     month: _now3.getMonth() + 1,
                     day: _now3.getDate(),
-                    source: 'web'
+                    source: 'web',
+                    formSnapshot: _captureInvoiceSnapshot()
                 };
                 await cloudDB.put(record, 'invoices');
                 await initInvoiceNumber();
@@ -2463,7 +2468,8 @@
                     year: _now4.getFullYear(),
                     month: _now4.getMonth() + 1,
                     day: _now4.getDate(),
-                    source: 'web'
+                    source: 'web',
+                    formSnapshot: _captureInvoiceSnapshot()
                 };
                 await cloudDB.put(record, 'invoices');
                 await initInvoiceNumber();
@@ -2605,6 +2611,9 @@
                 </div>
                 <div class="history-record-amount">${amountStr}</div>
                 <span class="history-status-badge ${badgeClass}${canToggle ? ' can-toggle' : ''}" ${toggleAttr}>${r.status || 'unpaid'}</span>
+                <button onclick="window.editHistoryRecord('${r.id}', '${storeName}')" class="history-record-edit" title="Edit record">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </button>
                 <button onclick="window.deleteRecord('${r.id}', '${storeName}')" class="history-record-del" title="Delete record">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>
@@ -2834,6 +2843,316 @@
             if (el('ec-history-filter-status')) el('ec-history-filter-status').value = '';
             if (el('ec-history-sort')) el('ec-history-sort').value = 'newest';
             window.renderEcHistoryList();
+        };
+
+
+        // ==========================================================================
+        // HISTORY EDIT FUNCTIONALITY
+        // ==========================================================================
+
+        // --- Snapshot capture helpers ---
+
+        function _captureQuoteSnapshot() {
+            return structuredClone(appState);
+        }
+
+        function _captureInvoiceSnapshot() {
+            const v = id => document.getElementById(id)?.value || '';
+            const c = id => document.getElementById(id)?.checked || false;
+            const snapshot = {
+                totalBudget: v('totalBudget'),
+                currency: v('currency'),
+                clientName: v('clientName'),
+                campaignMonth: v('campaignMonth'),
+                invoiceDate: v('invoiceDate'),
+                invCustomClientName: v('inv-custom-client-name'),
+                invCustomProject: v('inv-custom-project'),
+                invCustomDesc: v('inv-custom-desc'),
+                invCustomServices: structuredClone(invCustomServices),
+                platIG: c('platIG'), countIG: v('countIG'), percIG: v('percNum-IG'),
+                platSnap: c('platSnap'), countSnap: v('countSnap'), percSnap: v('percNum-Snap'),
+                platTikTok: c('platTikTok'), countTikTok: v('countTikTok'), percTikTok: v('percNum-TikTok'),
+                platGoogle: c('platGoogle'), countGoogle: v('countGoogle'), percGoogle: v('percNum-Google'),
+                platSalla: c('platSalla'), countSalla: v('countSalla'), percSalla: v('percNum-Salla')
+            };
+            return snapshot;
+        }
+
+        function _captureCtSnapshot() {
+            const v = id => document.getElementById(id)?.value || '';
+            const services = _readCtServices();
+            const clauses = _readClauses('#ct-clauses-container');
+            return {
+                num: v('ct-num'), date: v('ct-date'), duration: v('ct-duration'),
+                status: v('ct-status'), currency: v('ct-currency'), lang: v('ct-lang'),
+                p1Name: v('ct-p1-name'), p1Rep: v('ct-p1-rep'), p1Address: v('ct-p1-address'),
+                p1Email: v('ct-p1-email'), p1Phone: v('ct-p1-phone'), p1Website: v('ct-p1-website'), p1Tax: v('ct-p1-tax'),
+                p2Name: v('ct-p2-name'), p2Rep: v('ct-p2-rep'), p2Address: v('ct-p2-address'),
+                p2Email: v('ct-p2-email'), p2Phone: v('ct-p2-phone'), p2Website: v('ct-p2-website'), p2Tax: v('ct-p2-tax'),
+                totalValue: v('ct-total-value'), paymentMethod: v('ct-payment-method'),
+                paymentTerms: v('ct-payment-terms'), financialNotes: v('ct-financial-notes'),
+                sig1Name: v('ct-sig1-name'), sig2Name: v('ct-sig2-name'),
+                sigDate: v('ct-sig-date'), sigPlace: v('ct-sig-place'),
+                services: services, clauses: clauses
+            };
+        }
+
+        function _captureEcSnapshot() {
+            const v = id => document.getElementById(id)?.value || '';
+            const clauses = _readClauses('#ec-clauses-container');
+            return {
+                num: v('ec-num'), date: v('ec-date'), duration: v('ec-duration'),
+                status: v('ec-status'), currency: v('ec-currency'), lang: v('ec-lang'),
+                coName: v('ec-co-name'), coRep: v('ec-co-rep'), coAddress: v('ec-co-address'),
+                coEmail: v('ec-co-email'), coPhone: v('ec-co-phone'),
+                empName: v('ec-emp-name'), empId: v('ec-emp-id'), empAddress: v('ec-emp-address'),
+                empPhone: v('ec-emp-phone'), empEmail: v('ec-emp-email'),
+                empNationality: v('ec-emp-nationality'), empMarital: v('ec-emp-marital'),
+                jobTitle: v('ec-job-title'), jobDept: v('ec-job-dept'),
+                jobManager: v('ec-job-manager'), jobType: v('ec-job-type'),
+                startDate: v('ec-start-date'), empDuration: v('ec-emp-duration'),
+                probation: v('ec-probation'), workplace: v('ec-workplace'),
+                salary: v('ec-salary'), payMethod: v('ec-pay-method'),
+                payDate: v('ec-pay-date'), benefits: v('ec-benefits'),
+                dailyHours: v('ec-daily-hours'), workDays: v('ec-work-days'), vacations: v('ec-vacations'),
+                sig1Name: v('ec-sig1-name'), sig2Name: v('ec-sig2-name'),
+                sigDate: v('ec-sig-date'), sigPlace: v('ec-sig-place'),
+                clauses: clauses
+            };
+        }
+
+        // --- Snapshot restore helpers ---
+
+        function _restoreQuoteSnapshot(snapshot) {
+            if (!snapshot) return;
+            appState = Object.assign({}, appState, snapshot);
+            if (typeof window.populateForm === 'function') window.populateForm();
+        }
+
+        function _restoreInvoiceSnapshot(snapshot) {
+            if (!snapshot) return;
+            const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+            const setCheck = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
+            set('totalBudget', snapshot.totalBudget);
+            set('currency', snapshot.currency);
+            set('clientName', snapshot.clientName);
+            set('campaignMonth', snapshot.campaignMonth);
+            set('invoiceDate', snapshot.invoiceDate);
+            set('inv-custom-client-name', snapshot.invCustomClientName);
+            set('inv-custom-project', snapshot.invCustomProject);
+            set('inv-custom-desc', snapshot.invCustomDesc);
+
+            if (snapshot.invCustomServices && snapshot.invCustomServices.length > 0) {
+                const container = document.getElementById('inv-services-container');
+                if (container) container.innerHTML = '';
+                invCustomServices = [];
+                snapshot.invCustomServices.forEach(s => {
+                    if (typeof window.renderInvServiceRow === 'function') window.renderInvServiceRow(s.id, s.name, s.scope);
+                    invCustomServices.push({ id: s.id, name: s.name, scope: s.scope });
+                });
+            }
+
+            setCheck('platIG', snapshot.platIG); set('countIG', snapshot.countIG); set('percNum-IG', snapshot.percIG); set('percSlider-IG', snapshot.percIG);
+            setCheck('platSnap', snapshot.platSnap); set('countSnap', snapshot.countSnap); set('percNum-Snap', snapshot.percSnap); set('percSlider-Snap', snapshot.percSnap);
+            setCheck('platTikTok', snapshot.platTikTok); set('countTikTok', snapshot.countTikTok); set('percNum-TikTok', snapshot.percTikTok); set('percSlider-TikTok', snapshot.percTikTok);
+            setCheck('platGoogle', snapshot.platGoogle); set('countGoogle', snapshot.countGoogle); set('percNum-Google', snapshot.percGoogle); set('percSlider-Google', snapshot.percGoogle);
+            setCheck('platSalla', snapshot.platSalla); set('countSalla', snapshot.countSalla); set('percNum-Salla', snapshot.percSalla); set('percSlider-Salla', snapshot.percSalla);
+
+            if (typeof window.toggleDetailedOptions === 'function') window.toggleDetailedOptions();
+            if (typeof window.updateAllocations === 'function') window.updateAllocations();
+        }
+
+        function _restoreCtSnapshot(snapshot) {
+            if (!snapshot) return;
+            const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+            set('ct-num', snapshot.num); set('ct-date', snapshot.date); set('ct-duration', snapshot.duration);
+            set('ct-status', snapshot.status); set('ct-currency', snapshot.currency); set('ct-lang', snapshot.lang);
+            set('ct-p1-name', snapshot.p1Name); set('ct-p1-rep', snapshot.p1Rep); set('ct-p1-address', snapshot.p1Address);
+            set('ct-p1-email', snapshot.p1Email); set('ct-p1-phone', snapshot.p1Phone); set('ct-p1-website', snapshot.p1Website); set('ct-p1-tax', snapshot.p1Tax);
+            set('ct-p2-name', snapshot.p2Name); set('ct-p2-rep', snapshot.p2Rep); set('ct-p2-address', snapshot.p2Address);
+            set('ct-p2-email', snapshot.p2Email); set('ct-p2-phone', snapshot.p2Phone); set('ct-p2-website', snapshot.p2Website); set('ct-p2-tax', snapshot.p2Tax);
+            set('ct-total-value', snapshot.totalValue); set('ct-payment-method', snapshot.paymentMethod);
+            set('ct-payment-terms', snapshot.paymentTerms); set('ct-financial-notes', snapshot.financialNotes);
+            set('ct-sig1-name', snapshot.sig1Name); set('ct-sig2-name', snapshot.sig2Name);
+            set('ct-sig-date', snapshot.sigDate); set('ct-sig-place', snapshot.sigPlace);
+
+            if (snapshot.services) {
+                const svcContainer = document.getElementById('ct-services-container');
+                if (svcContainer) {
+                    svcContainer.innerHTML = '';
+                    snapshot.services.forEach(s => {
+                        if (typeof window.addContractService === 'function') window.addContractService(s);
+                    });
+                }
+            }
+
+            if (snapshot.clauses) {
+                const lang = snapshot.lang || 'ar';
+                const clContainer = document.getElementById('ct-clauses-container');
+                if (clContainer) {
+                    clContainer.innerHTML = '';
+                    snapshot.clauses.forEach(cl => {
+                        _renderClauseRow('ct', { id: _cid(), title: cl.title, text: cl.text }, clContainer, lang);
+                    });
+                    const cc = document.getElementById('ct-clauses-count');
+                    if (cc) cc.textContent = snapshot.clauses.length;
+                }
+            }
+
+            if (typeof window.renderContractPreview === 'function') window.renderContractPreview();
+        }
+
+        function _restoreEcSnapshot(snapshot) {
+            if (!snapshot) return;
+            const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+            set('ec-num', snapshot.num); set('ec-date', snapshot.date); set('ec-duration', snapshot.duration);
+            set('ec-status', snapshot.status); set('ec-currency', snapshot.currency); set('ec-lang', snapshot.lang);
+            set('ec-co-name', snapshot.coName); set('ec-co-rep', snapshot.coRep); set('ec-co-address', snapshot.coAddress);
+            set('ec-co-email', snapshot.coEmail); set('ec-co-phone', snapshot.coPhone);
+            set('ec-emp-name', snapshot.empName); set('ec-emp-id', snapshot.empId); set('ec-emp-address', snapshot.empAddress);
+            set('ec-emp-phone', snapshot.empPhone); set('ec-emp-email', snapshot.empEmail);
+            set('ec-emp-nationality', snapshot.empNationality); set('ec-emp-marital', snapshot.empMarital);
+            set('ec-job-title', snapshot.jobTitle); set('ec-job-dept', snapshot.jobDept);
+            set('ec-job-manager', snapshot.jobManager); set('ec-job-type', snapshot.jobType);
+            set('ec-start-date', snapshot.startDate); set('ec-emp-duration', snapshot.empDuration);
+            set('ec-probation', snapshot.probation); set('ec-workplace', snapshot.workplace);
+            set('ec-salary', snapshot.salary); set('ec-pay-method', snapshot.payMethod);
+            set('ec-pay-date', snapshot.payDate); set('ec-benefits', snapshot.benefits);
+            set('ec-daily-hours', snapshot.dailyHours); set('ec-work-days', snapshot.workDays); set('ec-vacations', snapshot.vacations);
+            set('ec-sig1-name', snapshot.sig1Name); set('ec-sig2-name', snapshot.sig2Name);
+            set('ec-sig-date', snapshot.sigDate); set('ec-sig-place', snapshot.sigPlace);
+
+            if (snapshot.clauses) {
+                const lang = snapshot.lang || 'ar';
+                const clContainer = document.getElementById('ec-clauses-container');
+                if (clContainer) {
+                    clContainer.innerHTML = '';
+                    snapshot.clauses.forEach(cl => {
+                        _renderEmpClauseRow({ id: _cid(), title: cl.title, text: cl.text }, clContainer, lang);
+                    });
+                    const ec = document.getElementById('ec-clauses-count');
+                    if (ec) ec.textContent = snapshot.clauses.length;
+                }
+            }
+
+            if (typeof window.renderEmpContractPreview === 'function') window.renderEmpContractPreview();
+        }
+
+        // --- Edit dispatch ---
+
+        window.editHistoryRecord = async function(id, storeName) {
+            const allRecords = await cloudDB.getAll(storeName);
+            const record = allRecords.find(r => r.id === id);
+            if (!record) return showToast('Record not found.');
+
+            if (storeName === 'quotations') {
+                currentEditingHistoryId = id;
+                if (record.formSnapshot) {
+                    _restoreQuoteSnapshot(record.formSnapshot);
+                } else {
+                    appState['client-name'] = record.client || appState['client-name'];
+                    appState['quote-num'] = record.ref || appState['quote-num'];
+                    appState.date = record.date || appState.date;
+                    appState.finalPrice = record.amount || appState.finalPrice;
+                    appState.currency = record.currency || appState.currency;
+                    if (typeof window.populateForm === 'function') window.populateForm();
+                }
+                window.switchMainModule('quotation');
+                window.switchTab('editor');
+                const banner = document.getElementById('edit-mode-banner');
+                const bannerText = document.getElementById('edit-mode-text');
+                if (banner) banner.classList.remove('hidden');
+                if (bannerText) bannerText.textContent = `Editing: ${record.client || record.ref || 'record'}`;
+
+            } else if (storeName === 'invoices') {
+                currentEditingInvHistoryId = id;
+                if (record.formSnapshot) {
+                    _restoreInvoiceSnapshot(record.formSnapshot);
+                } else {
+                    const set = (eid, val) => { const el = document.getElementById(eid); if (el) el.value = val; };
+                    set('totalBudget', record.amount);
+                    set('currency', record.currency);
+                    if (typeof window.toggleDetailedOptions === 'function') window.toggleDetailedOptions();
+                    if (typeof window.updateAllocations === 'function') window.updateAllocations();
+                }
+                window.switchMainModule('invoice');
+                window.switchInvTab('editor');
+                const banner = document.getElementById('inv-edit-mode-banner');
+                const bannerText = document.getElementById('inv-edit-mode-text');
+                if (banner) banner.classList.remove('hidden');
+                if (bannerText) bannerText.textContent = `Editing: ${record.client || record.ref || 'record'}`;
+
+            } else if (storeName === 'clientContracts') {
+                currentEditingCtId = id;
+                if (record.formSnapshot) {
+                    _restoreCtSnapshot(record.formSnapshot);
+                } else {
+                    const set = (eid, val) => { const el = document.getElementById(eid); if (el) el.value = val; };
+                    set('ct-p2-name', record.client);
+                    set('ct-num', record.ref);
+                    set('ct-date', record.date);
+                    set('ct-total-value', record.amount);
+                    set('ct-currency', record.currency);
+                    set('ct-status', record.status);
+                    if (typeof window.renderContractPreview === 'function') window.renderContractPreview();
+                }
+                window.switchMainModule('contract');
+                window.switchContractTab('editor');
+                const banner = document.getElementById('ct-edit-mode-banner');
+                const bannerText = document.getElementById('ct-edit-mode-text');
+                if (banner) banner.classList.remove('hidden');
+                if (bannerText) bannerText.textContent = `Editing: ${record.client || record.ref || 'record'}`;
+
+            } else if (storeName === 'hrContracts') {
+                currentEditingEcId = id;
+                if (record.formSnapshot) {
+                    _restoreEcSnapshot(record.formSnapshot);
+                } else {
+                    const set = (eid, val) => { const el = document.getElementById(eid); if (el) el.value = val; };
+                    set('ec-emp-name', record.client);
+                    set('ec-num', record.ref);
+                    set('ec-date', record.date);
+                    set('ec-salary', record.amount);
+                    set('ec-currency', record.currency);
+                    set('ec-status', record.status);
+                    if (typeof window.renderEmpContractPreview === 'function') window.renderEmpContractPreview();
+                }
+                window.switchMainModule('empcontract');
+                window.switchEmpContractTab('editor');
+                const banner = document.getElementById('ec-edit-mode-banner');
+                const bannerText = document.getElementById('ec-edit-mode-text');
+                if (banner) banner.classList.remove('hidden');
+                if (bannerText) bannerText.textContent = `Editing: ${record.client || record.ref || 'record'}`;
+            }
+
+            showToast('Record loaded for editing.');
+            setTimeout(() => { if (typeof window.adjustLayout === 'function') window.adjustLayout(); }, 100);
+        };
+
+        // --- Stop editing ---
+
+        window.stopEditing = function() {
+            currentEditingHistoryId = null;
+            const banner = document.getElementById('edit-mode-banner');
+            if (banner) banner.classList.add('hidden');
+        };
+
+        window.stopInvEditing = function() {
+            currentEditingInvHistoryId = null;
+            const banner = document.getElementById('inv-edit-mode-banner');
+            if (banner) banner.classList.add('hidden');
+        };
+
+        window.stopCtEditing = function() {
+            currentEditingCtId = null;
+            const banner = document.getElementById('ct-edit-mode-banner');
+            if (banner) banner.classList.add('hidden');
+        };
+
+        window.stopEcEditing = function() {
+            currentEditingEcId = null;
+            const banner = document.getElementById('ec-edit-mode-banner');
+            if (banner) banner.classList.add('hidden');
         };
 
 
@@ -3842,7 +4161,8 @@
                     year: _nowCt.getFullYear(),
                     month: _nowCt.getMonth() + 1,
                     day: _nowCt.getDate(),
-                    source: 'web'
+                    source: 'web',
+                    formSnapshot: isEmp ? _captureEcSnapshot() : _captureCtSnapshot()
                 };
                 await cloudDB.put(ctRecord, isEmp ? 'hrContracts' : 'clientContracts');
             } catch (e) {
@@ -3926,7 +4246,8 @@
                     year: _nowCtW.getFullYear(),
                     month: _nowCtW.getMonth() + 1,
                     day: _nowCtW.getDate(),
-                    source: 'web'
+                    source: 'web',
+                    formSnapshot: isEmp ? _captureEcSnapshot() : _captureCtSnapshot()
                 };
                 await cloudDB.put(ctWRecord, isEmp ? 'hrContracts' : 'clientContracts');
             } catch(e) {
