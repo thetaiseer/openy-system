@@ -166,18 +166,18 @@
             <img src="https://i.postimg.cc/PJ0fwSNY/OPENY.png" alt="OPENY Logo" class="system-logo">
         </div>
         <div class="ui-nav-pills justify-self-center">
-            <button id="nav-invoice" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('invoice')" class="ui-nav-pill active">Invoice</button>
-            <button id="nav-quotation" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('quotation')" class="ui-nav-pill">Quotation</button>
-            <button id="nav-contract" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('contract')" class="ui-nav-pill">Client Contract</button>
-            <button id="nav-empcontract" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('empcontract')" class="ui-nav-pill">HR Contract</button>
-            <button id="nav-employees" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('employees')" class="ui-nav-pill">Employees</button>
-            <button id="nav-accounting" onclick="if(typeof window.switchMainModule === 'function') window.switchMainModule('accounting')" class="ui-nav-pill">Accounting</button>
+            <a id="nav-invoice" href="/invoice" class="ui-nav-pill active">Invoice</a>
+            <a id="nav-quotation" href="/quotation" class="ui-nav-pill">Quotation</a>
+            <a id="nav-contract" href="/client-contract" class="ui-nav-pill">Client Contract</a>
+            <a id="nav-empcontract" href="/hr-contract" class="ui-nav-pill">HR Contract</a>
+            <a id="nav-employees" href="/employees" class="ui-nav-pill">Employees</a>
+            <a id="nav-accounting" href="/accounting" class="ui-nav-pill">Accounting</a>
         </div>
         <div class="flex items-center justify-end gap-2" style="position:relative;">
-            <button onclick="window.openLanding()" class="lang-toggle-btn no-print ui-nav-home-desktop" title="Back to Home">
+            <a href="/" class="lang-toggle-btn no-print ui-nav-home-desktop" title="Back to Home">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:14px;height:14px;display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                 Home
-            </button>
+            </a>
             <!-- Hamburger button: mobile only -->
             <button class="hamburger-btn no-print" id="mobile-menu-btn" onclick="window.toggleMobileMenu()" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav-dropdown">
                 <svg id="hamburger-icon" class="hamburger-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -189,35 +189,35 @@
             </button>
             <!-- Mobile dropdown menu -->
             <div id="mobile-nav-dropdown" role="menu" aria-label="Navigation menu">
-                <button class="mobile-nav-item" id="mnav-home" onclick="window.openLanding(); window.closeMobileMenu();" role="menuitem">
+                <a class="mobile-nav-item" id="mnav-home" href="/" role="menuitem">
                     <span class="mobile-nav-dot"></span>
                     Home
-                </button>
+                </a>
                 <div class="mobile-nav-divider"></div>
-                <button class="mobile-nav-item active" id="mnav-invoice" onclick="window.switchMainModule('invoice'); window.closeMobileMenu();" role="menuitem">
+                <a class="mobile-nav-item active" id="mnav-invoice" href="/invoice" role="menuitem">
                     <span class="mobile-nav-dot"></span>
                     Invoice
-                </button>
-                <button class="mobile-nav-item" id="mnav-quotation" onclick="window.switchMainModule('quotation'); window.closeMobileMenu();" role="menuitem">
+                </a>
+                <a class="mobile-nav-item" id="mnav-quotation" href="/quotation" role="menuitem">
                     <span class="mobile-nav-dot"></span>
                     Quotation
-                </button>
-                <button class="mobile-nav-item" id="mnav-contract" onclick="window.switchMainModule('contract'); window.closeMobileMenu();" role="menuitem">
+                </a>
+                <a class="mobile-nav-item" id="mnav-contract" href="/client-contract" role="menuitem">
                     <span class="mobile-nav-dot"></span>
                     Client Contract
-                </button>
-                <button class="mobile-nav-item" id="mnav-empcontract" onclick="window.switchMainModule('empcontract'); window.closeMobileMenu();" role="menuitem">
+                </a>
+                <a class="mobile-nav-item" id="mnav-empcontract" href="/hr-contract" role="menuitem">
                     <span class="mobile-nav-dot"></span>
                     HR Contract
-                </button>
-                <button class="mobile-nav-item" id="mnav-employees" onclick="window.switchMainModule('employees'); window.closeMobileMenu();" role="menuitem">
+                </a>
+                <a class="mobile-nav-item" id="mnav-employees" href="/employees" role="menuitem">
                     <span class="mobile-nav-dot"></span>
                     Employees
-                </button>
-                <button class="mobile-nav-item" id="mnav-accounting" onclick="window.switchMainModule('accounting'); window.closeMobileMenu();" role="menuitem">
+                </a>
+                <a class="mobile-nav-item" id="mnav-accounting" href="/accounting" role="menuitem">
                     <span class="mobile-nav-dot"></span>
                     Accounting
-                </button>
+                </a>
             </div>
         </div>
     </nav>

@@ -1108,6 +1108,7 @@
                 // Unlock heavy rendering after UI has safely painted (Mobile specific fix)
                 setTimeout(async () => { 
                     isAppBooting = false;
+                    window._openyReady = true;
                     await initInvoiceNumber();
                     if(typeof window.updateAllocations === 'function') window.updateAllocations(); 
                     if(typeof window.saveAndRender === 'function') window.saveAndRender(); 
@@ -6211,3 +6212,128 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
         }()); // end accounting IIFE
 
     
+        // ==========================================================================
+        // URL ROUTING — HTML5 History API
+        // Maps URL paths to internal module names and keeps the address bar in sync.
+        // ==========================================================================
+        (function () {
+            var MODULE_ROUTES = {
+                'invoice':     '/invoice',
+                'quotation':   '/quotation',
+                'contract':    '/client-contract',
+                'empcontract': '/hr-contract',
+                'employees':   '/employees',
+                'accounting':  '/accounting'
+            };
+
+            // Reverse map: path → module name
+            var ROUTE_MODULES = {};
+            Object.keys(MODULE_ROUTES).forEach(function (m) {
+                ROUTE_MODULES[MODULE_ROUTES[m]] = m;
+            });
+
+            // Flag to skip pushing a new history entry when navigating from popstate
+            var _skipPush = false;
+
+            // Cache original functions before patching
+            var _origSwitch  = null;
+            var _origLanding = null;
+
+            function patchFunctions() {
+                if (_origSwitch) return; // already patched
+                if (!window.switchMainModule || !window.openLanding) {
+                    console.warn('[Router] switchMainModule / openLanding not ready yet');
+                    return;
+                }
+
+                _origSwitch  = window.switchMainModule;
+                _origLanding = window.openLanding;
+
+                // Patch switchMainModule — push route URL when switching modules
+                window.switchMainModule = function (moduleName) {
+                    if (!_skipPush) {
+                        var route = MODULE_ROUTES[moduleName];
+                        if (route && window.location.pathname !== route) {
+                            history.pushState({ module: moduleName }, '', route);
+                        }
+                    }
+                    _origSwitch(moduleName);
+                };
+
+                // Patch openLanding — push '/' when going home
+                window.openLanding = function () {
+                    if (!_skipPush && window.location.pathname !== '/') {
+                        history.pushState({ page: 'home' }, '', '/');
+                    }
+                    _origLanding();
+                };
+            }
+
+            // Handle browser back / forward navigation
+            window.addEventListener('popstate', function () {
+                patchFunctions();
+                _skipPush = true;
+                var path = window.location.pathname;
+                var mod  = ROUTE_MODULES[path];
+                if (mod) {
+                    var landing = document.getElementById('landing-screen');
+                    if (landing) landing.style.display = 'none';
+                    _origSwitch(mod);
+                } else {
+                    _origLanding();
+                }
+                _skipPush = false;
+            });
+
+            // Delegated click handler — intercepts all internal nav <a> clicks so
+            // navigation is handled via JS without a full page reload.
+            document.addEventListener('click', function (e) {
+                var link = e.target.closest('a[href]');
+                if (!link) return;
+                var href = link.getAttribute('href');
+                // Only intercept same-origin relative paths that start with '/'
+                if (!href || href.indexOf('//') !== -1 || href.charAt(0) !== '/') return;
+
+                e.preventDefault();
+
+                // Close the mobile dropdown if it's open
+                if (typeof window.closeMobileMenu === 'function') window.closeMobileMenu();
+
+                var mod = ROUTE_MODULES[href];
+                if (mod) {
+                    if (typeof window.switchMainModule === 'function') window.switchMainModule(mod);
+                } else if (href === '/') {
+                    if (typeof window.openLanding === 'function') window.openLanding();
+                }
+            });
+
+            // Poll for app readiness then navigate to the module matching the URL path.
+            // window._openyReady is set to true at the end of the main init sequence.
+            function navigateOnReady(mod) {
+                if (window._openyReady) {
+                    _skipPush = true;
+                    if (_origSwitch) _origSwitch(mod);
+                    _skipPush = false;
+                } else {
+                    setTimeout(function () { navigateOnReady(mod); }, 50);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                patchFunctions();
+
+                var path = window.location.pathname;
+                var mod  = ROUTE_MODULES[path];
+
+                if (mod) {
+                    history.replaceState({ module: mod }, '', path);
+                    // Hide landing screen immediately to prevent a flash
+                    var landing = document.getElementById('landing-screen');
+                    if (landing) landing.style.display = 'none';
+                    // Wait for the app boot sequence to complete before rendering the module
+                    navigateOnReady(mod);
+                } else {
+                    history.replaceState({ page: 'home' }, '', '/');
+                }
+            });
+        }());
