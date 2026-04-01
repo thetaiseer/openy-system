@@ -740,6 +740,7 @@
             db: null,
             _ready: false,
             _syncingFromCloud: false,
+            _pendingDeletes: {},
             async init() {
                 try {
                     if (!FIREBASE_ENABLED) return; // No config provided yet
@@ -791,7 +792,10 @@
                     const colRef = window.FB.collection(this.db, storeName);
                     this.unsubscribers[storeName] = window.FB.onSnapshot(colRef, (snapshot) => {
                         const cloudRecords = snapshot.docs.map(d => d.data());
-                        cloudRecords.forEach(rec => localStore.put(rec, storeName));
+                        const pendingDels = this._pendingDeletes[storeName] || new Set();
+                        cloudRecords.forEach(rec => {
+                            if (!pendingDels.has(rec.id)) localStore.put(rec, storeName);
+                        });
                         const merged = localStore.getAll(storeName);
                         if (storeName === 'quotations') {
                             allHistoryRecords = merged;
@@ -823,12 +827,18 @@
                 } catch(e) { console.error("Failed to save to Firestore:", e); }
             },
             async delete(id, storeName = "history") {
+                if (!this._pendingDeletes[storeName]) this._pendingDeletes[storeName] = new Set();
+                this._pendingDeletes[storeName].add(id);
                 localStore.delete(id, storeName);
-                if (!this.db) return;
+                if (!this.db) {
+                    this._pendingDeletes[storeName].delete(id);
+                    return;
+                }
                 try {
                     const docRef = window.FB.doc(this.db, storeName, id);
                     await window.FB.deleteDoc(docRef);
-                } catch(e) { console.error("Failed to delete from Firestore:", e); }
+                } catch(e) { console.error("Failed to delete from Firestore:", e); throw e; }
+                finally { this._pendingDeletes[storeName].delete(id); }
             },
             async clear(storeName = "history") {
                 localStore.clear(storeName);
@@ -2640,14 +2650,24 @@
             }
         };
 
+        function _refreshHistoryList(storeName) {
+            if (storeName === 'quotations') window.renderHistoryList();
+            else if (storeName === 'invoices') window.renderInvHistoryList();
+            else if (storeName === 'clientContracts') window.renderCtHistoryList();
+            else if (storeName === 'hrContracts') window.renderEcHistoryList();
+        }
+
         window.deleteRecord = async function(id, storeName) {
             window.openConfirmModal("Delete Record", "Are you sure you want to delete this record? This action cannot be undone.", async () => {
-                await cloudDB.delete(id, storeName);
-                if (storeName === 'quotations') window.renderHistoryList();
-                else if (storeName === 'invoices') window.renderInvHistoryList();
-                else if (storeName === 'clientContracts') window.renderCtHistoryList();
-                else if (storeName === 'hrContracts') window.renderEcHistoryList();
-                showToast("Record deleted.");
+                try {
+                    await cloudDB.delete(id, storeName);
+                    _refreshHistoryList(storeName);
+                    showToast("Record deleted.");
+                } catch(e) {
+                    console.error("Delete failed:", e);
+                    showToast("Delete failed. Please try again.");
+                    _refreshHistoryList(storeName);
+                }
             });
         };
 
@@ -3025,8 +3045,79 @@
             if (banner) banner.classList.add('hidden');
         };
 
+        // --- Duplicate as New ---
+        // Clears the current editing ID and generates a new reference number so
+        // the next export saves as a brand-new independent record.
 
-        window.clearHistory = async function() {
+        window.duplicateAsNew = async function(storeName) {
+            if (storeName === 'quotations') {
+                currentEditingHistoryId = null;
+                // Increment quote counter to get a fresh number
+                const year = new Date().getFullYear();
+                let lastQuote = parseInt(localStorage.getItem(QUOTE_COUNTER_KEY)) || 100;
+                lastQuote++;
+                const newQuoteNum = `Q-${year}-${lastQuote}`;
+                localStorage.setItem(QUOTE_COUNTER_KEY, lastQuote.toString());
+                appState['quote-num'] = newQuoteNum;
+                const el = document.getElementById('in-quote-num');
+                if (el) el.value = newQuoteNum;
+                const banner = document.getElementById('edit-mode-banner');
+                if (banner) banner.classList.add('hidden');
+                showToast('Duplicate ready — export to save as a new record.');
+
+            } else if (storeName === 'invoices') {
+                currentEditingInvHistoryId = null;
+                // Generate next invoice number
+                await initInvoiceNumber();
+                const el = document.getElementById('invoiceRef');
+                if (el) el.value = currentInvoiceRef;
+                const banner = document.getElementById('inv-edit-mode-banner');
+                if (banner) banner.classList.add('hidden');
+                showToast('Duplicate ready — export to save as a new invoice.');
+
+            } else if (storeName === 'clientContracts') {
+                currentEditingCtId = null;
+                // Generate next contract number based on existing records
+                const year = new Date().getFullYear();
+                const prefix = `C-${year}-`;
+                const records = await cloudDB.getAll('clientContracts');
+                let maxNum = 0;
+                records.forEach(r => {
+                    if (r.ref && r.ref.startsWith(prefix)) {
+                        const n = parseInt(r.ref.slice(prefix.length), 10);
+                        if (!isNaN(n) && n > maxNum) maxNum = n;
+                    }
+                });
+                const newCtNum = `${prefix}${String(maxNum + 1).padStart(3, '0')}`;
+                const ctEl = document.getElementById('ct-num');
+                if (ctEl) { ctEl.value = newCtNum; if (typeof window.renderContractPreview === 'function') window.renderContractPreview(); }
+                const banner = document.getElementById('ct-edit-mode-banner');
+                if (banner) banner.classList.add('hidden');
+                showToast('Duplicate ready — export to save as a new contract.');
+
+            } else if (storeName === 'hrContracts') {
+                currentEditingEcId = null;
+                // Generate next HR contract number based on existing records
+                const year = new Date().getFullYear();
+                const prefix = `EC-${year}-`;
+                const records = await cloudDB.getAll('hrContracts');
+                let maxNum = 0;
+                records.forEach(r => {
+                    if (r.ref && r.ref.startsWith(prefix)) {
+                        const n = parseInt(r.ref.slice(prefix.length), 10);
+                        if (!isNaN(n) && n > maxNum) maxNum = n;
+                    }
+                });
+                const newEcNum = `${prefix}${String(maxNum + 1).padStart(3, '0')}`;
+                const ecEl = document.getElementById('ec-num');
+                if (ecEl) { ecEl.value = newEcNum; if (typeof window.renderEmpContractPreview === 'function') window.renderEmpContractPreview(); }
+                const banner = document.getElementById('ec-edit-mode-banner');
+                if (banner) banner.classList.add('hidden');
+                showToast('Duplicate ready — export to save as a new HR contract.');
+            }
+        };
+
+
             window.openConfirmModal("Clear History", "Are you sure you want to clear all Quotation records?", async () => {
                 await cloudDB.clear('quotations');
                 window.renderHistoryList();

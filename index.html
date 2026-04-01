@@ -213,12 +213,15 @@
             <main class="app-editor">
                 <div id="inv-tab-editor" class="tab-content active">
 
-                    <div id="inv-edit-mode-banner" class="ui-card flex justify-between items-center hidden">
-                        <div class="flex items-center gap-2 text-[#92400E] text-sm font-semibold">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                            <span id="inv-edit-mode-text">Editing invoice</span>
+                    <div id="inv-edit-mode-banner" class="ui-card flex justify-between items-center gap-3 hidden">
+                        <div class="flex items-center gap-2 text-[#92400E] text-sm font-semibold min-w-0">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            <span id="inv-edit-mode-text" class="truncate">Editing invoice</span>
                         </div>
-                        <button onclick="if(typeof window.stopInvEditing === 'function') window.stopInvEditing()" class="ui-button-ghost !bg-white !border !border-[#F59E0B] !text-[#92400E]">Stop</button>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <button onclick="window.duplicateAsNew('invoices')" class="ui-button-ghost !bg-[#f0fdf4] !border !border-[#86efac] !text-[#16a34a] !text-xs !py-1.5 !px-3" title="Save a copy as a new record with a new invoice number">Duplicate as New</button>
+                            <button onclick="if(typeof window.stopInvEditing === 'function') window.stopInvEditing()" class="ui-button-ghost !bg-white !border !border-[#F59E0B] !text-[#92400E] !text-xs !py-1.5 !px-3">Cancel</button>
+                        </div>
                     </div>
 
                     <!-- Setup Card -->
@@ -561,12 +564,15 @@
                 
                 <div id="tab-editor" class="tab-content active">
 
-                    <div id="edit-mode-banner" class="ui-card flex justify-between items-center hidden">
-                        <div class="flex items-center gap-2 text-[#92400E] text-sm font-semibold">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                            <span id="edit-mode-text">Editing quote</span>
+                    <div id="edit-mode-banner" class="ui-card flex justify-between items-center gap-3 hidden">
+                        <div class="flex items-center gap-2 text-[#92400E] text-sm font-semibold min-w-0">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            <span id="edit-mode-text" class="truncate">Editing quote</span>
                         </div>
-                        <button onclick="if(typeof window.stopEditing === 'function') window.stopEditing()" class="ui-button-ghost !bg-white !border !border-[#F59E0B] !text-[#92400E]">Stop</button>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <button onclick="window.duplicateAsNew('quotations')" class="ui-button-ghost !bg-[#f0fdf4] !border !border-[#86efac] !text-[#16a34a] !text-xs !py-1.5 !px-3" title="Save a copy as a new record with a new quote number">Duplicate as New</button>
+                            <button onclick="if(typeof window.stopEditing === 'function') window.stopEditing()" class="ui-button-ghost !bg-white !border !border-[#F59E0B] !text-[#92400E] !text-xs !py-1.5 !px-3">Cancel</button>
+                        </div>
                     </div>
 
                     <!-- Setup Card -->
@@ -787,12 +793,15 @@
             <main class="app-editor">
                 <div id="ct-tab-editor" class="tab-content active">
 
-                    <div id="ct-edit-mode-banner" class="ui-card flex justify-between items-center hidden">
-                        <div class="flex items-center gap-2 text-[#92400E] text-sm font-semibold">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                            <span id="ct-edit-mode-text">Editing contract</span>
+                    <div id="ct-edit-mode-banner" class="ui-card flex justify-between items-center gap-3 hidden">
+                        <div class="flex items-center gap-2 text-[#92400E] text-sm font-semibold min-w-0">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            <span id="ct-edit-mode-text" class="truncate">Editing contract</span>
                         </div>
-                        <button onclick="if(typeof window.stopCtEditing === 'function') window.stopCtEditing()" class="ui-button-ghost !bg-white !border !border-[#F59E0B] !text-[#92400E]">Stop</button>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <button onclick="window.duplicateAsNew('clientContracts')" class="ui-button-ghost !bg-[#f0fdf4] !border !border-[#86efac] !text-[#16a34a] !text-xs !py-1.5 !px-3" title="Save a copy as a new record with a new contract number">Duplicate as New</button>
+                            <button onclick="if(typeof window.stopCtEditing === 'function') window.stopCtEditing()" class="ui-button-ghost !bg-white !border !border-[#F59E0B] !text-[#92400E] !text-xs !py-1.5 !px-3">Cancel</button>
+                        </div>
                     </div>
 
                     <!-- Contract Info Card -->
@@ -1116,12 +1125,15 @@
             <main class="app-editor">
                 <div id="ec-tab-editor" class="tab-content active">
 
-                    <div id="ec-edit-mode-banner" class="ui-card flex justify-between items-center hidden">
-                        <div class="flex items-center gap-2 text-[#92400E] text-sm font-semibold">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                            <span id="ec-edit-mode-text">Editing HR contract</span>
+                    <div id="ec-edit-mode-banner" class="ui-card flex justify-between items-center gap-3 hidden">
+                        <div class="flex items-center gap-2 text-[#92400E] text-sm font-semibold min-w-0">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            <span id="ec-edit-mode-text" class="truncate">Editing HR contract</span>
                         </div>
-                        <button onclick="if(typeof window.stopEcEditing === 'function') window.stopEcEditing()" class="ui-button-ghost !bg-white !border !border-[#F59E0B] !text-[#92400E]">Stop</button>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <button onclick="window.duplicateAsNew('hrContracts')" class="ui-button-ghost !bg-[#f0fdf4] !border !border-[#86efac] !text-[#16a34a] !text-xs !py-1.5 !px-3" title="Save a copy as a new record with a new contract number">Duplicate as New</button>
+                            <button onclick="if(typeof window.stopEcEditing === 'function') window.stopEcEditing()" class="ui-button-ghost !bg-white !border !border-[#F59E0B] !text-[#92400E] !text-xs !py-1.5 !px-3">Cancel</button>
+                        </div>
                     </div>
 
                     <!-- Contract Info Card -->
