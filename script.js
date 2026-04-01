@@ -87,6 +87,24 @@
             });
             currentInvoiceRef = `${prefix}${String(maxNum + 1).padStart(3, '0')}`;
         }
+        async function initQuoteNumber() {
+            const year = new Date().getFullYear();
+            const prefix = `Q-${year}-`;
+            const records = await cloudDB.getAll('quotations');
+            let maxNum = 100;
+            records.forEach(r => {
+                if (r.ref && r.ref.startsWith(prefix)) {
+                    const n = parseInt(r.ref.slice(prefix.length), 10);
+                    if (!isNaN(n) && n > maxNum) maxNum = n;
+                }
+            });
+            const newNum = `${prefix}${maxNum + 1}`;
+            if (!appState['quote-num'] || appState['quote-num'].endsWith('…')) {
+                appState['quote-num'] = newNum;
+                const el = document.getElementById('in-quote-num');
+                if (el) el.value = newNum;
+            }
+        }
         function formatCurrency(amount) {
             const code = appState.currency || 'EGP';
             const sym = appState.currencyMap[code] || 'EGP';
@@ -845,6 +863,7 @@
                 return await window.FB.getDownloadURL(fileRef);
             } catch(e) {
                 console.warn('Storage upload failed (non-fatal):', e);
+                showToast('File exported locally — cloud backup unavailable.');
                 return null;
             }
         }
@@ -881,7 +900,8 @@
                 document.getElementById('in-date').value = new Date().toISOString().split('T')[0];
                 document.getElementById('in-currency').value = 'EGP';
                 document.getElementById('in-final-price').value = appState.finalPrice;
-                document.getElementById('in-quote-num').value = `Q-${new Date().getFullYear()}-101`;
+                // Placeholder — initQuoteNumber() below will derive the real next number from Firestore
+                document.getElementById('in-quote-num').value = `Q-${new Date().getFullYear()}-…`;
 
                 const methodSelect = document.getElementById('in-terms-method-select');
                 if (methodSelect) { methodSelect.value = 'Cash'; }
@@ -918,6 +938,7 @@
                     isAppBooting = false;
                     window._openyReady = true;
                     await initInvoiceNumber();
+                    await initQuoteNumber();
                     if(typeof window.updateAllocations === 'function') window.updateAllocations(); 
                     if(typeof window.saveAndRender === 'function') window.saveAndRender(); 
                     if(typeof window.adjustLayout === 'function') window.adjustLayout();
@@ -6376,7 +6397,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                     const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                     const fname = `OPENY_Accounting_${new Date().toISOString().split('T')[0]}.xlsx`;
                     saveAs(blob, fname);
-                    uploadExportToStorage(blob, 'acctLedger', fname).catch(() => {});
+                    await uploadExportToStorage(blob, 'acctLedger', fname);
                     showToast('Accounting workbook exported ✓');
                 } catch(e) {
                     console.error(e);
@@ -6429,9 +6450,9 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                         heightLeft -= pageHeight;
                     }
 
-                    pdf.save('OPENY-Accounting.pdf');
                     const acctPdfBlob = pdf.output('blob');
-                    uploadExportToStorage(acctPdfBlob, 'acctLedger', 'OPENY-Accounting.pdf').catch(() => {});
+                    saveAs(acctPdfBlob, 'OPENY-Accounting.pdf');
+                    await uploadExportToStorage(acctPdfBlob, 'acctLedger', 'OPENY-Accounting.pdf');
                     showToast('Accounting PDF exported ✓');
                 } catch(e) {
                     console.error('PDF export failed:', e);
