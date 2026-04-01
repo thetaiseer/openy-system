@@ -368,147 +368,9 @@
                 return new Date(+y, +m - 1, 1).toLocaleString('en-US', { month: 'short', year: '2-digit' });
             }
 
-            let _barChart = null, _donutChart = null;
 
-            window.renderLandingAnalytics = function() {
-                // ── Read data from localStorage ──
-                const invoices       = localStore.getAll('invoices');
-                const quotations     = localStore.getAll('quotations');
-                const clientContracts= localStore.getAll('clientContracts');
-                const hrContracts    = localStore.getAll('hrContracts');
-                const employees      = localStore.getAll('employees');
-                const ledger         = localStore.getAll('acctLedger');
-                const expenses       = localStore.getAll('acctExpenses');
+            window.renderLandingAnalytics = function() {};
 
-                const totalRevenue  = ledger.reduce((s, r) => s + toEGP(r.amount, r.currency), 0);
-                const totalExpenses = expenses.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
-                const netProfit     = totalRevenue - totalExpenses;
-
-                // ── Stat Cards ──
-                const statCards = [
-                    { label: 'Invoices',      value: invoices.length,        icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', bg: 'linear-gradient(135deg,#2563EB,#3B82F6)' },
-                    { label: 'Quotations',    value: quotations.length,      icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', bg: 'linear-gradient(135deg,#0EA5E9,#2563EB)' },
-                    { label: 'Contracts',     value: clientContracts.length + hrContracts.length, icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', bg: 'linear-gradient(135deg,#059669,#0D9488)' },
-                    { label: 'Employees',     value: employees.length,       icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', bg: 'linear-gradient(135deg,#7C3AED,#2563EB)' },
-                    { label: 'Revenue',       value: 'EGP ' + fmtNum(totalRevenue), icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', bg: 'linear-gradient(135deg,#0F766E,#059669)', isText: true },
-                    { label: 'Expenses',      value: 'EGP ' + fmtNum(totalExpenses), icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', bg: 'linear-gradient(135deg,#DC2626,#EF4444)', isText: true },
-                    { label: 'Net Profit',    value: 'EGP ' + fmtNum(Math.abs(netProfit)), icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', bg: netProfit >= 0 ? 'linear-gradient(135deg,#059669,#10B981)' : 'linear-gradient(135deg,#DC2626,#EF4444)', isText: true, tag: netProfit < 0 ? '▼ Loss' : '▲ Profit', tagColor: netProfit >= 0 ? '#059669' : '#DC2626' },
-                    { label: 'HR Contracts',  value: hrContracts.length,     icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', bg: 'linear-gradient(135deg,#D97706,#DC2626)' },
-                ];
-
-                const grid = document.getElementById('analytics-stat-cards');
-                if (grid) {
-                    grid.innerHTML = statCards.map(c => {
-                        const valClass = c.isText ? 'analytics-stat-value small' : 'analytics-stat-value';
-                        const tagHtml = c.tag ? `<span style="font-size:0.65rem;font-weight:600;color:${c.tagColor || '#059669'};opacity:0.85;">${c.tag}</span>` : '';
-                        return `<div class="analytics-stat-card">
-                            <div class="analytics-stat-icon" style="background:${c.bg};">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${c.icon}"></path></svg>
-                            </div>
-                            <div class="analytics-stat-label">${c.label}</div>
-                            <div class="${valClass}">${c.value}</div>
-                            ${tagHtml}
-                        </div>`;
-                    }).join('');
-                }
-
-                // ── Bar Chart: Monthly Revenue vs Expenses ──
-                const months6 = lastNMonths(6);
-                const revenueByMonth  = {};
-                const expensesByMonth = {};
-                months6.forEach(m => { revenueByMonth[m] = 0; expensesByMonth[m] = 0; });
-                ledger.forEach(r => {
-                    if (r.month && revenueByMonth[r.month] !== undefined) {
-                        revenueByMonth[r.month] += toEGP(r.amount, r.currency);
-                    }
-                });
-                expenses.forEach(r => {
-                    const mKey = (r.date || '').substring(0, 7);
-                    if (mKey && expensesByMonth[mKey] !== undefined) {
-                        expensesByMonth[mKey] += parseFloat(r.amount) || 0;
-                    }
-                });
-
-                const barCtx = document.getElementById('analytics-bar-chart');
-                if (barCtx) {
-                    if (_barChart) { _barChart.destroy(); _barChart = null; }
-                    _barChart = new Chart(barCtx, {
-                        type: 'bar',
-                        data: {
-                            labels: months6.map(monthLabel),
-                            datasets: [
-                                {
-                                    label: 'Revenue',
-                                    data: months6.map(m => Math.round(revenueByMonth[m])),
-                                    backgroundColor: 'rgba(37,99,235,0.75)',
-                                    borderRadius: 6, borderSkipped: false
-                                },
-                                {
-                                    label: 'Expenses',
-                                    data: months6.map(m => Math.round(expensesByMonth[m])),
-                                    backgroundColor: 'rgba(239,68,68,0.65)',
-                                    borderRadius: 6, borderSkipped: false
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true, maintainAspectRatio: false,
-                            plugins: { legend: { labels: { font: { size: 11 }, boxWidth: 10 } } },
-                            scales: {
-                                x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-                                y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10 }, callback: v => fmtNum(v) }, beginAtZero: true }
-                            }
-                        }
-                    });
-                }
-
-                // ── Donut Chart: Module Distribution ──
-                const moduleCounts = [
-                    invoices.length, quotations.length,
-                    clientContracts.length, hrContracts.length,
-                    employees.length
-                ];
-                const donutCtx = document.getElementById('analytics-donut-chart');
-                if (donutCtx) {
-                    if (_donutChart) { _donutChart.destroy(); _donutChart = null; }
-                    _donutChart = new Chart(donutCtx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['Invoices','Quotations','Client Contracts','HR Contracts','Employees'],
-                            datasets: [{
-                                data: moduleCounts,
-                                backgroundColor: [
-                                    'rgba(37,99,235,0.8)',
-                                    'rgba(14,165,233,0.8)',
-                                    'rgba(5,150,105,0.8)',
-                                    'rgba(217,119,6,0.8)',
-                                    'rgba(124,58,237,0.8)'
-                                ],
-                                borderWidth: 0,
-                                hoverOffset: 6
-                            }]
-                        },
-                        options: {
-                            responsive: true, maintainAspectRatio: false,
-                            cutout: '62%',
-                            plugins: {
-                                legend: {
-                                    position: 'right',
-                                    labels: { font: { size: 10 }, boxWidth: 10, padding: 8 }
-                                }
-                            }
-                        }
-                    });
-                }
-            };
-
-                        // Render on first page load — deferred slightly so that localStore is ready
-            // (other DOMContentLoaded handlers in script.js run migrations and cloud sync first)
-            document.addEventListener('DOMContentLoaded', function() {
-                if (typeof window.renderLandingAnalytics === 'function') {
-                    setTimeout(window.renderLandingAnalytics, 300);
-                }
-            });
         }());
 
         window.switchMainModule = function(moduleName) {
@@ -1964,8 +1826,9 @@
                 showToast("PDF Downloaded successfully!");
                 
                 const _now = new Date();
+                const _editingQuotationId = currentEditingHistoryId;
                 const record = {
-                    id: Date.now().toString(),
+                    id: _editingQuotationId || Date.now().toString(),
                     client: appState['client-name'],
                     ref: appState['quote-num'],
                     date: appState.date,
@@ -1981,7 +1844,8 @@
                     formSnapshot: _captureQuoteSnapshot()
                 };
                 await cloudDB.put(record, 'quotations');
-                logActivity('created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                logActivity(_editingQuotationId ? 'updated' : 'created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                if (_editingQuotationId) window.stopEditing();
             } catch (e) {
                 console.error(e);
                 showToast("Error generating PDF");
@@ -2039,8 +1903,9 @@
                 showToast("Excel Downloaded successfully!");
                 
                 const _now2 = new Date();
+                const _editingQuotationIdExcel = currentEditingHistoryId;
                 const record = {
-                    id: Date.now().toString(),
+                    id: _editingQuotationIdExcel || Date.now().toString(),
                     client: appState['client-name'],
                     ref: appState['quote-num'],
                     date: appState.date,
@@ -2056,7 +1921,8 @@
                     formSnapshot: _captureQuoteSnapshot()
                 };
                 await cloudDB.put(record, 'quotations');
-                logActivity('created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                logActivity(_editingQuotationIdExcel ? 'updated' : 'created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                if (_editingQuotationIdExcel) window.stopEditing();
             } catch (e) {
                 console.error(e);
                 showToast("Error generating Excel");
@@ -2114,8 +1980,9 @@
                 showToast("Invoice PDF Downloaded!");
                 
                 const _now3 = new Date();
+                const _editingInvoiceId = currentEditingInvHistoryId;
                 const record = {
-                    id: Date.now().toString(),
+                    id: _editingInvoiceId || Date.now().toString(),
                     client: invoiceData.client,
                     ref: invoiceRef,
                     date: invoiceData.invoiceDate,
@@ -2131,6 +1998,7 @@
                     formSnapshot: _captureInvoiceSnapshot()
                 };
                 await cloudDB.put(record, 'invoices');
+                if (_editingInvoiceId) window.stopInvEditing();
                 await initInvoiceNumber();
                 if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
             } catch (e) {
@@ -2455,8 +2323,9 @@
                 showToast("Invoice Excel Downloaded!");
 
                 const _now4 = new Date();
+                const _editingInvoiceIdExcel = currentEditingInvHistoryId;
                 const record = {
-                    id: Date.now().toString(),
+                    id: _editingInvoiceIdExcel || Date.now().toString(),
                     client: invoiceData.client,
                     ref: invoiceRef,
                     date: invoiceData.invoiceDate,
@@ -2472,6 +2341,7 @@
                     formSnapshot: _captureInvoiceSnapshot()
                 };
                 await cloudDB.put(record, 'invoices');
+                if (_editingInvoiceIdExcel) window.stopInvEditing();
                 await initInvoiceNumber();
                 if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
             } catch (e) {
@@ -4148,8 +4018,9 @@
                 showToast('PDF Downloaded successfully!');
                 // Save record to Firebase history
                 const _nowCt = new Date();
+                const _editingContractId = isEmp ? currentEditingEcId : currentEditingCtId;
                 const ctRecord = {
-                    id: Date.now().toString(),
+                    id: _editingContractId || Date.now().toString(),
                     client: clientName,
                     ref: refNum,
                     date: (isEmp ? document.getElementById('ec-date') : document.getElementById('ct-date'))?.value || _nowCt.toISOString().split('T')[0],
@@ -4165,6 +4036,7 @@
                     formSnapshot: isEmp ? _captureEcSnapshot() : _captureCtSnapshot()
                 };
                 await cloudDB.put(ctRecord, isEmp ? 'hrContracts' : 'clientContracts');
+                if (_editingContractId) { if (isEmp) window.stopEcEditing(); else window.stopCtEditing(); }
             } catch (e) {
                 console.error(e);
                 showToast('Error generating PDF');
@@ -4233,8 +4105,9 @@
                 showToast('Word document downloaded!');
                 // Save record to Firebase history
                 const _nowCtW = new Date();
+                const _editingContractIdWord = isEmp ? currentEditingEcId : currentEditingCtId;
                 const ctWRecord = {
-                    id: Date.now().toString(),
+                    id: _editingContractIdWord || Date.now().toString(),
                     client: clientName,
                     ref: refNum,
                     date: (isEmp ? document.getElementById('ec-date') : document.getElementById('ct-date'))?.value || _nowCtW.toISOString().split('T')[0],
@@ -4250,6 +4123,7 @@
                     formSnapshot: isEmp ? _captureEcSnapshot() : _captureCtSnapshot()
                 };
                 await cloudDB.put(ctWRecord, isEmp ? 'hrContracts' : 'clientContracts');
+                if (_editingContractIdWord) { if (isEmp) window.stopEcEditing(); else window.stopCtEditing(); }
             } catch(e) {
                 console.error(e);
                 showToast('Error generating Word document');
