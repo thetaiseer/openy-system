@@ -6,34 +6,9 @@
         let invCustomServices = [];
         let currentInvoiceRef = null;
 
-        const STORAGE_KEY = 'openy_quotation_editor_state'; 
-        const QUOTE_COUNTER_KEY = 'openy_last_quote_num';
+        // Firebase config and enabled flag come from firebase.js (window.FB)
+        // FIREBASE_ENABLED is derived lazily inside cloudDB.init() once window.FB is ready.
 
-        // ===========================================================================
-        // FIREBASE CONFIGURATION — FILL IN YOUR WEB APP CREDENTIALS BELOW
-        // Steps:
-        //   1. Go to Firebase Console → https://console.firebase.google.com/
-        //   2. Select your project → Project Settings → General
-        //   3. Under "Your apps", click "Add app" → Web (</>)
-        //   4. Register the app and copy the firebaseConfig values here
-        //   5. In Firebase Console → Firestore Database → Rules, set:
-        //        allow read, write: if request.auth != null;
-        //
-        // SECURITY NOTE: Only use Firebase Web SDK config here.
-        // NEVER put Admin SDK private keys or service account JSON in this file.
-        // ===========================================================================
-        const FIREBASE_WEB_CONFIG = {
-            apiKey:            "AIzaSyAhXa5gLCMIIxuFIAj0RFeFEvAcE5TiilY",
-            authDomain:        "openy-suite.firebaseapp.com",
-            projectId:         "openy-suite",
-            storageBucket:     "openy-suite.firebasestorage.app",
-            messagingSenderId: "735713304757",
-            appId:             "1:735713304757:web:d7c006022e4c0e8fa2defc",
-            measurementId:     "G-TWZQ62R09M"
-        };
-        // Set to true after filling in FIREBASE_WEB_CONFIG above
-        const FIREBASE_ENABLED = FIREBASE_WEB_CONFIG.apiKey !== "YOUR_API_KEY";
-        
         let allHistoryRecords = [];
         let allInvHistoryRecords = [];
         
@@ -305,7 +280,6 @@
 
         window.executeSuperReset = function() {
             window.openConfirmModal("Reset System", "This will restore the current working form to its default state. Are you sure?", () => {
-                localStorage.removeItem(STORAGE_KEY);
                 showToast("System restored to default state.");
                 setTimeout(() => { window.location.reload(); }, 800);
             });
@@ -516,7 +490,6 @@
         }());
 
         // ── Theme: always light mode ──────────────────────────────────────────────
-        localStorage.removeItem('openy_theme');
 
         // ── Bottom Glass Nav ─────────────────────────────────────────────────────
         window.setBottomNavActive = function(moduleName) {
@@ -683,29 +656,25 @@
         };
 
         // ==========================================================================
-        // 4. STORAGE / DB (Robust LocalStorage + Cloud Sync)
+        // 4. STORAGE / DB (In-Memory Cache + Firestore as Primary Store)
         // ==========================================================================
         const localStore = {
+            _cache: {},
             getAll(storeName) {
-                try { return JSON.parse(localStorage.getItem('openy_' + storeName)) || []; } catch(e) { return []; }
+                return this._cache[storeName] || [];
             },
             put(record, storeName) {
-                try {
-                    let records = this.getAll(storeName);
-                    const idx = records.findIndex(r => r.id === record.id);
-                    if (idx > -1) records[idx] = record; else records.push(record);
-                    localStorage.setItem('openy_' + storeName, JSON.stringify(records));
-                } catch(e) {}
+                if (!this._cache[storeName]) this._cache[storeName] = [];
+                const records = this._cache[storeName];
+                const idx = records.findIndex(r => r.id === record.id);
+                if (idx > -1) records[idx] = record; else records.push(record);
             },
             delete(id, storeName) {
-                try {
-                    let records = this.getAll(storeName);
-                    records = records.filter(r => r.id !== id);
-                    localStorage.setItem('openy_' + storeName, JSON.stringify(records));
-                } catch(e) {}
+                if (!this._cache[storeName]) return;
+                this._cache[storeName] = this._cache[storeName].filter(r => r.id !== id);
             },
             clear(storeName) {
-                try { localStorage.removeItem('openy_' + storeName); } catch(e) {}
+                this._cache[storeName] = [];
             }
         };
 
@@ -715,38 +684,23 @@
             // Legacy stores kept for backward compatibility (data migration safety); no longer used as data-entry points
             'acctClientCollections', 'acctEgyptCollections', 'acctCaptainCollections'];
 
-        // One-time localStorage key migration (old names → new Firestore-aligned names)
-        (function _migrateLocalStorageKeys() {
-            const migrations = {
-                'openy_history':       'openy_quotations',
-                'openy_inv_history':   'openy_invoices',
-                'openy_ct_history':    'openy_clientContracts',
-                'openy_ec_history':    'openy_hrContracts',
-                'openy_salary_history':'openy_salaryHistory'
-            };
-            try {
-                Object.entries(migrations).forEach(([oldKey, newKey]) => {
-                    const old = localStorage.getItem(oldKey);
-                    if (old && !localStorage.getItem(newKey)) {
-                        localStorage.setItem(newKey, old);
-                        localStorage.removeItem(oldKey);
-                    }
-                });
-            } catch(e) {}
-        }());
+        
 
         const cloudDB = {
             unsubscribers: {},
             db: null,
+            app: null,
             _ready: false,
             _syncingFromCloud: false,
             _pendingDeletes: {},
             async init() {
                 try {
-                    if (!FIREBASE_ENABLED) return; // No config provided yet
                     if (!window.FB) return;
+                    const cfg = window.FB.FIREBASE_WEB_CONFIG;
+                    if (!cfg || cfg.apiKey === "YOUR_API_KEY") return; // guard against placeholder
 
-                    const app = window.FB.initializeApp(FIREBASE_WEB_CONFIG);
+                    const app = window.FB.initializeApp(cfg);
+                    this.app = app;
                     this.db = window.FB.getFirestore(app);
                     const auth = window.FB.getAuth(app);
 
@@ -759,9 +713,7 @@
                     window.FB.onAuthStateChanged(auth, async (user) => {
                         if (user) {
                             this._ready = true;
-                            // Push any offline-written records to Firestore concurrently
-                            await Promise.all(ALL_STORES.map(s => this.syncUp(s)));
-                            // Then subscribe to live updates for each store
+                            // Subscribe to live updates for each store (data loads from Firestore)
                             for (const s of ALL_STORES) this.setupRealtime(s);
                             // Subscribe to the shared quotation draft so it syncs across devices
                             this.setupRealtimeDraft();
@@ -774,16 +726,6 @@
                         }
                     });
                 } catch(e) { console.error("Firebase init failed:", e); }
-            },
-            async syncUp(storeName) {
-                if (!this.db) return;
-                const records = localStore.getAll(storeName);
-                for (const rec of records) {
-                    try {
-                        const docRef = window.FB.doc(this.db, storeName, rec.id);
-                        await window.FB.setDoc(docRef, rec, { merge: true });
-                    } catch(e) {}
-                }
             },
             setupRealtime(storeName) {
                 if (!this.db) return;
@@ -866,7 +808,6 @@
                             this._syncingFromCloud = true;
                             const { id: _id, ...state } = cloudState;
                             appState = state;
-                            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
                             if (typeof window.populateForm === 'function') window.populateForm();
                             setTimeout(() => { this._syncingFromCloud = false; }, 500);
                         }
@@ -880,7 +821,6 @@
                     const ts = Date.now();
                     const stateWithMeta = { ...appState, id: 'draft_state', _updatedAt: ts };
                     appState._updatedAt = ts;
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
                     const docRef = window.FB.doc(this.db, 'settings', 'draft_state');
                     await window.FB.setDoc(docRef, stateWithMeta);
                 } catch(e) { console.error('Failed to save draft state to cloud:', e); }
@@ -888,8 +828,26 @@
         };
 
         // ==========================================================================
-        // 5. APP INITIALIZATION
+        // 4b. FIREBASE STORAGE UPLOAD HELPER
         // ==========================================================================
+        /**
+         * Upload a file Blob to Firebase Storage and return its public download URL.
+         * Path: exports/{storeName}/{timestamp}_{filename}
+         * Returns null on failure (non-fatal — the Firestore record is saved regardless).
+         */
+        async function uploadExportToStorage(blob, storeName, filename) {
+            try {
+                if (!window.FB || !window.FB.getStorage || !cloudDB.app) return null;
+                const storage = window.FB.getStorage(cloudDB.app);
+                const path = `exports/${storeName}/${Date.now()}_${filename}`;
+                const fileRef = window.FB.storageRef(storage, path);
+                await window.FB.uploadBytes(fileRef, blob);
+                return await window.FB.getDownloadURL(fileRef);
+            } catch(e) {
+                console.warn('Storage upload failed (non-fatal):', e);
+                return null;
+            }
+        }
         let isAppBooting = true; // Flag to prevent heavy preview renders on initial load
 
         // Always scroll to top on page load, refresh, or back/forward navigation
@@ -918,40 +876,16 @@
                 const idEl = document.getElementById('invoiceDate');
                 if (cmEl && !cmEl.value) cmEl.value = todayMonth;
                 if (idEl && !idEl.value) idEl.value = todayMonth;
-                
-                // Silent state load
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    appState = JSON.parse(saved);
-                } else {
-                    document.getElementById('in-date').value = new Date().toISOString().split('T')[0];
-                    document.getElementById('in-currency').value = 'EGP';
-                    document.getElementById('in-final-price').value = appState.finalPrice;
-                    let lastQuote = parseInt(localStorage.getItem(QUOTE_COUNTER_KEY)) || 100;
-                    lastQuote++;
-                    document.getElementById('in-quote-num').value = `Q-${new Date().getFullYear()}-${lastQuote}`;
-                    localStorage.setItem(QUOTE_COUNTER_KEY, lastQuote.toString());
-                }
 
-                // Silent form populate
-                const textInputs = ['date', 'quote-num', 'currency', 'client-name', 'company', 'project', 'project-desc', 'terms-days', 'terms-notes'];
-                textInputs.forEach(id => {
-                    const el = document.getElementById(`in-${id}`);
-                    const stateKey = id === 'project-desc' ? 'projectDesc' : id;
-                    if(el && appState[stateKey] !== undefined) el.value = appState[stateKey];
-                });
-                if(document.getElementById('in-final-price')) document.getElementById('in-final-price').value = appState.finalPrice || 0;
-                
+                // Set default form values — Firebase draft will overwrite via setupRealtimeDraft()
+                document.getElementById('in-date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('in-currency').value = 'EGP';
+                document.getElementById('in-final-price').value = appState.finalPrice;
+                document.getElementById('in-quote-num').value = `Q-${new Date().getFullYear()}-101`;
+
                 const methodSelect = document.getElementById('in-terms-method-select');
-                const methodCustom = document.getElementById('in-terms-method-custom');
-                if (appState['terms-method']) {
-                    const isStandard = Array.from(methodSelect.options).some(opt => opt.value === appState['terms-method'] && opt.value !== 'custom');
-                    if (isStandard) { methodSelect.value = appState['terms-method']; if(methodCustom) methodCustom.classList.add('hidden'); } 
-                    else { methodSelect.value = 'custom'; if(methodCustom) { methodCustom.value = appState['terms-method']; methodCustom.classList.remove('hidden'); } }
-                } else {
-                    if(methodSelect) methodSelect.value = 'Cash';
-                    appState['terms-method'] = 'Cash';
-                }
+                if (methodSelect) { methodSelect.value = 'Cash'; }
+                appState['terms-method'] = 'Cash';
 
                 const container = document.getElementById('services-container');
                 if(container) {
@@ -1507,18 +1441,7 @@
         // 7. QUOTATION SYSTEM LOGIC
         // ==========================================================================
         window.loadData = function() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                appState = JSON.parse(saved);
-            } else {
-                document.getElementById('in-date').value = new Date().toISOString().split('T')[0];
-                document.getElementById('in-currency').value = 'EGP';
-                document.getElementById('in-final-price').value = appState.finalPrice;
-                let lastQuote = parseInt(localStorage.getItem(QUOTE_COUNTER_KEY)) || 100;
-                lastQuote++;
-                document.getElementById('in-quote-num').value = `Q-${new Date().getFullYear()}-${lastQuote}`;
-                localStorage.setItem(QUOTE_COUNTER_KEY, lastQuote.toString());
-            }
+            // Data is loaded from Firebase via setupRealtimeDraft(); just populate the form
             if(typeof window.populateForm === 'function') window.populateForm();
         };
 
@@ -1617,7 +1540,6 @@
             const countEl = document.getElementById('ui-items-count');
             if(countEl) countEl.innerText = appState.services.length;
             
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
             // Sync draft to Firestore so it appears on other devices
             cloudDB.saveDraftState().catch(() => {});
 
@@ -1832,7 +1754,8 @@
             };
 
             try {
-                await html2pdf().set(opt).from(element).save();
+                const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
+                saveAs(pdfBlob, filename);
                 showToast("PDF Downloaded successfully!");
                 
                 const _now = new Date();
@@ -1853,6 +1776,8 @@
                     source: 'web',
                     formSnapshot: _captureQuoteSnapshot()
                 };
+                const fileUrl = await uploadExportToStorage(pdfBlob, 'quotations', filename);
+                if (fileUrl) record.fileUrl = fileUrl;
                 await cloudDB.put(record, 'quotations');
                 logActivity(_editingQuotationId ? 'updated' : 'created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
                 if (_editingQuotationId) window.stopEditing();
@@ -1930,6 +1855,8 @@
                     source: 'web',
                     formSnapshot: _captureQuoteSnapshot()
                 };
+                const fileUrlExcel = await uploadExportToStorage(blob, 'quotations', filename);
+                if (fileUrlExcel) record.fileUrl = fileUrlExcel;
                 await cloudDB.put(record, 'quotations');
                 logActivity(_editingQuotationIdExcel ? 'updated' : 'created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
                 if (_editingQuotationIdExcel) window.stopEditing();
@@ -1986,7 +1913,8 @@
             };
 
             try {
-                await html2pdf().set(opt).from(element).save();
+                const invPdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
+                saveAs(invPdfBlob, filename);
                 showToast("Invoice PDF Downloaded!");
                 
                 const _now3 = new Date();
@@ -2007,6 +1935,8 @@
                     source: 'web',
                     formSnapshot: _captureInvoiceSnapshot()
                 };
+                const invPdfUrl = await uploadExportToStorage(invPdfBlob, 'invoices', filename);
+                if (invPdfUrl) record.fileUrl = invPdfUrl;
                 await cloudDB.put(record, 'invoices');
                 if (_editingInvoiceId) window.stopInvEditing();
                 await initInvoiceNumber();
@@ -2350,6 +2280,8 @@
                     source: 'web',
                     formSnapshot: _captureInvoiceSnapshot()
                 };
+                const invXlsUrl = await uploadExportToStorage(blob, 'invoices', filename);
+                if (invXlsUrl) record.fileUrl = invXlsUrl;
                 await cloudDB.put(record, 'invoices');
                 if (_editingInvoiceIdExcel) window.stopInvEditing();
                 await initInvoiceNumber();
@@ -3052,12 +2984,18 @@
         window.duplicateAsNew = async function(storeName) {
             if (storeName === 'quotations') {
                 currentEditingHistoryId = null;
-                // Increment quote counter to get a fresh number
+                // Derive next quote number from existing records
                 const year = new Date().getFullYear();
-                let lastQuote = parseInt(localStorage.getItem(QUOTE_COUNTER_KEY)) || 100;
-                lastQuote++;
-                const newQuoteNum = `Q-${year}-${lastQuote}`;
-                localStorage.setItem(QUOTE_COUNTER_KEY, lastQuote.toString());
+                const prefix = `Q-${year}-`;
+                const records = await cloudDB.getAll('quotations');
+                let maxNum = 100;
+                records.forEach(r => {
+                    if (r.ref && r.ref.startsWith(prefix)) {
+                        const n = parseInt(r.ref.slice(prefix.length), 10);
+                        if (!isNaN(n) && n > maxNum) maxNum = n;
+                    }
+                });
+                const newQuoteNum = `${prefix}${maxNum + 1}`;
                 appState['quote-num'] = newQuoteNum;
                 const el = document.getElementById('in-quote-num');
                 if (el) el.value = newQuoteNum;
@@ -4105,11 +4043,13 @@
             };
 
             try {
-                await html2pdf().set(opt).from(element).save();
+                const ctPdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
+                saveAs(ctPdfBlob, filename);
                 showToast('PDF Downloaded successfully!');
                 // Save record to Firebase history
                 const _nowCt = new Date();
                 const _editingContractId = isEmp ? currentEditingEcId : currentEditingCtId;
+                const ctStoreName = isEmp ? 'hrContracts' : 'clientContracts';
                 const ctRecord = {
                     id: _editingContractId || Date.now().toString(),
                     client: clientName,
@@ -4126,7 +4066,9 @@
                     source: 'web',
                     formSnapshot: isEmp ? _captureEcSnapshot() : _captureCtSnapshot()
                 };
-                await cloudDB.put(ctRecord, isEmp ? 'hrContracts' : 'clientContracts');
+                const ctPdfUrl = await uploadExportToStorage(ctPdfBlob, ctStoreName, filename);
+                if (ctPdfUrl) ctRecord.fileUrl = ctPdfUrl;
+                await cloudDB.put(ctRecord, ctStoreName);
                 if (_editingContractId) { if (isEmp) window.stopEcEditing(); else window.stopCtEditing(); }
             } catch (e) {
                 console.error(e);
@@ -4197,6 +4139,7 @@
                 // Save record to Firebase history
                 const _nowCtW = new Date();
                 const _editingContractIdWord = isEmp ? currentEditingEcId : currentEditingCtId;
+                const ctWStoreName = isEmp ? 'hrContracts' : 'clientContracts';
                 const ctWRecord = {
                     id: _editingContractIdWord || Date.now().toString(),
                     client: clientName,
@@ -4213,7 +4156,9 @@
                     source: 'web',
                     formSnapshot: isEmp ? _captureEcSnapshot() : _captureCtSnapshot()
                 };
-                await cloudDB.put(ctWRecord, isEmp ? 'hrContracts' : 'clientContracts');
+                const ctWordUrl = await uploadExportToStorage(blob, ctWStoreName, filename);
+                if (ctWordUrl) ctWRecord.fileUrl = ctWordUrl;
+                await cloudDB.put(ctWRecord, ctWStoreName);
                 if (_editingContractIdWord) { if (isEmp) window.stopEcEditing(); else window.stopCtEditing(); }
             } catch(e) {
                 console.error(e);
@@ -4304,7 +4249,6 @@
 
         window.setLanguage = function(lang) {
             appLang = lang;
-            localStorage.setItem('openy_lang', lang);
             const isRTL = lang === 'ar';
             const dir = isRTL ? 'rtl' : 'ltr';
 
@@ -6432,6 +6376,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                     const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                     const fname = `OPENY_Accounting_${new Date().toISOString().split('T')[0]}.xlsx`;
                     saveAs(blob, fname);
+                    uploadExportToStorage(blob, 'acctLedger', fname).catch(() => {});
                     showToast('Accounting workbook exported ✓');
                 } catch(e) {
                     console.error(e);
@@ -6485,6 +6430,8 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                     }
 
                     pdf.save('OPENY-Accounting.pdf');
+                    const acctPdfBlob = pdf.output('blob');
+                    uploadExportToStorage(acctPdfBlob, 'acctLedger', 'OPENY-Accounting.pdf').catch(() => {});
                     showToast('Accounting PDF exported ✓');
                 } catch(e) {
                     console.error('PDF export failed:', e);

@@ -5,11 +5,11 @@
 // This module owns:
 //   • The typed Firebase Web-app configuration
 //   • A factory that initialises the SDK once and returns the shared instances
-//     of FirebaseApp, Auth and Firestore
+//     of FirebaseApp, Auth, Firestore, and Storage
 //
 // Usage (ESM – browser or bundler):
 //   import { initFirebase, FIREBASE_WEB_CONFIG } from "./firebase_setup.js";
-//   const { app, auth, db } = await initFirebase();
+//   const { app, auth, db, storage } = await initFirebase();
 //
 // Security note:
 //   Only Web SDK ("client") credentials are stored here.
@@ -25,6 +25,7 @@ import {
     signInAnonymously,
 } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
+import { getStorage, FirebaseStorage } from "firebase/storage";
 
 // ---------------------------------------------------------------------------
 // 1. Configuration
@@ -36,20 +37,11 @@ import { getFirestore, Firestore } from "firebase/firestore";
  * Fill in the values from:
  *   Firebase Console → Project Settings → General → Your apps → Web app
  *
- * After filling in real values, set FIREBASE_ENABLED to `true` (or keep the
- * guard below – it auto-detects whether the config is populated).
- *
  * Security note on API key visibility:
  *   Firebase Web SDK ("client") credentials are intentionally public – the API
  *   key merely identifies the Firebase project and is not a secret.  Access
- *   control is enforced exclusively via Firebase Security Rules
- *   (Firestore: `allow read, write: if request.auth != null`).
+ *   control is enforced exclusively via Firebase Security Rules.
  *   See: https://firebase.google.com/docs/projects/api-keys
- *
- *   If this project is later bundled with a tool that supports it (Vite,
- *   webpack, etc.) you can replace the literal values below with environment
- *   variables such as `import.meta.env.VITE_FIREBASE_API_KEY` and document
- *   them in a `.env.example` file.
  */
 export const FIREBASE_WEB_CONFIG: FirebaseOptions = {
     apiKey:            "AIzaSyAhXa5gLCMIIxuFIAj0RFeFEvAcE5TiilY",
@@ -73,9 +65,10 @@ export const FIREBASE_ENABLED: boolean =
 // ---------------------------------------------------------------------------
 
 interface FirebaseServices {
-    app:  FirebaseApp;
-    auth: Auth;
-    db:   Firestore;
+    app:     FirebaseApp;
+    auth:    Auth;
+    db:      Firestore;
+    storage: FirebaseStorage;
 }
 
 let _services: FirebaseServices | null = null;
@@ -105,9 +98,10 @@ export async function initFirebase(): Promise<FirebaseServices> {
         return _services;
     }
 
-    const app  = initializeApp(FIREBASE_WEB_CONFIG);
-    const auth = getAuth(app);
-    const db   = getFirestore(app);
+    const app     = initializeApp(FIREBASE_WEB_CONFIG);
+    const auth    = getAuth(app);
+    const db      = getFirestore(app);
+    const storage = getStorage(app);
 
     // Persist the anonymous session across hard reloads on the same browser.
     try {
@@ -119,7 +113,7 @@ export async function initFirebase(): Promise<FirebaseServices> {
 
     await signInAnonymously(auth);
 
-    _services = { app, auth, db };
+    _services = { app, auth, db, storage };
     return _services;
 }
 
@@ -153,3 +147,4 @@ export const ALL_STORES: readonly string[] = [
     "acctEgyptCollections",
     "acctCaptainCollections",
 ] as const;
+

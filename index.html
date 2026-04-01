@@ -31,18 +31,8 @@
         window.scrollTo(0, 0);
     </script>
 
-    <!-- Cloud Storage Integration - Deferred to avoid blocking on mobile -->
-    <script type="module" defer>
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        window.FB = {
-            initializeApp, getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence,
-            getFirestore, collection, doc, setDoc, getDocs, deleteDoc, onSnapshot
-        };
-        window.dispatchEvent(new Event('firebaseLoaded'));
-    </script>
+    <!-- Cloud Storage Integration — single Firebase source (firebase.js) -->
+    <script type="module" src="firebase.js" defer></script>
 </head>
 <body>
 
