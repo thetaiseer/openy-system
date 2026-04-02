@@ -433,7 +433,8 @@
             } else if (moduleName === 'employees') {
                 if(empMod) empMod.style.display = 'flex';
                 if(navEmp) navEmp.classList.add('active');
-                setTimeout(() => {
+                setTimeout(async () => {
+                    await Promise.all([cloudDB.getAll('employees'), cloudDB.getAll('salaryHistory')]);
                     if (typeof window.refreshEmployeesModule === 'function') window.refreshEmployeesModule();
                     if (typeof window.switchEmpTab === 'function') window.switchEmpTab('list');
                 }, 80);
@@ -442,7 +443,8 @@
                 if(navAcct) navAcct.classList.add('active');
                 const acctDock = document.getElementById('acct-export-section');
                 if (acctDock) acctDock.style.display = 'flex';
-                setTimeout(() => {
+                setTimeout(async () => {
+                    await Promise.all([cloudDB.getAll('acctLedger'), cloudDB.getAll('acctExpenses')]);
                     if (typeof window.refreshAccountingModule === 'function') window.refreshAccountingModule();
                 }, 80);
             }
@@ -825,6 +827,24 @@
 
         async function uploadExportToStorage(blob, storeName, filename) {
             return null;
+        }
+
+        // Log an activity entry to Supabase (activity_logs table)
+        async function logActivity(action, moduleName, recordId, details) {
+            try {
+                const entry = {
+                    id: 'log-' + Date.now() + '-' + Math.floor(Math.random() * 10000),
+                    module_name: moduleName,
+                    record_id: recordId,
+                    action_type: action,
+                    title: (details && (details.ref || details.client)) || recordId || '',
+                    details: details || {},
+                    created_at: new Date().toISOString()
+                };
+                await cloudDB.put(entry, 'activityLogs');
+            } catch (e) {
+                console.warn('[OPENY] logActivity failed:', e.message);
+            }
         }
         let isAppBooting = true; // Flag to prevent heavy preview renders on initial load
 
@@ -1902,6 +1922,7 @@
                 const invPdfUrl = await uploadExportToStorage(invPdfBlob, 'invoices', filename);
                 if (invPdfUrl) record.fileUrl = invPdfUrl;
                 await cloudDB.put(record, 'invoices');
+                logActivity(_editingInvoiceId ? 'updated' : 'created', 'invoice', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
                 if (_editingInvoiceId) window.stopInvEditing();
                 await initInvoiceNumber();
                 if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
@@ -2247,6 +2268,7 @@
                 const invXlsUrl = await uploadExportToStorage(blob, 'invoices', filename);
                 if (invXlsUrl) record.fileUrl = invXlsUrl;
                 await cloudDB.put(record, 'invoices');
+                logActivity(_editingInvoiceIdExcel ? 'updated' : 'created', 'invoice', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
                 if (_editingInvoiceIdExcel) window.stopInvEditing();
                 await initInvoiceNumber();
                 if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
@@ -4045,6 +4067,7 @@
                 const ctPdfUrl = await uploadExportToStorage(ctPdfBlob, ctStoreName, filename);
                 if (ctPdfUrl) ctRecord.fileUrl = ctPdfUrl;
                 await cloudDB.put(ctRecord, ctStoreName);
+                logActivity(_editingContractId ? 'updated' : 'created', isEmp ? 'hrcontract' : 'clientcontract', ctRecord.id, { client: ctRecord.client, ref: ctRecord.ref, amount: ctRecord.amount, currency: ctRecord.currency });
                 if (_editingContractId) { if (isEmp) window.stopEcEditing(); else window.stopCtEditing(); }
             } catch (e) {
                 console.error(e);
@@ -4135,6 +4158,7 @@
                 const ctWordUrl = await uploadExportToStorage(blob, ctWStoreName, filename);
                 if (ctWordUrl) ctWRecord.fileUrl = ctWordUrl;
                 await cloudDB.put(ctWRecord, ctWStoreName);
+                logActivity(_editingContractIdWord ? 'updated' : 'created', isEmp ? 'hrcontract' : 'clientcontract', ctWRecord.id, { client: ctWRecord.client, ref: ctWRecord.ref, amount: ctWRecord.amount, currency: ctWRecord.currency });
                 if (_editingContractIdWord) { if (isEmp) window.stopEcEditing(); else window.stopCtEditing(); }
             } catch(e) {
                 console.error(e);
@@ -5142,6 +5166,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 }
 
                 await cloudDB.put(emp, 'employees');
+                logActivity(isNew ? 'created' : 'updated', 'employee', emp.id, { client: emp.fullName, ref: emp.employeeId, amount: parseFloat(emp.currentSalary) || 0, currency: emp.currency || 'EGP' });
                 window.closeEmpFormModal();
                 window.refreshEmployeesModule();
                 showToast(isNew ? 'Employee added ✓' : 'Employee updated ✓');
@@ -6112,7 +6137,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
             };
 
             // ── Save Record ──
-            window.saveAcctRecord = function() {
+            window.saveAcctRecord = async function() {
                 const storeKey = acctCurrentStore;
                 const storeName = STORE_NAMES[storeKey];
                 if (!storeName) return;
@@ -6139,7 +6164,12 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 if (!valid) { showToast('Please fill in all required fields.'); return; }
 
                 localStore.put(record, storeName);
-                cloudDB.put(record, storeName).catch(e => console.error('Accounting sync failed:', e));
+                try {
+                    await cloudDB.put(record, storeName);
+                } catch (e) {
+                    console.error('Accounting sync failed:', e);
+                }
+                logActivity(acctEditingId ? 'updated' : 'created', storeKey, record.id, { client: record.clientName || record.description || '', ref: record.month || '', amount: parseFloat(record.amount) || 0, currency: record.currency || '' });
 
                 window.closeAcctModal();
                 window.refreshAccountingModule();
