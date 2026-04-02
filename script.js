@@ -393,6 +393,7 @@
                 setTimeout(() => {
                     if (typeof window.updateAllocations === 'function') window.updateAllocations();
                     if (typeof window.adjustLayout === 'function') window.adjustLayout();
+                    if (typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList();
                 }, 50);
             } else if (moduleName === 'quotation') {
                 if(quoMod) quoMod.style.display = 'flex';
@@ -927,6 +928,7 @@
                     if(typeof window.updateAllocations === 'function') window.updateAllocations(); 
                     if(typeof window.saveAndRender === 'function') window.saveAndRender(); 
                     if(typeof window.adjustLayout === 'function') window.adjustLayout();
+                    if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList();
                     window.scrollTo(0, 0);
                 }, 600);
 
@@ -1946,7 +1948,7 @@
 
             try {
                 // ── 1. Save record FIRST (before generating file) ────────────────
-                console.log('[OPENY] Invoice PDF save started');
+                console.log('saving invoice...');
                 const _now3 = new Date();
                 const _editingInvoiceId = currentEditingInvHistoryId;
                 // Preserve existing status when editing an existing invoice
@@ -1955,13 +1957,17 @@
                     const existing = (await cloudDB.getAll('invoices')).find(r => r.id === _editingInvoiceId);
                     if (existing && existing.status) invPdfStatus = existing.status;
                 }
+                const _invSnap = _captureInvoiceSnapshot();
+                const _invClient = invoiceData.client || 'Unknown Client';
                 const record = {
                     id: _editingInvoiceId || Date.now().toString(),
-                    client: invoiceData.client,
+                    client: _invClient,
+                    client_name: _invClient,
                     ref: invoiceRef,
-                    date: invoiceData.invoiceDate,
-                    amount: invoiceData.totalBudget,
-                    currency: invoiceData.currency,
+                    date: invoiceData.invoiceDate || new Date().toISOString().slice(0, 7),
+                    amount: invoiceData.totalBudget || 0,
+                    total: invoiceData.totalBudget || 0,
+                    currency: invoiceData.currency || 'USD',
                     status: invPdfStatus,
                     timestamp: Date.now(),
                     type: 'invoice',
@@ -1969,12 +1975,13 @@
                     month: _now3.getMonth() + 1,
                     day: _now3.getDate(),
                     source: 'web',
-                    formSnapshot: _captureInvoiceSnapshot()
+                    formSnapshot: _invSnap,
+                    form_data_json: _invSnap
                 };
                 await cloudDB.put(record, 'invoices');
-                console.log('[OPENY] Invoice save success — record ID:', record.id);
+                console.log('invoice saved with id', record.id);
                 await logActivity(_editingInvoiceId ? 'updated' : 'created', 'invoice', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
-                console.log('[OPENY] History insert success for record:', record.id);
+                console.log('history inserted');
 
                 // ── 2. Generate and download the PDF ────────────────────────────
                 const invPdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
@@ -2316,7 +2323,7 @@
                 const filename = sanitizeFilename(invoiceData.client, invoiceRef).replace('.pdf', '.xlsx');
 
                 // ── 1. Save record FIRST (before downloading file) ───────────────
-                console.log('[OPENY] Invoice Excel save started');
+                console.log('saving invoice...');
                 const _now4 = new Date();
                 const _editingInvoiceIdExcel = currentEditingInvHistoryId;
                 // Preserve existing status when editing an existing invoice
@@ -2325,13 +2332,17 @@
                     const existing = (await cloudDB.getAll('invoices')).find(r => r.id === _editingInvoiceIdExcel);
                     if (existing && existing.status) invXlsStatus = existing.status;
                 }
+                const _invSnapXls = _captureInvoiceSnapshot();
+                const _invClientXls = invoiceData.client || 'Unknown Client';
                 const record = {
                     id: _editingInvoiceIdExcel || Date.now().toString(),
-                    client: invoiceData.client,
+                    client: _invClientXls,
+                    client_name: _invClientXls,
                     ref: invoiceRef,
-                    date: invoiceData.invoiceDate,
-                    amount: invoiceData.totalBudget,
-                    currency: invoiceData.currency,
+                    date: invoiceData.invoiceDate || new Date().toISOString().slice(0, 7),
+                    amount: invoiceData.totalBudget || 0,
+                    total: invoiceData.totalBudget || 0,
+                    currency: invoiceData.currency || 'USD',
                     status: invXlsStatus,
                     timestamp: Date.now(),
                     type: 'invoice',
@@ -2339,14 +2350,15 @@
                     month: _now4.getMonth() + 1,
                     day: _now4.getDate(),
                     source: 'web',
-                    formSnapshot: _captureInvoiceSnapshot()
+                    formSnapshot: _invSnapXls,
+                    form_data_json: _invSnapXls
                 };
                 const invXlsUrl = await uploadExportToStorage(blob, 'invoices', filename);
                 if (invXlsUrl) record.fileUrl = invXlsUrl;
                 await cloudDB.put(record, 'invoices');
-                console.log('[OPENY] Invoice save success — record ID:', record.id);
+                console.log('invoice saved with id', record.id);
                 await logActivity(_editingInvoiceIdExcel ? 'updated' : 'created', 'invoice', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
-                console.log('[OPENY] History insert success for record:', record.id);
+                console.log('history inserted');
 
                 // ── 2. Download the Excel file ───────────────────────────────────
                 saveAs(blob, filename);
@@ -2555,6 +2567,7 @@
             const sortVal = document.getElementById('inv-history-sort')?.value || 'newest';
 
             const allRecords = await cloudDB.getAll('invoices');
+            console.log('fetched invoices count', allRecords.length);
 
             const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
             _populateHistorySelect('inv-history-filter-client', uniqueClients, 'All Clients');
