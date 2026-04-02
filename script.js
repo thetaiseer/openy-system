@@ -1763,7 +1763,7 @@
                 const fileUrl = await uploadExportToStorage(pdfBlob, 'quotations', filename);
                 if (fileUrl) record.fileUrl = fileUrl;
                 await cloudDB.put(record, 'quotations');
-                logActivity(_editingQuotationId ? 'updated' : 'created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                await logActivity(_editingQuotationId ? 'updated' : 'created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
                 if (_editingQuotationId) window.stopEditing();
             } catch (e) {
                 console.error(e);
@@ -1842,7 +1842,7 @@
                 const fileUrlExcel = await uploadExportToStorage(blob, 'quotations', filename);
                 if (fileUrlExcel) record.fileUrl = fileUrlExcel;
                 await cloudDB.put(record, 'quotations');
-                logActivity(_editingQuotationIdExcel ? 'updated' : 'created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                await logActivity(_editingQuotationIdExcel ? 'updated' : 'created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
                 if (_editingQuotationIdExcel) window.stopEditing();
             } catch (e) {
                 console.error(e);
@@ -1922,7 +1922,7 @@
                 const invPdfUrl = await uploadExportToStorage(invPdfBlob, 'invoices', filename);
                 if (invPdfUrl) record.fileUrl = invPdfUrl;
                 await cloudDB.put(record, 'invoices');
-                logActivity(_editingInvoiceId ? 'updated' : 'created', 'invoice', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                await logActivity(_editingInvoiceId ? 'updated' : 'created', 'invoice', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
                 if (_editingInvoiceId) window.stopInvEditing();
                 await initInvoiceNumber();
                 if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
@@ -2268,7 +2268,7 @@
                 const invXlsUrl = await uploadExportToStorage(blob, 'invoices', filename);
                 if (invXlsUrl) record.fileUrl = invXlsUrl;
                 await cloudDB.put(record, 'invoices');
-                logActivity(_editingInvoiceIdExcel ? 'updated' : 'created', 'invoice', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                await logActivity(_editingInvoiceIdExcel ? 'updated' : 'created', 'invoice', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
                 if (_editingInvoiceIdExcel) window.stopInvEditing();
                 await initInvoiceNumber();
                 if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
@@ -4067,7 +4067,7 @@
                 const ctPdfUrl = await uploadExportToStorage(ctPdfBlob, ctStoreName, filename);
                 if (ctPdfUrl) ctRecord.fileUrl = ctPdfUrl;
                 await cloudDB.put(ctRecord, ctStoreName);
-                logActivity(_editingContractId ? 'updated' : 'created', isEmp ? 'hrcontract' : 'clientcontract', ctRecord.id, { client: ctRecord.client, ref: ctRecord.ref, amount: ctRecord.amount, currency: ctRecord.currency });
+                await logActivity(_editingContractId ? 'updated' : 'created', isEmp ? 'hrcontract' : 'clientcontract', ctRecord.id, { client: ctRecord.client, ref: ctRecord.ref, amount: ctRecord.amount, currency: ctRecord.currency });
                 if (_editingContractId) { if (isEmp) window.stopEcEditing(); else window.stopCtEditing(); }
             } catch (e) {
                 console.error(e);
@@ -4158,7 +4158,7 @@
                 const ctWordUrl = await uploadExportToStorage(blob, ctWStoreName, filename);
                 if (ctWordUrl) ctWRecord.fileUrl = ctWordUrl;
                 await cloudDB.put(ctWRecord, ctWStoreName);
-                logActivity(_editingContractIdWord ? 'updated' : 'created', isEmp ? 'hrcontract' : 'clientcontract', ctWRecord.id, { client: ctWRecord.client, ref: ctWRecord.ref, amount: ctWRecord.amount, currency: ctWRecord.currency });
+                await logActivity(_editingContractIdWord ? 'updated' : 'created', isEmp ? 'hrcontract' : 'clientcontract', ctWRecord.id, { client: ctWRecord.client, ref: ctWRecord.ref, amount: ctWRecord.amount, currency: ctWRecord.currency });
                 if (_editingContractIdWord) { if (isEmp) window.stopEcEditing(); else window.stopCtEditing(); }
             } catch(e) {
                 console.error(e);
@@ -5166,7 +5166,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 }
 
                 await cloudDB.put(emp, 'employees');
-                logActivity(isNew ? 'created' : 'updated', 'employee', emp.id, { client: emp.fullName, ref: emp.employeeId, amount: parseFloat(emp.currentSalary) || 0, currency: emp.currency || 'EGP' });
+                await logActivity(isNew ? 'created' : 'updated', 'employee', emp.id, { client: emp.fullName, ref: emp.employeeId, amount: parseFloat(emp.currentSalary) || 0, currency: emp.currency || 'EGP' });
                 window.closeEmpFormModal();
                 window.refreshEmployeesModule();
                 showToast(isNew ? 'Employee added ✓' : 'Employee updated ✓');
@@ -6169,7 +6169,7 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 } catch (e) {
                     console.error('Accounting sync failed:', e);
                 }
-                logActivity(acctEditingId ? 'updated' : 'created', storeKey, record.id, { client: record.clientName || record.description || '', ref: record.month || '', amount: parseFloat(record.amount) || 0, currency: record.currency || '' });
+                await logActivity(acctEditingId ? 'updated' : 'created', storeKey, record.id, { client: record.clientName || record.description || '', ref: record.month || '', amount: parseFloat(record.amount) || 0, currency: record.currency || '' });
 
                 window.closeAcctModal();
                 window.refreshAccountingModule();
