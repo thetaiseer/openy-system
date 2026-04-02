@@ -671,8 +671,65 @@
         };
 
         // ==========================================================================
-        // 4. STORAGE / DB (In-Memory Cache)
+        // 4. STORAGE / DB (Supabase-backed with in-memory fallback)
         // ==========================================================================
+
+        // ── Supabase client init ──────────────────────────────────────────────────
+        const _sbUrl  = (typeof window !== 'undefined' && window.SUPABASE_URL)      || '';
+        const _sbKey  = (typeof window !== 'undefined' && window.SUPABASE_ANON_KEY) || '';
+        let _supabase      = null;
+        let _supabaseReady = false;
+
+        if (_sbUrl && _sbKey &&
+            !_sbUrl.includes('YOUR_SUPABASE_URL') &&
+            !_sbKey.includes('YOUR_SUPABASE_ANON_KEY')) {
+            try {
+                _supabase      = window.supabase.createClient(_sbUrl, _sbKey);
+                _supabaseReady = true;
+                console.log('[OPENY] ✅ Supabase client initialised:', _sbUrl);
+            } catch (e) {
+                console.error('[OPENY] ❌ Supabase init error — check supabase-config.js:', e.message);
+            }
+        } else {
+            console.warn('[OPENY] ⚠️  Supabase not configured — running in-memory only. Data will be lost on page refresh.');
+            console.info('[OPENY] Open supabase-config.js and replace the placeholder values with your Project URL and anon key.');
+        }
+
+        // Async connection test — runs once after init to verify DB is reachable
+        if (_supabaseReady) {
+            (async () => {
+                try {
+                    const { error } = await _supabase.from('invoices').select('id').limit(1);
+                    if (!error) {
+                        console.log('[OPENY] ✅ Supabase connection test passed — invoices table found');
+                    } else if (error.code === 'PGRST116') {
+                        console.warn('[OPENY] ⚠️  Supabase connected but tables are missing. Run supabase-schema.sql in your Supabase SQL editor.');
+                    } else {
+                        console.error('[OPENY] ❌ Supabase connection test failed:', error.message);
+                    }
+                } catch (e) {
+                    console.error('[OPENY] ❌ Supabase connection test error:', e.message);
+                }
+            })();
+        }
+
+        // camelCase store names → snake_case Supabase table names
+        const STORE_TO_TABLE = {
+            quotations:             'quotations',
+            invoices:               'invoices',
+            clientContracts:        'client_contracts',
+            hrContracts:            'hr_contracts',
+            employees:              'employees',
+            salaryHistory:          'salary_history',
+            activityLogs:           'activity_logs',
+            acctLedger:             'acct_ledger',
+            acctExpenses:           'acct_expenses',
+            acctClientCollections:  'acct_client_collections',
+            acctEgyptCollections:   'acct_egypt_collections',
+            acctCaptainCollections: 'acct_captain_collections',
+        };
+
+        // ── In-memory cache (primary store when Supabase is offline / unconfigured) ─
         const localStore = {
             _cache: {},
             getAll(storeName) {
@@ -698,18 +755,71 @@
             // Legacy stores kept for backward compatibility (data migration safety); no longer used as data-entry points
             'acctClientCollections', 'acctEgyptCollections', 'acctCaptainCollections'];
 
+        // ── cloudDB: Supabase-backed operations with in-memory fallback ──────────
         const cloudDB = {
-            async getAll(storeName = "history") {
+            _table(storeName) {
+                return STORE_TO_TABLE[storeName] || storeName;
+            },
+            // Fetch all records – reads from Supabase (live) and refreshes local cache
+            async getAll(storeName = 'history') {
+                if (_supabaseReady) {
+                    try {
+                        const { data, error } = await _supabase
+                            .from(this._table(storeName))
+                            .select('data');
+                        if (error) throw error;
+                        const records = (data || []).map(row => row.data);
+                        localStore._cache[storeName] = records;
+                        return records;
+                    } catch (e) {
+                        console.error(`[OPENY] Supabase getAll(${storeName}) failed, using local cache:`, e.message);
+                    }
+                }
                 return localStore.getAll(storeName);
             },
-            async put(record, storeName = "history") {
+            // Upsert a record – writes to local cache immediately, then syncs to Supabase
+            async put(record, storeName = 'history') {
                 localStore.put(record, storeName);
+                if (_supabaseReady) {
+                    try {
+                        const { error } = await _supabase
+                            .from(this._table(storeName))
+                            .upsert({ id: record.id, data: record }, { onConflict: 'id' });
+                        if (error) throw error;
+                    } catch (e) {
+                        console.error(`[OPENY] Supabase put(${storeName}) failed:`, e.message);
+                    }
+                }
             },
-            async delete(id, storeName = "history") {
+            // Hard-delete a record by id
+            async delete(id, storeName = 'history') {
                 localStore.delete(id, storeName);
+                if (_supabaseReady) {
+                    try {
+                        const { error } = await _supabase
+                            .from(this._table(storeName))
+                            .delete()
+                            .eq('id', id);
+                        if (error) throw error;
+                    } catch (e) {
+                        console.error(`[OPENY] Supabase delete(${storeName}) failed:`, e.message);
+                    }
+                }
             },
-            async clear(storeName = "history") {
+            // Remove all records from a store
+            async clear(storeName = 'history') {
                 localStore.clear(storeName);
+                if (_supabaseReady) {
+                    try {
+                        const { error } = await _supabase
+                            .from(this._table(storeName))
+                            .delete()
+                            .not('id', 'is', null);
+                        if (error) throw error;
+                    } catch (e) {
+                        console.error(`[OPENY] Supabase clear(${storeName}) failed:`, e.message);
+                    }
+                }
             }
         };
 
@@ -2305,7 +2415,7 @@
 
             let records = allRecords.filter(r => {
                 const matchSearch = !searchVal || (r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal));
-                const matchStatus = currentHistoryFilter === 'all' || r.status === currentHistoryFilter;
+                const matchStatus = currentHistoryFilter === 'all' ? r.status !== 'archived' : r.status === currentHistoryFilter;
                 const matchClient = !filterClient || r.client === filterClient;
                 const matchYear = !filterYear || String(r.year || new Date(r.timestamp || 0).getFullYear()) === filterYear;
                 const matchMonth = !filterMonth || String(r.month || (new Date(r.timestamp || 0).getMonth() + 1)) === filterMonth;
@@ -2339,7 +2449,7 @@
 
             let records = allRecords.filter(r => {
                 const matchSearch = !searchVal || (r.client?.toLowerCase().includes(searchVal) || r.ref?.toLowerCase().includes(searchVal));
-                const matchStatus = currentInvHistoryFilter === 'all' || r.status === currentInvHistoryFilter;
+                const matchStatus = currentInvHistoryFilter === 'all' ? r.status !== 'archived' : r.status === currentInvHistoryFilter;
                 const matchClient = !filterClient || r.client === filterClient;
                 const matchYear = !filterYear || String(r.year || new Date(r.timestamp || 0).getFullYear()) === filterYear;
                 const matchMonth = !filterMonth || String(r.month || (new Date(r.timestamp || 0).getMonth() + 1)) === filterMonth;
@@ -2378,7 +2488,7 @@
                 const matchYear = !filterYear || String(r.year || new Date(r.timestamp || 0).getFullYear()) === filterYear;
                 const matchMonth = !filterMonth || String(r.month || (new Date(r.timestamp || 0).getMonth() + 1)) === filterMonth;
                 const matchDay = !filterDay || String(r.day || new Date(r.timestamp || 0).getDate()) === filterDay;
-                const matchStatus = !filterStatus || r.status === filterStatus;
+                const matchStatus = filterStatus ? r.status === filterStatus : r.status !== 'archived';
                 return matchSearch && matchClient && matchYear && matchMonth && matchDay && matchStatus;
             });
             records = _sortHistoryRecords(records, sortVal);
@@ -2413,7 +2523,7 @@
                 const matchYear = !filterYear || String(r.year || new Date(r.timestamp || 0).getFullYear()) === filterYear;
                 const matchMonth = !filterMonth || String(r.month || (new Date(r.timestamp || 0).getMonth() + 1)) === filterMonth;
                 const matchDay = !filterDay || String(r.day || new Date(r.timestamp || 0).getDate()) === filterDay;
-                const matchStatus = !filterStatus || r.status === filterStatus;
+                const matchStatus = filterStatus ? r.status === filterStatus : r.status !== 'archived';
                 return matchSearch && matchClient && matchYear && matchMonth && matchDay && matchStatus;
             });
             records = _sortHistoryRecords(records, sortVal);
@@ -2444,14 +2554,26 @@
         }
 
         window.deleteRecord = async function(id, storeName) {
-            window.openConfirmModal("Delete Record", "Are you sure you want to delete this record? This action cannot be undone.", async () => {
+            const archivable = ['quotations', 'invoices', 'clientContracts', 'hrContracts'];
+            const useArchive = archivable.includes(storeName);
+            const title   = useArchive ? 'Archive Record' : 'Delete Record';
+            const message = useArchive
+                ? 'Archive this record? It will be hidden from the active list but is not permanently deleted.'
+                : 'Are you sure you want to delete this record? This action cannot be undone.';
+            window.openConfirmModal(title, message, async () => {
                 try {
-                    await cloudDB.delete(id, storeName);
+                    if (useArchive) {
+                        const all = await cloudDB.getAll(storeName);
+                        const rec = all.find(r => r.id === id);
+                        if (rec) await cloudDB.put({ ...rec, status: 'archived' }, storeName);
+                    } else {
+                        await cloudDB.delete(id, storeName);
+                    }
                     _refreshHistoryList(storeName);
-                    showToast("Record deleted.");
+                    showToast(useArchive ? 'Record archived.' : 'Record deleted.');
                 } catch(e) {
-                    console.error("Delete failed:", e);
-                    showToast("Delete failed. Please try again.");
+                    console.error('Delete/archive failed:', e);
+                    showToast('Operation failed. Please try again.');
                     _refreshHistoryList(storeName);
                 }
             });
