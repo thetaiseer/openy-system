@@ -8,6 +8,10 @@
 -- store any record shape without schema migrations.
 -- The `id` column mirrors the record's own `id` field and
 -- acts as the primary key for upserts.
+--
+-- Storage bucket for exported files (PDF / Excel / Word):
+--   Dashboard → Storage → New bucket → name: "exports" → Public bucket: ON
+-- The app uploads to paths like:  invoices/<timestamp>-<uid>-<filename>
 -- ============================================================
 
 -- Invoices

@@ -393,10 +393,13 @@
                 setTimeout(() => {
                     if (typeof window.updateAllocations === 'function') window.updateAllocations();
                     if (typeof window.adjustLayout === 'function') window.adjustLayout();
-                    // Only load history if the history tab is currently active
+                }, 50);
+                // Fetch fresh invoice data in background and re-render when ready
+                cloudDB.getAll('invoices').then(() => {
+                    if (typeof window.updateAllocations === 'function') window.updateAllocations();
                     const histTab = invMod && invMod.querySelector('.ui-nav-pill[data-inv-tab="history"].active');
                     if (histTab && typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList();
-                }, 50);
+                });
             } else if (moduleName === 'quotation') {
                 if(quoMod) quoMod.style.display = 'flex';
                 if(navQuo) navQuo.classList.add('active');
@@ -407,6 +410,11 @@
                     if (editorActive) quoDock.style.display = 'flex';
                 }
                 setTimeout(() => { if (typeof window.adjustLayout === 'function') window.adjustLayout(); }, 50);
+                // Fetch fresh quotation data in background and re-render when ready
+                cloudDB.getAll('quotations').then(() => {
+                    const histTab = quoMod && quoMod.querySelector('.ui-nav-pill[data-tab="history"].active');
+                    if (histTab && typeof window.renderHistoryList === 'function') window.renderHistoryList();
+                });
             } else if (moduleName === 'contract') {
                 if(ctMod) ctMod.style.display = 'flex';
                 if(navCt) navCt.classList.add('active');
@@ -420,6 +428,11 @@
                     if (typeof window.renderContractPreview === 'function') window.renderContractPreview();
                     if (typeof window.adjustLayout === 'function') window.adjustLayout();
                 }, 80);
+                // Fetch fresh client contract data in background and re-render when ready
+                cloudDB.getAll('clientContracts').then(() => {
+                    const histTab = ctMod && ctMod.querySelector('.ui-nav-pill[data-ctab="history"].active');
+                    if (histTab && typeof window.renderCtHistoryList === 'function') window.renderCtHistoryList();
+                });
             } else if (moduleName === 'empcontract') {
                 if(ecMod) ecMod.style.display = 'flex';
                 if(navEc) navEc.classList.add('active');
@@ -433,6 +446,11 @@
                     if (typeof window.renderEmpContractPreview === 'function') window.renderEmpContractPreview();
                     if (typeof window.adjustLayout === 'function') window.adjustLayout();
                 }, 80);
+                // Fetch fresh HR contract data in background and re-render when ready
+                cloudDB.getAll('hrContracts').then(() => {
+                    const histTab = ecMod && ecMod.querySelector('.ui-nav-pill[data-ectab="history"].active');
+                    if (histTab && typeof window.renderEcHistoryList === 'function') window.renderEcHistoryList();
+                });
             } else if (moduleName === 'employees') {
                 if(empMod) empMod.style.display = 'flex';
                 if(navEmp) navEmp.classList.add('active');
@@ -759,6 +777,9 @@
             },
             clear(storeName) {
                 this._cache[storeName] = [];
+            },
+            invalidate(storeName) {
+                this._cache[storeName] = null;
             }
         };
 
@@ -845,8 +866,52 @@
             }
         };
 
+        // ── Supabase Realtime — sync UI across all devices without manual refresh ─
+        if (_supabaseReady) {
+            // Debounce helper to avoid redundant back-to-back refreshes
+            function _debounce(fn, ms) {
+                let t;
+                return function() { clearTimeout(t); t = setTimeout(fn, ms); };
+            }
+            const _refreshAccounting = _debounce(() => { if (typeof window.refreshAccountingModule === 'function') window.refreshAccountingModule(); }, 150);
+
+            const _realtimeMap = [
+                { table: 'invoices',         store: 'invoices',        refresh: () => { if (typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList(); if (typeof window.updateAllocations === 'function') window.updateAllocations(); } },
+                { table: 'quotations',       store: 'quotations',      refresh: () => { if (typeof window.renderHistoryList === 'function') window.renderHistoryList(); } },
+                { table: 'client_contracts', store: 'clientContracts', refresh: () => { if (typeof window.renderCtHistoryList === 'function') window.renderCtHistoryList(); } },
+                { table: 'hr_contracts',     store: 'hrContracts',     refresh: () => { if (typeof window.renderEcHistoryList === 'function') window.renderEcHistoryList(); } },
+                { table: 'employees',        store: 'employees',       refresh: () => { if (typeof window.refreshEmployeesModule === 'function') window.refreshEmployeesModule(); } },
+                { table: 'acct_ledger',      store: 'acctLedger',      refresh: _refreshAccounting },
+                { table: 'acct_expenses',    store: 'acctExpenses',    refresh: _refreshAccounting },
+            ];
+            _realtimeMap.forEach(({ table, store, refresh }) => {
+                _supabase.channel('openy-' + table)
+                    .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
+                        // Invalidate local cache so the next getAll fetches fresh data from Supabase
+                        localStore.invalidate(store);
+                        refresh();
+                    })
+                    .subscribe();
+            });
+            console.log('[OPENY] ✅ Realtime subscriptions active');
+        }
+
         async function uploadExportToStorage(blob, storeName, filename) {
-            return null;
+            if (!_supabaseReady) return null;
+            try {
+                const uid = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID().slice(0, 8) : Date.now().toString(36);
+                const path = `${storeName}/${Date.now()}-${uid}-${filename}`;
+                const { error } = await _supabase.storage
+                    .from('exports')
+                    .upload(path, blob, { contentType: blob.type || 'application/octet-stream' });
+                if (error) throw error;
+                const { data: pub } = _supabase.storage.from('exports').getPublicUrl(path);
+                console.log('[OPENY] File uploaded to Storage:', pub.publicUrl);
+                return pub.publicUrl;
+            } catch (e) {
+                console.warn('[OPENY] uploadExportToStorage failed (non-critical):', e.message);
+                return null;
+            }
         }
 
         // Log an activity entry to Supabase (activity_logs table)
