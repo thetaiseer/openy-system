@@ -772,12 +772,15 @@
                         if (error) throw error;
                         const records = (data || []).map(row => row.data);
                         localStore._cache[storeName] = records;
+                        console.log(`[OPENY] Supabase getAll(${storeName}) — ${records.length} record(s)`);
                         return records;
                     } catch (e) {
                         console.error(`[OPENY] Supabase getAll(${storeName}) failed, using local cache:`, e.message);
                     }
                 }
-                return localStore.getAll(storeName);
+                const cached = localStore.getAll(storeName);
+                console.log(`[OPENY] localStore getAll(${storeName}) — ${cached.length} record(s) (Supabase not configured or failed)`);
+                return cached;
             },
             // Upsert a record – writes to local cache immediately, then syncs to Supabase
             async put(record, storeName = 'history') {
@@ -788,9 +791,12 @@
                             .from(this._table(storeName))
                             .upsert({ id: record.id, data: record }, { onConflict: 'id' });
                         if (error) throw error;
+                        console.log(`[OPENY] Supabase put(${storeName}) success — id:`, record.id);
                     } catch (e) {
                         console.error(`[OPENY] Supabase put(${storeName}) failed:`, e.message);
                     }
+                } else {
+                    console.log(`[OPENY] localStore put(${storeName}) — id:`, record.id, '(Supabase not configured)');
                 }
             },
             // Hard-delete a record by id
@@ -1738,12 +1744,16 @@
             };
 
             try {
-                const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
-                saveAs(pdfBlob, filename);
-                showToast("PDF Downloaded successfully!");
-                
+                // ── 1. Save record FIRST (before generating file) ────────────────
+                console.log('[OPENY] Quotation PDF save started');
                 const _now = new Date();
                 const _editingQuotationId = currentEditingHistoryId;
+                // Preserve existing status when editing
+                let quotPdfStatus = 'unpaid';
+                if (_editingQuotationId) {
+                    const existing = (await cloudDB.getAll('quotations')).find(r => r.id === _editingQuotationId);
+                    if (existing && existing.status) quotPdfStatus = existing.status;
+                }
                 const record = {
                     id: _editingQuotationId || Date.now().toString(),
                     client: appState['client-name'],
@@ -1751,7 +1761,7 @@
                     date: appState.date,
                     amount: appState.finalPrice,
                     currency: appState.currency,
-                    status: 'unpaid',
+                    status: quotPdfStatus,
                     timestamp: Date.now(),
                     type: 'quote',
                     year: _now.getFullYear(),
@@ -1760,13 +1770,31 @@
                     source: 'web',
                     formSnapshot: _captureQuoteSnapshot()
                 };
-                const fileUrl = await uploadExportToStorage(pdfBlob, 'quotations', filename);
-                if (fileUrl) record.fileUrl = fileUrl;
                 await cloudDB.put(record, 'quotations');
+                console.log('[OPENY] Quotation save success — record ID:', record.id);
                 await logActivity(_editingQuotationId ? 'updated' : 'created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                console.log('[OPENY] History insert success for record:', record.id);
+
+                // ── 2. Generate and download the PDF ────────────────────────────
+                const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
+                const fileUrl = await uploadExportToStorage(pdfBlob, 'quotations', filename);
+                if (fileUrl) {
+                    record.fileUrl = fileUrl;
+                    await cloudDB.put(record, 'quotations');
+                }
+                saveAs(pdfBlob, filename);
+                console.log('[OPENY] Quotation PDF export success:', filename);
+                showToast("PDF Downloaded successfully!");
+
+                // ── 3. Post-save housekeeping ────────────────────────────────────
                 if (_editingQuotationId) window.stopEditing();
+
+                // ── 4. Refresh history immediately ───────────────────────────────
+                if (typeof window.renderHistoryList === 'function') {
+                    await window.renderHistoryList();
+                }
             } catch (e) {
-                console.error(e);
+                console.error('[OPENY] Quotation PDF pipeline error:', e);
                 showToast("Error generating PDF");
             } finally {
                 element.style.padding = origPadding;
@@ -1818,11 +1846,17 @@
                 const buffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                 const filename = sanitizeFilename(appState['client-name'], appState['quote-num']).replace('.pdf', '.xlsx');
-                saveAs(blob, filename);
-                showToast("Excel Downloaded successfully!");
-                
+
+                // ── 1. Save record FIRST (before downloading file) ───────────────
+                console.log('[OPENY] Quotation Excel save started');
                 const _now2 = new Date();
                 const _editingQuotationIdExcel = currentEditingHistoryId;
+                // Preserve existing status when editing
+                let quotXlsStatus = 'unpaid';
+                if (_editingQuotationIdExcel) {
+                    const existing = (await cloudDB.getAll('quotations')).find(r => r.id === _editingQuotationIdExcel);
+                    if (existing && existing.status) quotXlsStatus = existing.status;
+                }
                 const record = {
                     id: _editingQuotationIdExcel || Date.now().toString(),
                     client: appState['client-name'],
@@ -1830,7 +1864,7 @@
                     date: appState.date,
                     amount: appState.finalPrice,
                     currency: appState.currency,
-                    status: 'unpaid',
+                    status: quotXlsStatus,
                     timestamp: Date.now(),
                     type: 'quote',
                     year: _now2.getFullYear(),
@@ -1842,10 +1876,24 @@
                 const fileUrlExcel = await uploadExportToStorage(blob, 'quotations', filename);
                 if (fileUrlExcel) record.fileUrl = fileUrlExcel;
                 await cloudDB.put(record, 'quotations');
+                console.log('[OPENY] Quotation save success — record ID:', record.id);
                 await logActivity(_editingQuotationIdExcel ? 'updated' : 'created', 'quotation', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                console.log('[OPENY] History insert success for record:', record.id);
+
+                // ── 2. Download the Excel file ───────────────────────────────────
+                saveAs(blob, filename);
+                console.log('[OPENY] Quotation Excel export success:', filename);
+                showToast("Excel Downloaded successfully!");
+
+                // ── 3. Post-save housekeeping ────────────────────────────────────
                 if (_editingQuotationIdExcel) window.stopEditing();
+
+                // ── 4. Refresh history immediately ───────────────────────────────
+                if (typeof window.renderHistoryList === 'function') {
+                    await window.renderHistoryList();
+                }
             } catch (e) {
-                console.error(e);
+                console.error('[OPENY] Quotation Excel pipeline error:', e);
                 showToast("Error generating Excel");
             } finally {
                 btn.innerHTML = originalText;
@@ -1897,12 +1945,16 @@
             };
 
             try {
-                const invPdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
-                saveAs(invPdfBlob, filename);
-                showToast("Invoice PDF Downloaded!");
-                
+                // ── 1. Save record FIRST (before generating file) ────────────────
+                console.log('[OPENY] Invoice PDF save started');
                 const _now3 = new Date();
                 const _editingInvoiceId = currentEditingInvHistoryId;
+                // Preserve existing status when editing an existing invoice
+                let invPdfStatus = 'unpaid';
+                if (_editingInvoiceId) {
+                    const existing = (await cloudDB.getAll('invoices')).find(r => r.id === _editingInvoiceId);
+                    if (existing && existing.status) invPdfStatus = existing.status;
+                }
                 const record = {
                     id: _editingInvoiceId || Date.now().toString(),
                     client: invoiceData.client,
@@ -1910,7 +1962,7 @@
                     date: invoiceData.invoiceDate,
                     amount: invoiceData.totalBudget,
                     currency: invoiceData.currency,
-                    status: 'unpaid',
+                    status: invPdfStatus,
                     timestamp: Date.now(),
                     type: 'invoice',
                     year: _now3.getFullYear(),
@@ -1919,15 +1971,33 @@
                     source: 'web',
                     formSnapshot: _captureInvoiceSnapshot()
                 };
-                const invPdfUrl = await uploadExportToStorage(invPdfBlob, 'invoices', filename);
-                if (invPdfUrl) record.fileUrl = invPdfUrl;
                 await cloudDB.put(record, 'invoices');
+                console.log('[OPENY] Invoice save success — record ID:', record.id);
                 await logActivity(_editingInvoiceId ? 'updated' : 'created', 'invoice', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                console.log('[OPENY] History insert success for record:', record.id);
+
+                // ── 2. Generate and download the PDF ────────────────────────────
+                const invPdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
+                const invPdfUrl = await uploadExportToStorage(invPdfBlob, 'invoices', filename);
+                if (invPdfUrl) {
+                    record.fileUrl = invPdfUrl;
+                    await cloudDB.put(record, 'invoices');
+                }
+                saveAs(invPdfBlob, filename);
+                console.log('[OPENY] Invoice PDF export success:', filename);
+                showToast("Invoice PDF Downloaded!");
+
+                // ── 3. Post-save housekeeping ────────────────────────────────────
                 if (_editingInvoiceId) window.stopInvEditing();
                 await initInvoiceNumber();
                 if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
+
+                // ── 4. Refresh history immediately ───────────────────────────────
+                if (typeof window.renderInvHistoryList === 'function') {
+                    await window.renderInvHistoryList();
+                }
             } catch (e) {
-                console.error(e);
+                console.error('[OPENY] Invoice PDF pipeline error:', e);
                 showToast("Error generating PDF");
             } finally {
                 element.style.padding = origPadding;
@@ -2244,11 +2314,17 @@
                 const buffer = await workbook.xlsx.writeBuffer();
                 const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                 const filename = sanitizeFilename(invoiceData.client, invoiceRef).replace('.pdf', '.xlsx');
-                saveAs(blob, filename);
-                showToast("Invoice Excel Downloaded!");
 
+                // ── 1. Save record FIRST (before downloading file) ───────────────
+                console.log('[OPENY] Invoice Excel save started');
                 const _now4 = new Date();
                 const _editingInvoiceIdExcel = currentEditingInvHistoryId;
+                // Preserve existing status when editing an existing invoice
+                let invXlsStatus = 'unpaid';
+                if (_editingInvoiceIdExcel) {
+                    const existing = (await cloudDB.getAll('invoices')).find(r => r.id === _editingInvoiceIdExcel);
+                    if (existing && existing.status) invXlsStatus = existing.status;
+                }
                 const record = {
                     id: _editingInvoiceIdExcel || Date.now().toString(),
                     client: invoiceData.client,
@@ -2256,7 +2332,7 @@
                     date: invoiceData.invoiceDate,
                     amount: invoiceData.totalBudget,
                     currency: invoiceData.currency,
-                    status: 'unpaid',
+                    status: invXlsStatus,
                     timestamp: Date.now(),
                     type: 'invoice',
                     year: _now4.getFullYear(),
@@ -2268,12 +2344,26 @@
                 const invXlsUrl = await uploadExportToStorage(blob, 'invoices', filename);
                 if (invXlsUrl) record.fileUrl = invXlsUrl;
                 await cloudDB.put(record, 'invoices');
+                console.log('[OPENY] Invoice save success — record ID:', record.id);
                 await logActivity(_editingInvoiceIdExcel ? 'updated' : 'created', 'invoice', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                console.log('[OPENY] History insert success for record:', record.id);
+
+                // ── 2. Download the Excel file ───────────────────────────────────
+                saveAs(blob, filename);
+                console.log('[OPENY] Invoice Excel export success:', filename);
+                showToast("Invoice Excel Downloaded!");
+
+                // ── 3. Post-save housekeeping ────────────────────────────────────
                 if (_editingInvoiceIdExcel) window.stopInvEditing();
                 await initInvoiceNumber();
                 if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
+
+                // ── 4. Refresh history immediately ───────────────────────────────
+                if (typeof window.renderInvHistoryList === 'function') {
+                    await window.renderInvHistoryList();
+                }
             } catch (e) {
-                console.error(e);
+                console.error('[OPENY] Invoice Excel pipeline error:', e);
                 showToast("Error generating Excel");
             } finally {
                 btn.innerHTML = originalText;
@@ -4041,10 +4131,9 @@
             };
 
             try {
-                const ctPdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
-                saveAs(ctPdfBlob, filename);
-                showToast('PDF Downloaded successfully!');
-                // Save record to history
+                // ── 1. Save record FIRST (before generating file) ────────────────
+                const contractType = isEmp ? 'HR contract' : 'client contract';
+                console.log(`[OPENY] ${contractType} PDF save started`);
                 const _nowCt = new Date();
                 const _editingContractId = isEmp ? currentEditingEcId : currentEditingCtId;
                 const ctStoreName = isEmp ? 'hrContracts' : 'clientContracts';
@@ -4064,13 +4153,32 @@
                     source: 'web',
                     formSnapshot: isEmp ? _captureEcSnapshot() : _captureCtSnapshot()
                 };
-                const ctPdfUrl = await uploadExportToStorage(ctPdfBlob, ctStoreName, filename);
-                if (ctPdfUrl) ctRecord.fileUrl = ctPdfUrl;
                 await cloudDB.put(ctRecord, ctStoreName);
+                console.log(`[OPENY] ${contractType} save success — record ID:`, ctRecord.id);
                 await logActivity(_editingContractId ? 'updated' : 'created', isEmp ? 'hrcontract' : 'clientcontract', ctRecord.id, { client: ctRecord.client, ref: ctRecord.ref, amount: ctRecord.amount, currency: ctRecord.currency });
+                console.log('[OPENY] History insert success for record:', ctRecord.id);
+
+                // ── 2. Generate and download the PDF ────────────────────────────
+                const ctPdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
+                const ctPdfUrl = await uploadExportToStorage(ctPdfBlob, ctStoreName, filename);
+                if (ctPdfUrl) {
+                    ctRecord.fileUrl = ctPdfUrl;
+                    await cloudDB.put(ctRecord, ctStoreName);
+                }
+                saveAs(ctPdfBlob, filename);
+                console.log(`[OPENY] ${contractType} PDF export success:`, filename);
+                showToast('PDF Downloaded successfully!');
+
+                // ── 3. Post-save housekeeping ────────────────────────────────────
                 if (_editingContractId) { if (isEmp) window.stopEcEditing(); else window.stopCtEditing(); }
+
+                // ── 4. Refresh history immediately ───────────────────────────────
+                const renderFn = isEmp ? window.renderEcHistoryList : window.renderCtHistoryList;
+                if (typeof renderFn === 'function') {
+                    await renderFn();
+                }
             } catch (e) {
-                console.error(e);
+                console.error('[OPENY] Contract PDF pipeline error:', e);
                 showToast('Error generating PDF');
             } finally {
                 element.style.padding = origPadding;
@@ -4130,12 +4238,10 @@
                 const dir = isCtArabic ? 'rtl' : 'ltr';
                 const fullHtml = `<!DOCTYPE html><html dir="${dir}" lang="${ctLang}"><head><meta charset="UTF-8">${styleBlock}</head><body style="direction:${dir};">${htmlContent}</body></html>`;
                 const blob = new Blob(['\ufeff', fullHtml], { type: 'application/msword' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; a.download = filename; a.click();
-                URL.revokeObjectURL(url);
-                showToast('Word document downloaded!');
-                // Save record to history
+
+                // ── 1. Save record FIRST (before downloading file) ───────────────
+                const contractTypeWord = isEmp ? 'HR contract' : 'client contract';
+                console.log(`[OPENY] ${contractTypeWord} Word save started`);
                 const _nowCtW = new Date();
                 const _editingContractIdWord = isEmp ? currentEditingEcId : currentEditingCtId;
                 const ctWStoreName = isEmp ? 'hrContracts' : 'clientContracts';
@@ -4158,10 +4264,28 @@
                 const ctWordUrl = await uploadExportToStorage(blob, ctWStoreName, filename);
                 if (ctWordUrl) ctWRecord.fileUrl = ctWordUrl;
                 await cloudDB.put(ctWRecord, ctWStoreName);
+                console.log(`[OPENY] ${contractTypeWord} save success — record ID:`, ctWRecord.id);
                 await logActivity(_editingContractIdWord ? 'updated' : 'created', isEmp ? 'hrcontract' : 'clientcontract', ctWRecord.id, { client: ctWRecord.client, ref: ctWRecord.ref, amount: ctWRecord.amount, currency: ctWRecord.currency });
+                console.log('[OPENY] History insert success for record:', ctWRecord.id);
+
+                // ── 2. Download the Word file ────────────────────────────────────
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = filename; a.click();
+                URL.revokeObjectURL(url);
+                console.log(`[OPENY] ${contractTypeWord} Word export success:`, filename);
+                showToast('Word document downloaded!');
+
+                // ── 3. Post-save housekeeping ────────────────────────────────────
                 if (_editingContractIdWord) { if (isEmp) window.stopEcEditing(); else window.stopCtEditing(); }
+
+                // ── 4. Refresh history immediately ───────────────────────────────
+                const renderWordFn = isEmp ? window.renderEcHistoryList : window.renderCtHistoryList;
+                if (typeof renderWordFn === 'function') {
+                    await renderWordFn();
+                }
             } catch(e) {
-                console.error(e);
+                console.error('[OPENY] Contract Word pipeline error:', e);
                 showToast('Error generating Word document');
             } finally {
                 btn.innerHTML = originalText;
