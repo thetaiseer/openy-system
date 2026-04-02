@@ -393,7 +393,9 @@
                 setTimeout(() => {
                     if (typeof window.updateAllocations === 'function') window.updateAllocations();
                     if (typeof window.adjustLayout === 'function') window.adjustLayout();
-                    if (typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList();
+                    // Only load history if the history tab is currently active
+                    const histTab = invMod && invMod.querySelector('.ui-nav-pill[data-inv-tab="history"].active');
+                    if (histTab && typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList();
                 }, 50);
             } else if (moduleName === 'quotation') {
                 if(quoMod) quoMod.style.display = 'flex';
@@ -434,20 +436,27 @@
             } else if (moduleName === 'employees') {
                 if(empMod) empMod.style.display = 'flex';
                 if(navEmp) navEmp.classList.add('active');
-                setTimeout(async () => {
-                    await Promise.all([cloudDB.getAll('employees'), cloudDB.getAll('salaryHistory')]);
+                // Render immediately with cached data (may be empty on first load — each render
+                // function handles the empty state gracefully with a placeholder message).
+                if (typeof window.refreshEmployeesModule === 'function') window.refreshEmployeesModule();
+                if (typeof window.switchEmpTab === 'function') window.switchEmpTab('list');
+                // Fetch fresh data in background and re-render when ready
+                Promise.all([cloudDB.getAll('employees'), cloudDB.getAll('salaryHistory')]).then(() => {
                     if (typeof window.refreshEmployeesModule === 'function') window.refreshEmployeesModule();
-                    if (typeof window.switchEmpTab === 'function') window.switchEmpTab('list');
-                }, 80);
+                });
             } else if (moduleName === 'accounting') {
                 if(acctMod) acctMod.style.display = 'flex';
                 if(navAcct) navAcct.classList.add('active');
                 const acctDock = document.getElementById('acct-export-section');
                 if (acctDock) acctDock.style.display = 'flex';
-                setTimeout(async () => {
-                    await Promise.all([cloudDB.getAll('acctLedger'), cloudDB.getAll('acctExpenses')]);
+                // Render immediately with cached data (may be empty on first load — render
+                // functions handle the empty state gracefully with a placeholder message).
+                // refreshAccountingModule renders all tabs directly, so no switchAcctTab is needed.
+                if (typeof window.refreshAccountingModule === 'function') window.refreshAccountingModule();
+                // Fetch fresh data in background and re-render when ready
+                Promise.all([cloudDB.getAll('acctLedger'), cloudDB.getAll('acctExpenses')]).then(() => {
                     if (typeof window.refreshAccountingModule === 'function') window.refreshAccountingModule();
-                }, 80);
+                });
             }
 
             // Sync mobile nav active states
@@ -788,10 +797,14 @@
                 localStore.put(record, storeName);
                 if (_supabaseReady) {
                     try {
-                        const { error } = await _supabase
+                        const { data: saved, error } = await _supabase
                             .from(this._table(storeName))
-                            .upsert({ id: record.id, data: record }, { onConflict: 'id' });
+                            .upsert({ id: record.id, data: record }, { onConflict: 'id' })
+                            .select('data')
+                            .single();
                         if (error) throw error;
+                        // Keep local cache in sync with the server-returned record
+                        if (saved && saved.data) localStore.put(saved.data, storeName);
                         console.log(`[OPENY] Supabase put(${storeName}) success — id:`, record.id);
                     } catch (e) {
                         console.error(`[OPENY] Supabase put(${storeName}) failed:`, e.message);
@@ -918,19 +931,20 @@
                 }
 
                 if(typeof window.updateExportVisibility === 'function') window.updateExportVisibility();
-                
-                // Unlock heavy rendering after UI has safely painted (Mobile specific fix)
+
+                // Signal app ready immediately so URL-based navigation fires without delay
+                isAppBooting = false;
+                window._openyReady = true;
+
+                // Defer heavy initialization to the next event loop tick so the browser can
+                // paint the initial UI (and URL routing can fire) before blocking work starts.
                 setTimeout(async () => { 
-                    isAppBooting = false;
-                    window._openyReady = true;
-                    await initInvoiceNumber();
-                    await initQuoteNumber();
+                    await Promise.all([initInvoiceNumber(), initQuoteNumber()]);
                     if(typeof window.updateAllocations === 'function') window.updateAllocations(); 
                     if(typeof window.saveAndRender === 'function') window.saveAndRender(); 
                     if(typeof window.adjustLayout === 'function') window.adjustLayout();
-                    if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList();
                     window.scrollTo(0, 0);
-                }, 600);
+                }, 0);
 
             } catch(e) { console.error("Initialization error", e); }
 
@@ -2532,6 +2546,10 @@
             const { filterYear, filterMonth, filterDay } = parseDateFilter(filterDateVal);
             const sortVal = document.getElementById('history-sort')?.value || 'newest';
 
+            // Show loading state while fetching
+            container.innerHTML = '<div style="text-align:center;padding:32px;color:#94A3B8;">Loading…</div>';
+            if (emptyEl) emptyEl.classList.add('hidden');
+
             const allRecords = await cloudDB.getAll('quotations');
 
             const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
@@ -2565,6 +2583,10 @@
             const filterDateVal = document.getElementById('inv-history-filter-date')?.value || '';
             const { filterYear, filterMonth, filterDay } = parseDateFilter(filterDateVal);
             const sortVal = document.getElementById('inv-history-sort')?.value || 'newest';
+
+            // Show loading state while fetching
+            container.innerHTML = '<div style="text-align:center;padding:32px;color:#94A3B8;">Loading…</div>';
+            if (emptyEl) emptyEl.classList.add('hidden');
 
             const allRecords = await cloudDB.getAll('invoices');
             console.log('fetched invoices count', allRecords.length);
@@ -2602,6 +2624,10 @@
             const filterStatus = document.getElementById('ct-history-filter-status')?.value || '';
             const sortVal = document.getElementById('ct-history-sort')?.value || 'newest';
 
+            // Show loading state while fetching
+            container.innerHTML = '<div style="text-align:center;padding:32px;color:#94A3B8;">Loading…</div>';
+            if (emptyEl) emptyEl.classList.add('hidden');
+
             const allRecords = await cloudDB.getAll('clientContracts');
 
             const uniqueClients = [...new Set(allRecords.map(r => r.client).filter(Boolean))].sort();
@@ -2636,6 +2662,10 @@
             const { filterYear, filterMonth, filterDay } = parseDateFilter(filterDateVal);
             const filterStatus = document.getElementById('ec-history-filter-status')?.value || '';
             const sortVal = document.getElementById('ec-history-sort')?.value || 'newest';
+
+            // Show loading state while fetching
+            container.innerHTML = '<div style="text-align:center;padding:32px;color:#94A3B8;">Loading…</div>';
+            if (emptyEl) emptyEl.classList.add('hidden');
 
             const allRecords = await cloudDB.getAll('hrContracts');
 
