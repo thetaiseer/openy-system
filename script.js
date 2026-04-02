@@ -6,9 +6,6 @@
         let invCustomServices = [];
         let currentInvoiceRef = null;
 
-        // Firebase config and enabled flag come from firebase.js (window.FB)
-        // FIREBASE_ENABLED is derived lazily inside cloudDB.init() once window.FB is ready.
-
         let allHistoryRecords = [];
         let allInvHistoryRecords = [];
         
@@ -674,7 +671,7 @@
         };
 
         // ==========================================================================
-        // 4. STORAGE / DB (In-Memory Cache + Firestore as Primary Store)
+        // 4. STORAGE / DB (In-Memory Cache)
         // ==========================================================================
         const localStore = {
             _cache: {},
@@ -697,175 +694,27 @@
         };
 
         // All known store names – extend here when adding new document types
-        // Maps to Firestore collection names: quotations, invoices, clientContracts, hrContracts, employees, salaryHistory, activityLogs
         const ALL_STORES = ['quotations', 'invoices', 'clientContracts', 'hrContracts', 'employees', 'salaryHistory', 'activityLogs', 'acctLedger', 'acctExpenses',
             // Legacy stores kept for backward compatibility (data migration safety); no longer used as data-entry points
             'acctClientCollections', 'acctEgyptCollections', 'acctCaptainCollections'];
 
-        
-
         const cloudDB = {
-            unsubscribers: {},
-            db: null,
-            app: null,
-            _ready: false,
-            _syncingFromCloud: false,
-            _pendingDeletes: {},
-            async init() {
-                try {
-                    if (!window.FB) return;
-                    const cfg = window.FB.FIREBASE_WEB_CONFIG;
-                    if (!cfg || cfg.apiKey === "YOUR_API_KEY") return; // guard against placeholder
-
-                    const app = window.FB.initializeApp(cfg);
-                    this.app = app;
-                    this.db = window.FB.getFirestore(app);
-                    const auth = window.FB.getAuth(app);
-
-                    // Keep session alive across page reloads on the same browser
-                    try { await window.FB.setPersistence(auth, window.FB.browserLocalPersistence); } catch(e) {}
-
-                    // Anonymous sign-in so Firestore rules can use `request.auth != null`
-                    await window.FB.signInAnonymously(auth);
-
-                    window.FB.onAuthStateChanged(auth, async (user) => {
-                        if (user) {
-                            this._ready = true;
-                            // Subscribe to live updates for each store (data loads from Firestore)
-                            for (const s of ALL_STORES) this.setupRealtime(s);
-                            // Subscribe to the shared quotation draft so it syncs across devices
-                            this.setupRealtimeDraft();
-                        } else {
-                            this._ready = false;
-                            ALL_STORES.forEach(s => {
-                                if (this.unsubscribers[s]) { this.unsubscribers[s](); delete this.unsubscribers[s]; }
-                            });
-                            if (this.unsubscribers['_draft']) { this.unsubscribers['_draft'](); delete this.unsubscribers['_draft']; }
-                        }
-                    });
-                } catch(e) { console.error("Firebase init failed:", e); }
-            },
-            setupRealtime(storeName) {
-                if (!this.db) return;
-                try {
-                    if (this.unsubscribers[storeName]) this.unsubscribers[storeName]();
-                    const colRef = window.FB.collection(this.db, storeName);
-                    this.unsubscribers[storeName] = window.FB.onSnapshot(colRef, (snapshot) => {
-                        const cloudRecords = snapshot.docs.map(d => d.data());
-                        const pendingDels = this._pendingDeletes[storeName] || new Set();
-                        cloudRecords.forEach(rec => {
-                            if (!pendingDels.has(rec.id)) localStore.put(rec, storeName);
-                        });
-                        const merged = localStore.getAll(storeName);
-                        if (storeName === 'quotations') {
-                            allHistoryRecords = merged;
-                            if (document.getElementById('tab-history')?.classList.contains('active')) window.renderHistoryList();
-                        } else if (storeName === 'invoices') {
-                            allInvHistoryRecords = merged;
-                            if (document.getElementById('inv-tab-history')?.classList.contains('active')) window.renderInvHistoryList();
-                        } else if (storeName === 'clientContracts') {
-                            if (document.getElementById('ct-tab-history')?.classList.contains('active')) window.renderCtHistoryList();
-                        } else if (storeName === 'hrContracts') {
-                            if (document.getElementById('ec-tab-history')?.classList.contains('active')) window.renderEcHistoryList();
-                        } else if (storeName === 'employees' || storeName === 'salaryHistory') {
-                            if (typeof window.refreshEmployeesModule === 'function') window.refreshEmployeesModule();
-                        } else if (storeName === 'acctLedger' || storeName === 'acctExpenses') {
-                            if (typeof window.refreshAccountingModule === 'function') window.refreshAccountingModule();
-                        }
-                    }, (error) => console.error(`Firestore sync error for ${storeName}:`, error));
-                } catch(e) { console.error(`Failed to setup realtime for ${storeName}:`, e); }
-            },
             async getAll(storeName = "history") {
                 return localStore.getAll(storeName);
             },
             async put(record, storeName = "history") {
-                localStore.put(record, storeName); // instant local write
-                if (!this.db) return;
-                try {
-                    const docRef = window.FB.doc(this.db, storeName, record.id);
-                    await window.FB.setDoc(docRef, record);
-                } catch(e) { console.error("Failed to save to Firestore:", e); }
+                localStore.put(record, storeName);
             },
             async delete(id, storeName = "history") {
-                if (!this._pendingDeletes[storeName]) this._pendingDeletes[storeName] = new Set();
-                this._pendingDeletes[storeName].add(id);
                 localStore.delete(id, storeName);
-                if (!this.db) {
-                    this._pendingDeletes[storeName].delete(id);
-                    return;
-                }
-                try {
-                    const docRef = window.FB.doc(this.db, storeName, id);
-                    await window.FB.deleteDoc(docRef);
-                } catch(e) { console.error("Failed to delete from Firestore:", e); throw e; }
-                finally { this._pendingDeletes[storeName].delete(id); }
             },
             async clear(storeName = "history") {
                 localStore.clear(storeName);
-                if (!this.db) return;
-                try {
-                    const colRef = window.FB.collection(this.db, storeName);
-                    const snap = await window.FB.getDocs(colRef);
-                    await Promise.all(snap.docs.map(d => window.FB.deleteDoc(d.ref)));
-                } catch(e) { console.error("Failed to clear Firestore:", e); }
-            },
-            // Subscribe to the shared quotation-draft document in Firestore.
-            // When another device saves a newer draft, this listener picks it up and
-            // applies it to the local form without causing a write-back loop.
-            setupRealtimeDraft() {
-                if (!this.db) return;
-                try {
-                    if (this.unsubscribers['_draft']) this.unsubscribers['_draft']();
-                    const docRef = window.FB.doc(this.db, 'settings', 'draft_state');
-                    this.unsubscribers['_draft'] = window.FB.onSnapshot(docRef, (snap) => {
-                        if (!snap.exists()) return;
-                        const cloudState = snap.data();
-                        const localTs = appState._updatedAt || 0;
-                        const cloudTs = cloudState._updatedAt || 0;
-                        if (cloudTs > localTs && !this._syncingFromCloud) {
-                            this._syncingFromCloud = true;
-                            const { id: _id, ...state } = cloudState;
-                            appState = state;
-                            if (typeof window.populateForm === 'function') window.populateForm();
-                            setTimeout(() => { this._syncingFromCloud = false; }, 500);
-                        }
-                    }, (err) => console.error('Draft state sync error:', err));
-                } catch(e) { console.error('Failed to setup draft realtime:', e); }
-            },
-            // Write the current appState to Firestore so other devices can pick it up.
-            async saveDraftState() {
-                if (!this.db || !this._ready || this._syncingFromCloud) return;
-                try {
-                    const ts = Date.now();
-                    const stateWithMeta = { ...appState, id: 'draft_state', _updatedAt: ts };
-                    appState._updatedAt = ts;
-                    const docRef = window.FB.doc(this.db, 'settings', 'draft_state');
-                    await window.FB.setDoc(docRef, stateWithMeta);
-                } catch(e) { console.error('Failed to save draft state to cloud:', e); }
             }
         };
 
-        // ==========================================================================
-        // 4b. FIREBASE STORAGE UPLOAD HELPER
-        // ==========================================================================
-        /**
-         * Upload a file Blob to Firebase Storage and return its public download URL.
-         * Path: exports/{storeName}/{timestamp}_{filename}
-         * Returns null on failure (non-fatal — the Firestore record is saved regardless).
-         */
         async function uploadExportToStorage(blob, storeName, filename) {
-            try {
-                if (!window.FB || !window.FB.getStorage || !cloudDB.app) return null;
-                const storage = window.FB.getStorage(cloudDB.app);
-                const path = `exports/${storeName}/${Date.now()}_${filename}`;
-                const fileRef = window.FB.storageRef(storage, path);
-                await window.FB.uploadBytes(fileRef, blob);
-                return await window.FB.getDownloadURL(fileRef);
-            } catch(e) {
-                console.warn('Storage upload failed (non-fatal):', e);
-                showToast('File exported locally — cloud backup unavailable.');
-                return null;
-            }
+            return null;
         }
         let isAppBooting = true; // Flag to prevent heavy preview renders on initial load
 
@@ -896,11 +745,11 @@
                 if (cmEl && !cmEl.value) cmEl.value = todayMonth;
                 if (idEl && !idEl.value) idEl.value = todayMonth;
 
-                // Set default form values — Firebase draft will overwrite via setupRealtimeDraft()
+                // Set default form values
                 document.getElementById('in-date').value = new Date().toISOString().split('T')[0];
                 document.getElementById('in-currency').value = 'EGP';
                 document.getElementById('in-final-price').value = appState.finalPrice;
-                // Placeholder — initQuoteNumber() below will derive the real next number from Firestore
+                // Placeholder — initQuoteNumber() below will derive the real next number from history
                 document.getElementById('in-quote-num').value = `Q-${new Date().getFullYear()}-…`;
 
                 const methodSelect = document.getElementById('in-terms-method-select');
@@ -949,21 +798,6 @@
 
             // Initialize Contract Modules (separate try/catch to be resilient to other errors)
             try { if (typeof initContractModules === 'function') initContractModules(); } catch(e) { console.error("Contract module init error", e); }
-        });
-
-        // Initialize Firebase safely when the module loads (Deferred)
-        window.addEventListener('firebaseLoaded', async () => {
-            setTimeout(async () => {
-                try {
-                    await cloudDB.init();
-                    if(typeof window.renderHistoryList === 'function') window.renderHistoryList(); 
-                    if(typeof window.renderInvHistoryList === 'function') window.renderInvHistoryList();
-                    if(typeof window.renderCtHistoryList === 'function') window.renderCtHistoryList();
-                    if(typeof window.renderEcHistoryList === 'function') window.renderEcHistoryList();
-                } catch(e) {
-                    console.warn("Cloud init error", e);
-                }
-            }, 1200); // Wait 1.2s before touching databases to prevent mobile thread locking
         });
 
         // ==========================================================================
@@ -1462,7 +1296,7 @@
         // 7. QUOTATION SYSTEM LOGIC
         // ==========================================================================
         window.loadData = function() {
-            // Data is loaded from Firebase via setupRealtimeDraft(); just populate the form
+            // Data is loaded from local state; just populate the form
             if(typeof window.populateForm === 'function') window.populateForm();
         };
 
@@ -1561,8 +1395,7 @@
             const countEl = document.getElementById('ui-items-count');
             if(countEl) countEl.innerText = appState.services.length;
             
-            // Sync draft to Firestore so it appears on other devices
-            cloudDB.saveDraftState().catch(() => {});
+            // Sync draft state locally
 
             const editorTab = document.getElementById('tab-editor');
             if (editorTab && editorTab.classList.contains('active')) {
@@ -4067,7 +3900,7 @@
                 const ctPdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
                 saveAs(ctPdfBlob, filename);
                 showToast('PDF Downloaded successfully!');
-                // Save record to Firebase history
+                // Save record to history
                 const _nowCt = new Date();
                 const _editingContractId = isEmp ? currentEditingEcId : currentEditingCtId;
                 const ctStoreName = isEmp ? 'hrContracts' : 'clientContracts';
@@ -4157,7 +3990,7 @@
                 a.href = url; a.download = filename; a.click();
                 URL.revokeObjectURL(url);
                 showToast('Word document downloaded!');
-                // Save record to Firebase history
+                // Save record to history
                 const _nowCtW = new Date();
                 const _editingContractIdWord = isEmp ? currentEditingEcId : currentEditingCtId;
                 const ctWStoreName = isEmp ? 'hrContracts' : 'clientContracts';
@@ -5650,20 +5483,6 @@ Only fill fields relevant to the detected document type. Return ONLY valid JSON.
                 }
             );
         };
-
-        // ── Firebase realtime sync for employees stores ──
-        (function _patchCloudDBForEmployees() {
-            const origSetup = cloudDB.setupRealtime.bind(cloudDB);
-            cloudDB.setupRealtime = function(storeName) {
-                origSetup(storeName);
-                // employees and salary_history stores handled by the snapshot callback below
-            };
-            // Patch onSnapshot handler to also handle employees/salary_history
-            const origInit = cloudDB.init.bind(cloudDB);
-            cloudDB.init = async function() {
-                await origInit();
-            };
-        }());
 
         // ── Export dock: always visible while active (no scroll-based hide) ──
 
