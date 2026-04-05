@@ -182,10 +182,10 @@
 
         /* Desktop: side-by-side fixed-height layout */
         .app-wrapper { display: flex; flex-direction: column; height: auto; min-height: calc(100vh - 64px); }
-        @media (min-width: 1024px) { .app-wrapper { flex-direction: row; height: calc(100vh - 64px); } }
+        @media (min-width: 1024px) { .app-wrapper { flex-direction: row; height: calc(100vh - 64px); gap: 1rem; } }
         
         .app-sidebar { width: 100%; border-right: 1px solid var(--border-soft); background-color: #ffffff; display: flex; flex-direction: column; }
-        @media (min-width: 1024px) { .app-sidebar { width: 45%; max-width: 520px; } }
+        @media (min-width: 1024px) { .app-sidebar { flex: 1 1 0; width: auto; max-width: none; } }
         
         .app-editor { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 1.5rem; }
 
@@ -230,6 +230,15 @@
                 background: #f1f5f9;
                 border-left: none;
                 border-top: 1px solid var(--border-soft);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .app-preview { flex: 1 1 0; }
+            .app-preview .a4-page {
+                transform: scale(0.87);
+                transform-origin: top center;
+                margin-bottom: calc(297mm * (0.87 - 1));
             }
         }
         
