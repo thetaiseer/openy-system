@@ -1480,3 +1480,288 @@
         .acct-month-body { padding: 0; }
         .acct-month-body .emp-table-wrap { border-radius: 0; box-shadow: none; }
         details.acct-month-group:not([open]) > .acct-month-body { display: none; }
+
+
+/* =====================================================================
+   Custom Date / Month Picker
+   ===================================================================== */
+
+/* Wrapper replaces the original <input> in the DOM flow */
+.cdp-wrapper {
+    position: relative;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Compact variant used for history-filter inputs */
+.cdp-wrapper.cdp-compact {
+    width: 145px;
+    flex: 1 1 120px;
+    max-width: 100%;
+    min-width: 0;
+}
+
+/* ── Trigger field (the visible "input-like" element) ── */
+.cdp-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 2.875rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-input, #ffffff);
+    border: 1px solid var(--border-input, #e2e8f0);
+    border-radius: var(--radius-input, 8px);
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-main, #0f172a);
+}
+.cdp-field:hover {
+    border-color: #cbd5e1;
+}
+.cdp-field:focus,
+.cdp-field:focus-visible {
+    outline: none;
+    border-color: var(--border-focus, #2563eb);
+    box-shadow: var(--shadow-focus, 0 0 0 3px rgba(37, 99, 235, 0.15));
+}
+
+/* Compact trigger (history-filter style) */
+.cdp-compact .cdp-field {
+    min-height: unset;
+    padding: 0.4rem 0.625rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* ── Calendar icon ── */
+.cdp-icon {
+    color: #94a3b8;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    line-height: 0;
+}
+
+/* ── Selected value / placeholder text ── */
+.cdp-display {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+}
+.cdp-display.cdp-placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+/* ── Inline clear (×) button ── */
+.cdp-clear {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0 2px;
+    flex-shrink: 0;
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cdp-clear:hover {
+    color: #ef4444;
+}
+
+/* =====================================================================
+   Popup Panel
+   ===================================================================== */
+.cdp-popup {
+    position: absolute;
+    z-index: 9999;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 6px rgba(0, 0, 0, 0.04);
+    padding: 16px;
+    min-width: 280px;
+    width: 280px;
+    box-sizing: border-box;
+    animation: cdp-in 0.13s ease;
+}
+
+@keyframes cdp-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* Narrower panel for month picker */
+.cdp-month-popup {
+    min-width: 240px;
+    width: 240px;
+}
+
+/* RTL: align popup to the right edge of the wrapper */
+[dir="rtl"] .cdp-popup {
+    left: auto;
+    right: 0;
+}
+
+/* ── Popup header (prev / title / next) ── */
+.cdp-cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+.cdp-cal-title {
+    flex: 1;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+.cdp-nav-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    font-size: 1.5rem;
+    line-height: 1;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+}
+.cdp-nav-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+/* ── Weekday header row ── */
+.cdp-week-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 4px;
+}
+.cdp-week-day {
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #94a3b8;
+    padding: 4px 0;
+    text-transform: uppercase;
+}
+
+/* ── Day grid ── */
+.cdp-day-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+}
+.cdp-day-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    font-size: 0.82rem;
+    color: #374151;
+    border: none;
+    background: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    padding: 0;
+    line-height: 1;
+}
+.cdp-day-empty {
+    pointer-events: none;
+}
+.cdp-day-cell:not(.cdp-day-empty):not(.cdp-day-selected):hover {
+    background: #eff6ff;
+    color: #2563eb;
+}
+.cdp-day-today:not(.cdp-day-selected) {
+    color: #2563eb;
+    font-weight: 700;
+}
+.cdp-day-selected {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* ── Month grid ── */
+.cdp-month-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin: 4px 0 8px;
+}
+.cdp-month-cell {
+    text-align: center;
+    padding: 8px 4px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #374151;
+    border: none;
+    background: #f8fafc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+}
+.cdp-month-cell:not(.cdp-month-selected):hover {
+    background: #eff6ff;
+    color: #2563eb;
+}
+.cdp-month-selected {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* ── Footer (clear button) ── */
+.cdp-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #f1f5f9;
+}
+.cdp-footer-clear {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+}
+.cdp-footer-clear:hover {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+/* ── Responsive ── */
+@media (max-width: 400px) {
+    .cdp-popup {
+        min-width: 260px;
+        width: 260px;
+    }
+}
