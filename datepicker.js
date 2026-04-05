@@ -201,7 +201,8 @@
       prev.type = 'button'; prev.className = 'cdp-nav-btn'; prev.innerHTML = '&#8249;';
       prev.onclick = function (e) {
         e.stopPropagation();
-        vm--; if (vm < 0) { vm = 11; vy--; }
+        vm--;
+        if (vm < 0) { vm = 11; vy--; }
         renderCalendar();
       };
 
@@ -213,7 +214,8 @@
       nxt.type  = 'button'; nxt.className = 'cdp-nav-btn'; nxt.innerHTML = '&#8250;';
       nxt.onclick = function (e) {
         e.stopPropagation();
-        vm++; if (vm > 11) { vm = 0; vy++; }
+        vm++;
+        if (vm > 11) { vm = 0; vy++; }
         renderCalendar();
       };
 
