@@ -10,7 +10,7 @@
 -- acts as the primary key for upserts.
 --
 -- Storage bucket for exported files (PDF / Excel / Word):
---   Dashboard → Storage → New bucket → name: "exports" → Public bucket: ON
+--   Dashboard → Storage → New bucket → name: "documents" → Public bucket: ON
 -- The app uploads to paths like:  invoices/<timestamp>-<uid>-<filename>
 -- ============================================================
 

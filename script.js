@@ -791,8 +791,23 @@
             _collection(storeName) {
                 return STORE_TO_TABLE[storeName] || storeName;
             },
-            // Fetch all records – reads from Firestore (live) and refreshes local cache
+            // Fetch all records – tries Supabase first (for invoices / activityLogs),
+            // then Firestore, then falls back to the local in-memory cache.
             async getAll(storeName = 'history') {
+                // ── Supabase path (invoices and activityLogs) ──────────────────
+                if (window.supabaseDB && window.supabaseDB.ready) {
+                    if (storeName === 'invoices') {
+                        const records = await window.supabaseDB.getInvoices();
+                        localStore._cache[storeName] = records;
+                        return records;
+                    }
+                    if (storeName === 'activityLogs') {
+                        const records = await window.supabaseDB.getInvoiceHistory();
+                        localStore._cache[storeName] = records;
+                        return records;
+                    }
+                }
+                // ── Firebase path ──────────────────────────────────────────────
                 if (_firebaseReady) {
                     try {
                         const snapshot = await _db.collection(this._collection(storeName)).get();
@@ -805,12 +820,27 @@
                     }
                 }
                 const cached = localStore.getAll(storeName);
-                console.log(`[OPENY] localStore getAll(${storeName}) — ${cached.length} record(s) (Firebase not configured or failed)`);
+                console.log(`[OPENY] localStore getAll(${storeName}) — ${cached.length} record(s) (no cloud backend configured or the request failed)`);
                 return cached;
             },
-            // Upsert a record – writes to local cache immediately, then syncs to Firestore
+            // Upsert a record – writes to Supabase (for invoices / activityLogs) when ready,
+            // otherwise syncs to Firestore; always updates the local in-memory cache.
             async put(record, storeName = 'history') {
                 localStore.put(record, storeName);
+                // ── Supabase path ──────────────────────────────────────────────
+                if (window.supabaseDB && window.supabaseDB.ready) {
+                    if (storeName === 'invoices') {
+                        try { await window.supabaseDB.saveInvoice(record); } catch (e) { console.error('[OPENY] Supabase put(invoices) failed:', e.message); }
+                        return;
+                    }
+                    if (storeName === 'activityLogs') {
+                        try {
+                            await window.supabaseDB.logHistory(record.record_id || record.id, record.title || record.id);
+                        } catch (e) { console.error('[OPENY] Supabase put(activityLogs) failed:', e.message); }
+                        return;
+                    }
+                }
+                // ── Firebase path ──────────────────────────────────────────────
                 if (_firebaseReady) {
                     try {
                         await _db.collection(this._collection(storeName)).doc(record.id).set(record);
@@ -2019,7 +2049,7 @@
             };
 
             try {
-                // ── 1. Save record FIRST (before generating file) ────────────────
+                // ── 1. Save invoice to Supabase ───────────────────────────────
                 console.log('saving invoice...');
                 const _now3 = new Date();
                 const _editingInvoiceId = currentEditingInvHistoryId;
@@ -2052,29 +2082,51 @@
                 };
                 await cloudDB.put(record, 'invoices');
                 console.log('invoice saved with id', record.id);
-                await logActivity(_editingInvoiceId ? 'updated' : 'created', 'invoice', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+
+                // ── 2. Generate PDF ───────────────────────────────────────────
+                const invPdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
+
+                // ── 3. Upload PDF to Supabase Storage ─────────────────────────
+                let invPdfUrl = null;
+                if (window.supabaseDB && window.supabaseDB.ready) {
+                    const pdfFile = new File([invPdfBlob], filename, { type: 'application/pdf' });
+                    invPdfUrl = await window.supabaseDB.uploadInvoicePdf(pdfFile, record.id);
+                } else {
+                    invPdfUrl = await uploadExportToStorage(invPdfBlob, 'invoices', filename);
+                }
+
+                // ── 4. Save pdf_url back into invoice ─────────────────────────
+                if (invPdfUrl) {
+                    if (window.supabaseDB && window.supabaseDB.ready) {
+                        await window.supabaseDB.attachPdfUrl(record.id, invPdfUrl);
+                    } else {
+                        record.fileUrl = invPdfUrl;
+                        await cloudDB.put(record, 'invoices');
+                    }
+                }
+
+                // ── 5. Insert activity_logs row ───────────────────────────────
+                if (window.supabaseDB && window.supabaseDB.ready) {
+                    await window.supabaseDB.logHistory(record.id, record.ref || record.client);
+                } else {
+                    await logActivity(_editingInvoiceId ? 'updated' : 'created', 'invoice', record.id, { client: record.client, ref: record.ref, amount: record.amount, currency: record.currency });
+                }
                 console.log('history inserted');
 
-                // ── 2. Generate and download the PDF ────────────────────────────
-                const invPdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
-                const invPdfUrl = await uploadExportToStorage(invPdfBlob, 'invoices', filename);
-                if (invPdfUrl) {
-                    record.fileUrl = invPdfUrl;
-                    await cloudDB.put(record, 'invoices');
+                // ── 6. Refresh invoice list and history ───────────────────────
+                if (typeof window.renderInvHistoryList === 'function') {
+                    await window.renderInvHistoryList();
                 }
+
+                // ── 7. Download file locally ──────────────────────────────────
                 saveAs(invPdfBlob, filename);
                 console.log('[OPENY] Invoice PDF export success:', filename);
                 showToast("Invoice PDF Downloaded!");
 
-                // ── 3. Post-save housekeeping ────────────────────────────────────
+                // ── Post-save housekeeping ────────────────────────────────────
                 if (_editingInvoiceId) window.stopInvEditing();
                 await initInvoiceNumber();
                 if (typeof window.debouncedUpdateAllocations === 'function') window.debouncedUpdateAllocations();
-
-                // ── 4. Refresh history immediately ───────────────────────────────
-                if (typeof window.renderInvHistoryList === 'function') {
-                    await window.renderInvHistoryList();
-                }
             } catch (e) {
                 console.error('[OPENY] Invoice PDF pipeline error:', e);
                 showToast("Error generating PDF");
