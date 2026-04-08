@@ -155,6 +155,22 @@
         }
     }
 
+    // ── attachExcelUrl ────────────────────────────────────────────────────
+    // Updates the excel_url column on an invoice row.
+    async function attachExcelUrl(invoiceId, excelUrl) {
+        if (!_ready || !excelUrl) return;
+        try {
+            const { error } = await _client
+                .from('invoices')
+                .update({ excel_url: excelUrl, updated_at: new Date().toISOString() })
+                .eq('id', invoiceId);
+            if (error) throw error;
+            console.log('[OPENY] Supabase attachExcelUrl success — id:', invoiceId);
+        } catch (e) {
+            console.warn('[OPENY] attachExcelUrl failed (non-critical):', e.message);
+        }
+    }
+
     // ── logHistory ────────────────────────────────────────────────────────
     // Inserts a row into activity_logs for the given invoice UUID.
     async function logHistory(recordId, title, action, details) {
@@ -249,6 +265,7 @@
             date:         row.invoice_date || '',
             fileUrl:      row.pdf_url      || '',
             pdf_url:      row.pdf_url      || '',
+            excel_url:    row.excel_url    || '',
             archived:     row.archived     || false,
             _created_at:  row.created_at,
         });
@@ -288,6 +305,7 @@
         saveInvoice:       saveInvoice,
         uploadInvoicePdf:  uploadInvoicePdf,
         attachPdfUrl:      attachPdfUrl,
+        attachExcelUrl:    attachExcelUrl,
         logHistory:        logHistory,
         getInvoices:       getInvoices,
         getInvoiceHistory: getInvoiceHistory,

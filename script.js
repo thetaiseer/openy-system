@@ -2502,7 +2502,7 @@
                     if (saved) record = saved;
                     // Upload Excel to storage and attach url
                     const invXlsUrl = await uploadExportToStorage(blob, 'invoices', filename);
-                    if (invXlsUrl) await window.supabaseDB.attachPdfUrl(record.id, invXlsUrl);
+                    if (invXlsUrl) await window.supabaseDB.attachExcelUrl(record.id, invXlsUrl);
                     await window.supabaseDB.logHistory(record.id, record.ref || record.client, _editingInvoiceIdExcel ? 'updated' : 'created');
                 } else {
                     const invXlsUrl = await uploadExportToStorage(blob, 'invoices', filename);
