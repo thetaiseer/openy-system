@@ -327,8 +327,11 @@
     }
 
     async function _validateDocsSchema() {
-        const { error } = await _client.schema('public').from(TABLES.invoices).select('id').limit(1);
-        if (error) throw error;
+        const required = [TABLES.invoices, TABLES.branches, TABLES.platforms, TABLES.rows];
+        for (const table of required) {
+            const { error } = await _client.schema('public').from(table).select('id').limit(1);
+            if (error) throw error;
+        }
     }
 
     function _init() {

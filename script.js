@@ -1438,6 +1438,7 @@
         window.renderInvoiceBranchBreakdown = function(data) {
             const panel = document.getElementById('invoiceBranchBreakdown');
             const body = document.getElementById('invoiceBranchBreakdownBody');
+            const esc = (val) => String(val || '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
             if (!panel || !body) return;
             if (!data || data.type !== 'detailed' || !Array.isArray(data.branches) || data.branches.length === 0) {
                 panel.style.display = 'none';
@@ -1449,10 +1450,10 @@
                 const platforms = Array.isArray(branch.platforms) ? branch.platforms : [];
                 const platformHtml = platforms.map((platform) => {
                     const rowsCount = Array.isArray(platform.rows) ? platform.rows.length : 0;
-                    return `<div class="inv-branch-platform-row"><span>${formatBilingualText(platform.name)}</span><span>${rowsCount} row(s) • ${(Number(platform.subtotal) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</span></div>`;
+                    return `<div class="inv-branch-platform-row"><span>${esc(platform.name)}</span><span>${rowsCount} row(s) • ${(Number(platform.subtotal) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${esc(data.currency)}</span></div>`;
                 }).join('');
-                return `<details class="inv-branch-card" ${idx === 0 ? 'open' : ''}><summary><span>${formatBilingualText(branch.name)}</span><strong>${(Number(branch.subtotal) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</strong></summary><div class="inv-branch-body">${platformHtml}</div></details>`;
-            }).join('') + `<div class="inv-branch-summary-row"><span>Final Budget</span><strong>${(Number(data.finalBudget || data.netBudget) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</strong></div><div class="inv-branch-summary-row"><span>Fees</span><strong>${(Number(data.fees) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</strong></div><div class="inv-branch-summary-row inv-branch-summary-total"><span>Grand Total</span><strong>${(Number(data.grandTotal || data.totalBudget) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</strong></div>`;
+                return `<details class="inv-branch-card" ${idx === 0 ? 'open' : ''}><summary><span>${esc(branch.name)}</span><strong>${(Number(branch.subtotal) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${esc(data.currency)}</strong></summary><div class="inv-branch-body">${platformHtml}</div></details>`;
+            }).join('') + `<div class="inv-branch-summary-row"><span>Final Budget</span><strong>${(Number(data.finalBudget || data.netBudget) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${esc(data.currency)}</strong></div><div class="inv-branch-summary-row"><span>Fees</span><strong>${(Number(data.fees) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${esc(data.currency)}</strong></div><div class="inv-branch-summary-row inv-branch-summary-total"><span>Grand Total</span><strong>${(Number(data.grandTotal || data.totalBudget) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${esc(data.currency)}</strong></div>`;
         };
 
         window.renderInvoicePreview = function(data, isValid = true, currentPerc = 0) {

@@ -1842,7 +1842,7 @@
     color: #0f172a;
 }
 @media (max-width: 768px) {
-    #platformsSection .p-4.bg-slate-50.grid {
+    #platformsSection [id^="platBody-"] {
         grid-template-columns: 1fr;
         gap: 10px;
     }
