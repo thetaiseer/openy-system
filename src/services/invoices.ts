@@ -17,15 +17,21 @@ export type InvoiceFormData = {
 // buildInvoicePayload
 // Maps an InvoiceFormData object to the invoices table columns.
 function buildInvoicePayload(form: InvoiceFormData) {
+  const grandTotal = Number(form.totalBudget || 0);
+  const fees = Number((form as { fees?: number | string }).fees || 0);
+  const finalBudget = Math.max(0, grandTotal - fees);
   return {
     invoice_number: form.invoiceNumber || `INV-${Date.now()}`,
     client_name:    form.clientName    || 'Unknown',
     currency:       form.currency      || 'EGP',
-    total_budget:   Number(form.totalBudget || 0),
+    final_budget:   finalBudget,
+    fees,
+    grand_total:    grandTotal,
     campaign_month: form.campaignMonth || '',
     invoice_date:   form.invoiceDate   || '',
     status:         form.status        || 'draft',
-    form_data:      form,
+    form_snapshot:  form,
+    invoice_data:   form,
     archived:       false,
     updated_at:     new Date().toISOString(),
   };
@@ -37,7 +43,8 @@ export async function createInvoice(form: InvoiceFormData) {
   const payload = buildInvoicePayload(form);
 
   const { data, error } = await supabase
-    .from('invoices')
+    .schema('public')
+    .from('docs_invoices')
     .insert([payload])
     .select()
     .single();
@@ -50,7 +57,8 @@ export async function createInvoice(form: InvoiceFormData) {
 // Fetches all non-archived invoice rows ordered by newest first.
 export async function getInvoices() {
   const { data, error } = await supabase
-    .from('invoices')
+    .schema('public')
+    .from('docs_invoices')
     .select('*')
     .eq('archived', false)
     .order('created_at', { ascending: false });
@@ -79,7 +87,8 @@ export async function uploadInvoicePdf(file: File | Blob, id: string): Promise<s
 // Updates the pdf_url column of an existing invoice row.
 export async function savePdfUrl(id: string, url: string): Promise<void> {
   const { error } = await supabase
-    .from('invoices')
+    .schema('public')
+    .from('docs_invoices')
     .update({ pdf_url: url, updated_at: new Date().toISOString() })
     .eq('id', id);
 
@@ -94,7 +103,7 @@ export async function logHistory(params: {
   title: string;
   details?: string;
 }): Promise<void> {
-  const { error } = await supabase.from('activity_logs').insert([
+  const { error } = await supabase.schema('public').from('activity_logs').insert([
     {
       module:    'invoice',
       record_id: params.recordId,
@@ -111,6 +120,7 @@ export async function logHistory(params: {
 // Fetches the 200 most-recent `activity_logs` rows for the invoice module.
 export async function getHistory() {
   const { data, error } = await supabase
+    .schema('public')
     .from('activity_logs')
     .select('*')
     .eq('module', 'invoice')
@@ -125,7 +135,8 @@ export async function getHistory() {
 // Marks an invoice as archived and logs the action.
 export async function archiveInvoice(id: string): Promise<void> {
   const { error } = await supabase
-    .from('invoices')
+    .schema('public')
+    .from('docs_invoices')
     .update({ archived: true, status: 'archived', updated_at: new Date().toISOString() })
     .eq('id', id);
 

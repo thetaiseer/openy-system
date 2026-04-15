@@ -15,8 +15,63 @@
 -- Enable pgcrypto for gen_random_uuid()
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Invoices (column-based for cross-device querying)
-CREATE TABLE IF NOT EXISTS invoices (
+-- Nested invoice schema (public)
+CREATE TABLE IF NOT EXISTS public.docs_invoices (
+    id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    invoice_number TEXT        NOT NULL,
+    client_name    TEXT        NOT NULL,
+    currency       TEXT        NOT NULL DEFAULT 'EGP',
+    final_budget   NUMERIC     NOT NULL DEFAULT 0,
+    fees           NUMERIC     NOT NULL DEFAULT 0,
+    grand_total    NUMERIC     NOT NULL DEFAULT 0,
+    campaign_month TEXT,
+    invoice_date   TEXT,
+    status         TEXT        NOT NULL DEFAULT 'draft',
+    pdf_url        TEXT,
+    excel_url      TEXT,
+    form_snapshot  JSONB,
+    invoice_data   JSONB,
+    archived       BOOLEAN     NOT NULL DEFAULT FALSE,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.docs_invoice_branches (
+    id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    invoice_id UUID        NOT NULL REFERENCES public.docs_invoices(id) ON DELETE CASCADE,
+    name       TEXT        NOT NULL,
+    position   INTEGER     NOT NULL DEFAULT 0,
+    subtotal   NUMERIC     NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.docs_invoice_platforms (
+    id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    branch_id  UUID        NOT NULL REFERENCES public.docs_invoice_branches(id) ON DELETE CASCADE,
+    name       TEXT        NOT NULL,
+    position   INTEGER     NOT NULL DEFAULT 0,
+    subtotal   NUMERIC     NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.docs_invoice_rows (
+    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    platform_id UUID        NOT NULL REFERENCES public.docs_invoice_platforms(id) ON DELETE CASCADE,
+    position    INTEGER     NOT NULL DEFAULT 0,
+    branch_name TEXT,
+    ad_name     TEXT,
+    date_str    TEXT,
+    results     TEXT,
+    cost        NUMERIC     NOT NULL DEFAULT 0,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_docs_invoice_branches_invoice_id ON public.docs_invoice_branches(invoice_id);
+CREATE INDEX IF NOT EXISTS idx_docs_invoice_platforms_branch_id ON public.docs_invoice_platforms(branch_id);
+CREATE INDEX IF NOT EXISTS idx_docs_invoice_rows_platform_id ON public.docs_invoice_rows(platform_id);
+
+-- Legacy invoices table (kept for backward compatibility)
+CREATE TABLE IF NOT EXISTS public.invoices (
     id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     invoice_number TEXT        NOT NULL,
     client_name    TEXT        NOT NULL,
@@ -34,7 +89,7 @@ CREATE TABLE IF NOT EXISTS invoices (
 );
 
 -- Quotations
-CREATE TABLE IF NOT EXISTS quotations (
+CREATE TABLE IF NOT EXISTS public.quotations (
     id         TEXT        PRIMARY KEY,
     data       JSONB       NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -42,7 +97,7 @@ CREATE TABLE IF NOT EXISTS quotations (
 );
 
 -- Client Contracts
-CREATE TABLE IF NOT EXISTS client_contracts (
+CREATE TABLE IF NOT EXISTS public.client_contracts (
     id         TEXT        PRIMARY KEY,
     data       JSONB       NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -50,7 +105,7 @@ CREATE TABLE IF NOT EXISTS client_contracts (
 );
 
 -- HR Contracts
-CREATE TABLE IF NOT EXISTS hr_contracts (
+CREATE TABLE IF NOT EXISTS public.hr_contracts (
     id         TEXT        PRIMARY KEY,
     data       JSONB       NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -58,7 +113,7 @@ CREATE TABLE IF NOT EXISTS hr_contracts (
 );
 
 -- Employees
-CREATE TABLE IF NOT EXISTS employees (
+CREATE TABLE IF NOT EXISTS public.employees (
     id         TEXT        PRIMARY KEY,
     data       JSONB       NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -66,7 +121,7 @@ CREATE TABLE IF NOT EXISTS employees (
 );
 
 -- Salary History
-CREATE TABLE IF NOT EXISTS salary_history (
+CREATE TABLE IF NOT EXISTS public.salary_history (
     id         TEXT        PRIMARY KEY,
     data       JSONB       NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -74,7 +129,7 @@ CREATE TABLE IF NOT EXISTS salary_history (
 );
 
 -- Activity Logs (column-based for structured querying)
-CREATE TABLE IF NOT EXISTS activity_logs (
+CREATE TABLE IF NOT EXISTS public.activity_logs (
     id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     module     TEXT        NOT NULL,
     record_id  UUID        NOT NULL,
@@ -85,7 +140,7 @@ CREATE TABLE IF NOT EXISTS activity_logs (
 );
 
 -- Accounting Ledger
-CREATE TABLE IF NOT EXISTS acct_ledger (
+CREATE TABLE IF NOT EXISTS public.acct_ledger (
     id         TEXT        PRIMARY KEY,
     data       JSONB       NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -93,7 +148,7 @@ CREATE TABLE IF NOT EXISTS acct_ledger (
 );
 
 -- Accounting Expenses
-CREATE TABLE IF NOT EXISTS acct_expenses (
+CREATE TABLE IF NOT EXISTS public.acct_expenses (
     id         TEXT        PRIMARY KEY,
     data       JSONB       NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -101,7 +156,7 @@ CREATE TABLE IF NOT EXISTS acct_expenses (
 );
 
 -- Legacy: Client Collections (backward-compatibility only)
-CREATE TABLE IF NOT EXISTS acct_client_collections (
+CREATE TABLE IF NOT EXISTS public.acct_client_collections (
     id         TEXT        PRIMARY KEY,
     data       JSONB       NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -109,7 +164,7 @@ CREATE TABLE IF NOT EXISTS acct_client_collections (
 );
 
 -- Legacy: Egypt Collections (backward-compatibility only)
-CREATE TABLE IF NOT EXISTS acct_egypt_collections (
+CREATE TABLE IF NOT EXISTS public.acct_egypt_collections (
     id         TEXT        PRIMARY KEY,
     data       JSONB       NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -117,7 +172,7 @@ CREATE TABLE IF NOT EXISTS acct_egypt_collections (
 );
 
 -- Legacy: Captain Collections (backward-compatibility only)
-CREATE TABLE IF NOT EXISTS acct_captain_collections (
+CREATE TABLE IF NOT EXISTS public.acct_captain_collections (
     id         TEXT        PRIMARY KEY,
     data       JSONB       NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -130,18 +185,45 @@ CREATE TABLE IF NOT EXISTS acct_captain_collections (
 -- and write without authentication. Tighten these policies
 -- once you add user authentication to the app.
 -- ============================================================
-ALTER TABLE invoices      ENABLE ROW LEVEL SECURITY;
-ALTER TABLE activity_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.docs_invoices          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.docs_invoice_branches  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.docs_invoice_platforms ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.docs_invoice_rows      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.invoices               ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.activity_logs          ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "invoices_allow_all" ON invoices;
+DROP POLICY IF EXISTS "docs_invoices_allow_all" ON public.docs_invoices;
+CREATE POLICY "docs_invoices_allow_all"
+ON public.docs_invoices FOR ALL TO anon
+USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "docs_invoice_branches_allow_all" ON public.docs_invoice_branches;
+CREATE POLICY "docs_invoice_branches_allow_all"
+ON public.docs_invoice_branches FOR ALL TO anon
+USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "docs_invoice_platforms_allow_all" ON public.docs_invoice_platforms;
+CREATE POLICY "docs_invoice_platforms_allow_all"
+ON public.docs_invoice_platforms FOR ALL TO anon
+USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "docs_invoice_rows_allow_all" ON public.docs_invoice_rows;
+CREATE POLICY "docs_invoice_rows_allow_all"
+ON public.docs_invoice_rows FOR ALL TO anon
+USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "invoices_allow_all" ON public.invoices;
 CREATE POLICY "invoices_allow_all"
-ON invoices FOR ALL TO anon
+ON public.invoices FOR ALL TO anon
 USING (true) WITH CHECK (true);
 
-DROP POLICY IF EXISTS "logs_allow_all" ON activity_logs;
+DROP POLICY IF EXISTS "logs_allow_all" ON public.activity_logs;
 CREATE POLICY "logs_allow_all"
-ON activity_logs FOR ALL TO anon
+ON public.activity_logs FOR ALL TO anon
 USING (true) WITH CHECK (true);
+
+-- Reload PostgREST schema cache after table/policy changes.
+NOTIFY pgrst, 'reload schema';
 
 -- ============================================================
 -- Optional: Row-Level Security for other tables
