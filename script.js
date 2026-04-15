@@ -1244,7 +1244,8 @@
             if (!tbEl) return;
             const totalBudget = parseFloat(tbEl.value) || 0;
             const currency = document.getElementById('currency')?.value || 'EGP';
-            const netBudget = Math.max(0, totalBudget - 500); 
+            const fees = Math.min(500, Math.max(0, totalBudget));
+            const netBudget = Math.max(0, totalBudget - fees);
             const clientVal = document.getElementById('clientName')?.value || '';
             const summaryText = document.getElementById('allocationTotalText');
             const summaryCard = document.getElementById('allocationSummaryCard');
@@ -1254,6 +1255,7 @@
 
             // ALWAYS build the preview skeleton even if there is an error, so the error message has a place to live
             const invoiceData = window.calculateInvoiceData();
+            if (typeof window.renderInvoiceBranchBreakdown === 'function') window.renderInvoiceBranchBreakdown(invoiceData);
             
             if (clientVal === 'custom') {
                 if (errText) errText.classList.add('hidden');
@@ -1328,22 +1330,28 @@
             const month = formatMonthForDisplay(document.getElementById('campaignMonth')?.value) || 'N/A';
             const invoiceDate = formatMonthForDisplay(document.getElementById('invoiceDate')?.value) || 'N/A';
             const currency = document.getElementById('currency')?.value || 'EGP';
-            const fees = 500;
-            const netBudget = totalBudget - fees;
+            const fees = Math.min(500, Math.max(0, totalBudget));
+            const netBudget = Math.max(0, totalBudget - fees);
 
             if (clientVal === 'custom') {
+                const finalBudget = netBudget;
+                const grandTotal = finalBudget + fees;
                 return {
                     client: document.getElementById('inv-custom-client-name').value || 'New Client',
-                    month, invoiceDate, currency, totalBudget, fees, netBudget, type: 'custom',
+                    month, invoiceDate, currency, totalBudget: grandTotal, fees, netBudget: finalBudget, finalBudget, grandTotal, type: 'custom', branches: [],
                     project: document.getElementById('inv-custom-project').value || '',
                     desc: document.getElementById('inv-custom-desc').value || '',
                     services: invCustomServices
                 };
             }
 
-            let invoice = { client: clientVal, month, invoiceDate, currency, totalBudget, fees, netBudget, type: 'detailed', branches: [] };
+            let invoice = { client: clientVal, month, invoiceDate, currency, totalBudget, fees, netBudget, finalBudget: netBudget, grandTotal: totalBudget, type: 'detailed', branches: [] };
             if (clientVal !== 'Pro icon KSA') {
                 invoice.type = 'simple';
+                invoice.finalBudget = netBudget;
+                invoice.netBudget = netBudget;
+                invoice.grandTotal = netBudget + fees;
+                invoice.totalBudget = invoice.grandTotal;
                 return invoice;
             }
 
@@ -1384,10 +1392,12 @@
                     }
                 });
 
-                let branchData = { name: branchName, total: 0, items: [] };
+                let branchData = { name: branchName, subtotal: 0, total: 0, platforms: [], items: [] };
                 platforms.forEach((plat) => {
                     if (pAllocations[plat.name] <= 0) return;
                     const cBudgets = window.splitBudget(pAllocations[plat.name], plat.count);
+                    const platformRows = [];
+                    let platformSubtotal = 0;
                     let campaignDays = [];
                     if (plat.count === 1) campaignDays.push(1);
                     else {
@@ -1399,20 +1409,50 @@
                     cBudgets.forEach((cBudget, cIdx) => {
                         let expectedCPA = plat.costMin + ((plat.count > 1 ? (cIdx / (plat.count - 1)) : 0) * (plat.costMax - plat.costMin));
                         let finalCPA = Math.max(plat.costMin, Math.min(plat.costMax, expectedCPA * (1 + (Math.random() * 0.2 - 0.1))));
-                        branchData.items.push({
+                        const row = {
                             branchName: branchName.split(' ')[0],
                             platform: plat.name,
                             adName: `${branchName.split(' ')[0]} ${month} ${plat.name} ${cIdx + 1}`,
                             dateStr: `${campaignDays[cIdx].toString().padStart(2, '0')}-${month}`,
                             results: `${Math.floor(cBudget / finalCPA).toLocaleString()} ${plat.resType}`,
                             cost: cBudget
-                        });
-                        branchData.total += cBudget;
+                        };
+                        platformRows.push(row);
+                        branchData.items.push(row);
+                        platformSubtotal += cBudget;
                     });
+                    branchData.platforms.push({ name: plat.name, subtotal: platformSubtotal, rows: platformRows });
+                    branchData.subtotal += platformSubtotal;
                 });
+                branchData.total = branchData.subtotal;
                 invoice.branches.push(branchData);
             });
+            const computedFinalBudget = invoice.branches.reduce((sum, branch) => sum + (Number(branch.subtotal) || 0), 0);
+            invoice.finalBudget = computedFinalBudget;
+            invoice.netBudget = computedFinalBudget;
+            invoice.grandTotal = computedFinalBudget + fees;
+            invoice.totalBudget = invoice.grandTotal;
             return invoice;
+        };
+
+        window.renderInvoiceBranchBreakdown = function(data) {
+            const panel = document.getElementById('invoiceBranchBreakdown');
+            const body = document.getElementById('invoiceBranchBreakdownBody');
+            if (!panel || !body) return;
+            if (!data || data.type !== 'detailed' || !Array.isArray(data.branches) || data.branches.length === 0) {
+                panel.style.display = 'none';
+                body.innerHTML = '';
+                return;
+            }
+            panel.style.display = 'block';
+            body.innerHTML = data.branches.map((branch, idx) => {
+                const platforms = Array.isArray(branch.platforms) ? branch.platforms : [];
+                const platformHtml = platforms.map((platform) => {
+                    const rowsCount = Array.isArray(platform.rows) ? platform.rows.length : 0;
+                    return `<div class="inv-branch-platform-row"><span>${formatBilingualText(platform.name)}</span><span>${rowsCount} row(s) • ${(Number(platform.subtotal) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</span></div>`;
+                }).join('');
+                return `<details class="inv-branch-card" ${idx === 0 ? 'open' : ''}><summary><span>${formatBilingualText(branch.name)}</span><strong>${(Number(branch.subtotal) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</strong></summary><div class="inv-branch-body">${platformHtml}</div></details>`;
+            }).join('') + `<div class="inv-branch-summary-row"><span>Final Budget</span><strong>${(Number(data.finalBudget || data.netBudget) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</strong></div><div class="inv-branch-summary-row"><span>Fees</span><strong>${(Number(data.fees) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</strong></div><div class="inv-branch-summary-row inv-branch-summary-total"><span>Grand Total</span><strong>${(Number(data.grandTotal || data.totalBudget) || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</strong></div>`;
         };
 
         window.renderInvoicePreview = function(data, isValid = true, currentPerc = 0) {
@@ -1465,13 +1505,14 @@
                 </tr></thead><tbody>`);
                 if (data.services.length === 0) { parts.push(`<tr><td colspan="2" style="border: 1px solid #111; padding: 6px; font-size: 11px; text-align: center; color: #666;">No services added.</td></tr>`); } 
                 else { data.services.forEach(s => { parts.push(`<tr><td style="border: 1px solid #111; padding: 12px; font-size: 11px; font-weight: bold; vertical-align: top; width: 30%; background: #fff;">${formatBilingualText(s.name || '—')}</td><td style="border: 1px solid #111; padding: 12px; font-size: 11px; vertical-align: top; width: 70%; background: #fff;">${formatBilingualText(s.scope || '—')}</td></tr>`); }); }
-                parts.push(`</tbody></table><div style="display: flex; justify-content: flex-end; margin-top: 16px;"><table style="width: 300px; border-collapse: collapse;"><tr style="background: #111; color: #fff;"><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 6px; font-size: 14px; font-weight: bold; text-align: right; background: #111;">TOTAL AMOUNT:</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 14px; font-weight: bold; text-align: center; background: #111;">${data.totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr></table></div></div>`);
+                parts.push(`</tbody></table><div style="display: flex; justify-content: flex-end; margin-top: 16px;"><table style="width: 300px; border-collapse: collapse;"><tr style="background: #111; color: #fff;"><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 6px; font-size: 14px; font-weight: bold; text-align: right; background: #111;">TOTAL AMOUNT:</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 14px; font-weight: bold; text-align: center; background: #111;">${(data.grandTotal || data.totalBudget).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr></table></div></div>`);
             } else if (data.type === 'simple') {
                 parts.push(`<div class="invoice-section avoid-break"><table class="invoice-table" style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
                     <thead><tr style="background: #111; color: #fff;"><th class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 12px; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; text-align: left;">Description</th><th class="no-wrap-text" style="border: 1px solid #111; padding: 12px; font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; text-align: left;">Amount (${data.currency})</th></tr></thead>
                     <tbody>
-                        <tr><td style="border: 1px solid #111; padding: 12px; font-size: 11px; text-align: left; background: #fff;">Service Fees - ${data.month}</td><td style="border: 1px solid #111; padding: 12px; font-size: 11px; text-align: left; font-weight: bold; background: #fff; white-space: nowrap;">${data.totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
-                        <tr style="background: #111; color: #fff;"><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 12px; font-size: 12px; text-align: right; font-weight: bold; background: #111;">GRAND TOTAL:</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 12px; font-size: 12px; text-align: left; font-weight: bold; background: #111; white-space: nowrap;">${data.totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
+                        <tr><td style="border: 1px solid #111; padding: 12px; font-size: 11px; text-align: left; background: #fff;">Service Fees - ${data.month}</td><td style="border: 1px solid #111; padding: 12px; font-size: 11px; text-align: left; font-weight: bold; background: #fff; white-space: nowrap;">${(data.finalBudget || data.netBudget).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
+                        <tr><td style="border: 1px solid #111; padding: 12px; font-size: 11px; text-align: left; background: #fff;">Fees</td><td style="border: 1px solid #111; padding: 12px; font-size: 11px; text-align: left; font-weight: bold; background: #fff; white-space: nowrap;">${(data.fees || 0).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
+                        <tr style="background: #111; color: #fff;"><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 12px; font-size: 12px; text-align: right; font-weight: bold; background: #111;">GRAND TOTAL:</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 12px; font-size: 12px; text-align: left; font-weight: bold; background: #111; white-space: nowrap;">${(data.grandTotal || data.totalBudget).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
                     </tbody></table></div>`);
             } else {
                 data.branches.forEach((branch, bIdx) => {
@@ -1522,9 +1563,9 @@
                 });
                 
                 parts.push(`<div class="avoid-break" style="page-break-inside: avoid; display: flex; justify-content: flex-end; margin-top: 16px;"><table style="width: 300px; border-collapse: collapse;"><tbody>
-                    <tr><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 6px; font-size: 12px; font-weight: bold; text-align: right; width: 60%; background: #fff;">Final Budget (Ad Spend):</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 12px; font-weight: bold; text-align: center; width: 40%; background: #fff; white-space: nowrap;">${data.netBudget.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
+                    <tr><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 6px; font-size: 12px; font-weight: bold; text-align: right; width: 60%; background: #fff;">Final Budget (Ad Spend):</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 12px; font-weight: bold; text-align: center; width: 40%; background: #fff; white-space: nowrap;">${(data.finalBudget || data.netBudget).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
                     <tr><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 6px; font-size: 12px; font-weight: bold; text-align: right; background: #fff;">Our Fees:</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 12px; font-weight: bold; text-align: center; background: #fff; white-space: nowrap;">${data.fees.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
-                    <tr style="background: #111; color: #fff;"><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 6px; font-size: 12px; font-weight: bold; text-align: right; background: #111;">GRAND TOTAL:</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 12px; font-weight: bold; text-align: center; background: #111; white-space: nowrap;">${data.totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
+                    <tr style="background: #111; color: #fff;"><td class="no-wrap-text" style="border: 1px solid #111; border-right: 1px solid white; padding: 6px; font-size: 12px; font-weight: bold; text-align: right; background: #111;">GRAND TOTAL:</td><td class="no-wrap-text" style="border: 1px solid #111; padding: 6px; font-size: 12px; font-weight: bold; text-align: center; background: #111; white-space: nowrap;">${(data.grandTotal || data.totalBudget).toLocaleString(undefined, {minimumFractionDigits: 2})} ${data.currency}</td></tr>
                 </tbody></table></div></div></div>`);
             }
             
@@ -2074,9 +2115,12 @@
                     client_name: _invClient,
                     ref: invoiceRef,
                     date: invoiceData.invoiceDate || new Date().toISOString().slice(0, 7),
-                    amount: invoiceData.totalBudget || 0,
-                    total: invoiceData.totalBudget || 0,
+                    amount: invoiceData.grandTotal || invoiceData.totalBudget || 0,
+                    total: invoiceData.grandTotal || invoiceData.totalBudget || 0,
                     currency: invoiceData.currency || 'USD',
+                    fees: invoiceData.fees || 0,
+                    final_budget: invoiceData.finalBudget || invoiceData.netBudget || 0,
+                    grand_total: invoiceData.grandTotal || invoiceData.totalBudget || 0,
                     status: invPdfStatus,
                     timestamp: Date.now(),
                     type: 'invoice',
@@ -2085,7 +2129,9 @@
                     day: _now3.getDate(),
                     source: 'web',
                     formSnapshot: _invSnap,
-                    form_data_json: _invSnap
+                    form_data_json: _invSnap,
+                    invoiceStructure: structuredClone(invoiceData),
+                    invoiceData: structuredClone(invoiceData)
                 };
                 if (window.supabaseDB && window.supabaseDB.ready) {
                     const saved = await window.supabaseDB.saveInvoice(record);
@@ -2420,7 +2466,7 @@
                     fLabel.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
 
                     let fVal = worksheet.getCell(`F${currentRow}`);
-                    fVal.value = `${invoiceData.netBudget.toLocaleString(undefined, {minimumFractionDigits: 2})} ${invoiceData.currency}`;
+                    fVal.value = `${(invoiceData.finalBudget || invoiceData.netBudget).toLocaleString(undefined, {minimumFractionDigits: 2})} ${invoiceData.currency}`;
                     fVal.font = { bold: true, size: 10, name: 'Arial' };
                     fVal.alignment = { horizontal: 'center', vertical: 'middle' };
                     fVal.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
@@ -2451,7 +2497,7 @@
                 grandLabel.border = { top: {style:'thin'}, left: {style:'thin'}, bottom: {style:'thin'}, right: {style:'thin'} };
 
                 let grandVal = worksheet.getCell(`F${currentRow}`);
-                grandVal.value = `${invoiceData.totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})} ${invoiceData.currency}`;
+                grandVal.value = `${(invoiceData.grandTotal || invoiceData.totalBudget).toLocaleString(undefined, {minimumFractionDigits: 2})} ${invoiceData.currency}`;
                 grandVal.font = { bold: true, size: 10, color: { argb: 'FFFFFFFF' }, name: 'Arial' };
                 grandVal.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF111111' } };
                 grandVal.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -2484,9 +2530,12 @@
                     client_name: _invClientXls,
                     ref: invoiceRef,
                     date: invoiceData.invoiceDate || new Date().toISOString().slice(0, 7),
-                    amount: invoiceData.totalBudget || 0,
-                    total: invoiceData.totalBudget || 0,
+                    amount: invoiceData.grandTotal || invoiceData.totalBudget || 0,
+                    total: invoiceData.grandTotal || invoiceData.totalBudget || 0,
                     currency: invoiceData.currency || 'USD',
+                    fees: invoiceData.fees || 0,
+                    final_budget: invoiceData.finalBudget || invoiceData.netBudget || 0,
+                    grand_total: invoiceData.grandTotal || invoiceData.totalBudget || 0,
                     status: invXlsStatus,
                     timestamp: Date.now(),
                     type: 'invoice',
@@ -2495,7 +2544,9 @@
                     day: _now4.getDate(),
                     source: 'web',
                     formSnapshot: _invSnapXls,
-                    form_data_json: _invSnapXls
+                    form_data_json: _invSnapXls,
+                    invoiceStructure: structuredClone(invoiceData),
+                    invoiceData: structuredClone(invoiceData)
                 };
                 if (window.supabaseDB && window.supabaseDB.ready) {
                     const saved = await window.supabaseDB.saveInvoice(record);
